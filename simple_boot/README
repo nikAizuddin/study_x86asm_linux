@@ -1,0 +1,16 @@
+How to compile:
+
+METHOD 1: By using my Makefile
+
+sudo make
+
+
+
+
+METHOD 2: Without using my Makefile
+
+STEP1:
+nasm bootloader.asm -o bootloader.img -fbin
+
+STEP2:
+sudo mkisofs -pad -b bootloader.img -R -o cd.iso -no-emul-boot -boot-load-size 4 bootloader.img

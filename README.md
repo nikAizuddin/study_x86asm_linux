@@ -8,3 +8,6 @@ useful for others too.
     allocate_heap_memory
         Study about how to allocate and free heap memory using
         brk() systemcall.
+
+    simple_boot
+        Study about creating a simple boot program for IBM PC.
