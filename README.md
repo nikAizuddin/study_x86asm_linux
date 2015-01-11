@@ -11,3 +11,7 @@ useful for others too.
 
     simple_boot
         Study about creating a simple boot program for IBM PC.
+
+    simple_string_ops
+        Study about simple string operations using instruction
+        MOVSB, MOVSW, and MOVSD.
