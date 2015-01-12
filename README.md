@@ -15,3 +15,7 @@ useful for others too.
     simple_string_ops
         Study about simple string operations using instruction
         MOVSB, MOVSW, and MOVSD.
+
+    xlib_plainwindow
+        Study about Xlib Programming with x86 NASM. Create a
+        simple plain window.
