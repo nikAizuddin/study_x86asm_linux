@@ -9,6 +9,9 @@ useful for others too.
         Study about how to allocate and free heap memory using
         brk() systemcall.
 
+    simple_array
+        Study about structures and arrays in NASM Assembler.
+
     simple_boot
         Study about creating a simple boot program for IBM PC.
 
