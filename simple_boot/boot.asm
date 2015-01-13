@@ -46,9 +46,11 @@ start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Point SI to address msg
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     xor    ax, ax
     mov    ds, ax                    ;ds = 0, to load msg
@@ -56,9 +58,11 @@ start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Initialize cursor position to 0 (the top left corner)
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     xor    dx, dx                   ;Cursor position = 0
 
@@ -67,18 +71,22 @@ print_msg:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Set cursor position
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     mov    ah, 2
     int    0x10
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Print 1 character at current cursor position
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     mov    ah, 9                    ;9 for write character & color
     lodsb                           ;load a byte of the msg into AL
@@ -87,35 +95,42 @@ print_msg:
     int    0x10
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Move the cursor position by 1 character
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     add    dx, 1
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Loop until all characters from the msg are written.
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     cmp    si, msg_end              ;did all characters are writted..?
     jne    print_msg
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   After finished writting all the characters, halt the program
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     hlt
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Set boot sector signature at byte 510
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     times  0x200 - 2 - ($ - $$) db 0
     dw     0xaa55
-

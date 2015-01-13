@@ -34,6 +34,7 @@ extern edata ;address of the end of the initialized data segment.
 extern end   ;address of the end of the uninitialized (bss segm.).
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Those externs, etext, edata, end, have nothing to do with brk().
 ;   But I include them in case if we need to know the address of
@@ -45,6 +46,7 @@ extern end   ;address of the end of the uninitialized (bss segm.).
 ;   For more information about etext, edata, and end, open your
 ;   terminal and run the command "$ man 3 end".
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 
 global _start
@@ -63,6 +65,7 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   About brk() system call, please read only at "LINUX NOTES" in
 ;   "$ man 2 brk" manpage, because brk() in C Function is different
@@ -74,13 +77,16 @@ _start:
 ;   To get the current break address, pass any value that makes this
 ;   system call failed.
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Get current break address
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     mov    eax, 45                  ;system call brk
     mov    ebx, 0                   ;invalid address
@@ -91,10 +97,12 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Break the program here in GDB. Open terminal, and run command
 ;   "$ top". Watch the memory used by this program, and remember it.
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 
 
@@ -102,9 +110,11 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Allocate 8 bytes of heap memory
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     mov    eax, 45                  ;system call brk
     mov    ebx, [current_break]
@@ -119,17 +129,21 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Break the program here in GDB. You'll see the memory used by
 ;   the program has increased by 8 bytes.
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Allocate another 67108864 bytes of heap memory
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     mov    eax, 45                  ;system call brk
     mov    ebx, [current_break]
@@ -143,10 +157,12 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Break the program here in GDB. You'll noticed the memory
 ;   used by the program has increased to 65688kb.
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 
 
@@ -154,9 +170,11 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Free allocated heap memory
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     mov    eax, 45                  ;system call brk
     mov    ebx, [initial_break]     ;reset break address initial addr
@@ -166,10 +184,12 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Break the program here in GDB, to see the memory drop from
 ;   65688kb to 148kb.
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 
 

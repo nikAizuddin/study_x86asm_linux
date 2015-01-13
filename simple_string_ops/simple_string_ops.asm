@@ -35,6 +35,7 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   ESI is Extended Source Index.
 ;   EDI is Extended Destination Index.
@@ -43,12 +44,14 @@ _start:
 ;       MOV = Get the value from the memory address.
 ;       LEA = Get the memory address.
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     lea esi, [input_string]         ;ESI = address input_string
     lea edi, [output_string]        ;EDI = address output_string
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   If the Direction Flag (in EFLAGS register) is 0,
 ;   the ESI and EDI registers are incremented each time the
@@ -61,6 +64,7 @@ _start:
 ;       cld = clear Direction Flag (Direction Flag = 0)
 ;       std = set Direction Flag (Direction Flag = 1)
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     cld                             ;make sure Direction Flag = 0
     movsb                           ;copy 1 byte from [ESI] to [EDI]

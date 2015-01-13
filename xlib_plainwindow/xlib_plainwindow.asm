@@ -145,6 +145,7 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Connect to x server
 ;
@@ -155,6 +156,7 @@ _start:
 ;   DISPLAY variable. Use BASH command "echo $DISPLAY" to view
 ;   the current contents of the DISPLAY environment variable.
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     lea    esi, [gui_t.xserver_t]
 
@@ -167,6 +169,7 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Get default screen
 ;
@@ -175,6 +178,7 @@ _start:
 ;   This function should be used to retrieve the screen number in
 ;   applications that will use only a single screen.
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     lea    esi, [gui_t.xserver_t]
 
@@ -188,6 +192,7 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Get pointer to the default
 ;
@@ -195,6 +200,7 @@ _start:
 ;
 ;   This function returns a pointer to the default screen.
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     lea    esi, [gui_t.xserver_t]
 
@@ -208,6 +214,7 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Capture delete window message
 ;
@@ -223,6 +230,7 @@ _start:
 ;   the message. We do this by comparing the wm_delete_msg with
 ;   event message.
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     lea    esi, [gui_t.xserver_t]
     lea    edi, [gui_t.xwin_t]
@@ -242,6 +250,7 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Get rootwindow
 ;
@@ -249,6 +258,7 @@ _start:
 ;
 ;   We need a root window so that we can create the plain window.
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     lea    esi, [gui_t.xserver_t]
     lea    edi, [gui_t.xwin_t]
@@ -264,6 +274,7 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Set window attribute background pixel color
 ;
@@ -271,6 +282,7 @@ _start:
 ;
 ;   This function returns the black pixel value.
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     lea    esi, [gui_t.xserver_t]
     lea    edi, [gui_t.xswa_t]
@@ -287,12 +299,14 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Set window attribute border pixel color:
 ;   unsigned long XWhitePixel(Display *display, int screen_number)
 ;
 ;   This function returns the white pixel value.
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     lea    esi, [gui_t.xserver_t]
     lea    edi, [gui_t.xswa_t]
@@ -309,6 +323,7 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Create a plain window
 ;
@@ -329,6 +344,7 @@ _start:
 ;   parent window. It returns the window ID of the created window
 ;   and causes X server to generate a CreateNotify event.
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     sub    esp, 48 ;reserve 48 bytes
 
@@ -370,6 +386,7 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Overwrite WM_PROTOCOLS property with our specified atom
 ;
@@ -381,6 +398,7 @@ _start:
 ;   If the function failed to intern the WM_PROTOCOLS, the return
 ;   status will be zero.
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     sub    esp, 16
     mov    eax, [gui_t.xserver_t + xserver.pDisplay]
@@ -396,6 +414,7 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Map our plain window
 ;
@@ -404,6 +423,7 @@ _start:
 ;   This function maps the window and all of its subwindows that have
 ;   map requests.
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     sub    esp, 8
     mov    eax, [gui_t.xserver_t + xserver.pDisplay]
@@ -418,6 +438,7 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Get event
 ;
@@ -428,6 +449,7 @@ _start:
 ;   the event queue is empty, XNextEvent flushes the output buffer and
 ;   blocks until an event is received.
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     sub    esp, 8
     mov    eax, [gui_t.xserver_t + xserver.pDisplay]
@@ -439,6 +461,7 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Exit if the type of event is buttonpress
 ;
@@ -446,6 +469,7 @@ _start:
 ;       0100 = Mouse/Touchpad Button Press
 ;       0101 = Mouse/Touchpad Button Release
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     mov    eax, [gui_t.xevent_t + xevent.data + 0]
     cmp    eax, 0b0100
@@ -453,9 +477,11 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Also exit if button "X" (Close button) is clicked
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     mov    eax, [gui_t.xevent_t + xevent.data + 0]
     cmp    eax, 0b100001
@@ -477,6 +503,7 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Disconnect from X Server
 ;
@@ -485,6 +512,7 @@ _start:
 ;   This function destroys all windows, resource IDs, and other
 ;   resources created by the client on this display.
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     sub    esp, 4
     mov    eax, [gui_t.xserver_t + xserver.pDisplay]
@@ -494,9 +522,11 @@ _start:
 
 
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Systemcall exit(0)
 ;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
     mov    eax, 0x1
     mov    ebx, 0x0
