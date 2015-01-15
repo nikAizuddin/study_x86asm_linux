@@ -9,6 +9,9 @@ useful for others too.
         Study about how to allocate and free heap memory using
         brk() systemcall.
 
+    bubble_sort
+        Study about bubble sort algorithm using x86 Assembly.
+
     simple_array
         Study about structures and arrays in NASM Assembler.
 
