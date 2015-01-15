@@ -15,6 +15,9 @@ useful for others too.
     simple_array
         Study about structures and arrays in NASM Assembler.
 
+    simple_bcd
+        Study about using FPU Binary Coded Decimal.
+
     simple_boot
         Study about creating a simple boot program for IBM PC.
 
