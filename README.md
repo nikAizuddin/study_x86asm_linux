@@ -5,6 +5,9 @@ useful for others too.
 
 ## Directory information
 
+    32bit_protected_mode
+        Switching from 16-bit Real Mode to 32-bit Protected Mode.
+
     allocate_heap_memory
         Study about how to allocate and free heap memory using
         brk() systemcall.
