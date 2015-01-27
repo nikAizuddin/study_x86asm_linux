@@ -1,0 +1,84 @@
+         1         2         3         4         5         6         7
+1234567890123456789012345678901234567890123456789012345678901234567890
+======================================================================
+---------------------------------------------+------------------------
+ TITLE: Generate 10^7 random numbers         |
+        using Lehmer Algorithm.              |    #x86assembly
+                                             |    #research
+                                             |    #study
+AUTHOR: Nik Mohamad Aizuddin bin Nik Azmi    |    #prototype
+ EMAIL: nickaizuddin93@gmail.com             |    #algorithm
+  DATE: 27-JAN-2015, Tuesday                 |
+---------------------------------------------+------------------------
+
+TARGET
+    KERNEL       : Linux x86
+    ARCHITECTURE : x86_64
+    ASSEMBLER    : NASM
+
+REQUIRED EXTERNAL FILES
+    string_append.asm
+    cvt_hex2dec.asm
+    cvt_dec2string.asm
+    cvt_int2string.asm
+    find_int_digits.asm
+    pow_int.asm
+
+NOTES
+    Those external files are taken from lib80386.
+
+----------------------------------------------------------------------
+
+PROCESS DESCRIPTION:
+
+  +----------------------------------------------------------------+
+  |                   BSS SEGMENT INFORMATION                      |
+  +-------------+---------------+----------------------------------+
+  |     Data    |      Size     |           Description            |
+  +-------------+---------------+----------------------------------+
+  | r_str       | 32-bit * 3    | Random number                    |
+  | r_strlen    | 32-bit * 1    |                                  |
+  | r           | 32-bit * 1    |                                  |
+  +-------------+---------------+----------------------------------+
+  | i           | 32-bit * 1    | Counter                          |
+  +-------------+---------------+----------------------------------+
+
+  +----------------------------------------------------------------+
+  |                 RODATA SEGMENT INFORMATION                     |
+  +------------+--------+------------+-----------------------------+
+  |    Data    |  Size  |   Value    |         Description         |
+  +------------+--------+------------+-----------------------------+
+  | n          | 32-bit | 10000000   | Total random numbers        |
+  +------------+--------+------------+-----------------------------+
+  | seed       | 32-bit | 243        | Seed value                  |
+  +------------+--------+------------+-----------------------------+
+  | multiplier | 32-bit | 2          | Multiplier value            |
+  +------------+--------+------------+-----------------------------+
+  | modulo     | 32-bit | 1000000000 | Mod value                   |
+  +------------+--------+------------+-----------------------------+
+
+       begin
+
+  001:     r = seed;
+  002:     cvt_int2string( r, @r_str, @r_strlen, 0 );
+  003:     EDI = @r_str + r_strlen;
+  004:     EDI^ = 0x0a;
+  005:     ++ r_strlen;
+  006:     WRITE( stdout, @r_str, r_strlen );
+
+  007:     i = n - 1;
+           .loop:
+  008:         r = ( pow_int(multiplier, (i%2)+1) * r ) % modulo;
+  009:         r_str = 0;
+  010:         cvt_int2string( r, @r_str, @r_strlen, 0 );
+  011:         EDI = @r_str + r_strlen;
+  012:         EDI^ = 0x0a;
+  013:         ++ r_strlen;
+  014:         WRITE( stdout, @r_str, r_strlen );
+  015:         -- i;
+  016:         if i != 0, goto .loop;
+           .endloop:
+
+       end.
+
+======================================================================
