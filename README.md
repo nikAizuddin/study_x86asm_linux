@@ -12,8 +12,14 @@ useful for others too.
         Study about how to allocate and free heap memory using
         brk() systemcall.
 
+    big_integer_add
+        Example how to implement a simple big integer add operation.
+
     bubble_sort
         Study about bubble sort algorithm using x86 Assembly.
+
+    lehmer_random_numbers
+        Generate random numbers using Lehmer algorithm.
 
     simple_array
         Study about structures and arrays in NASM Assembler.
