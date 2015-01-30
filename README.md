@@ -18,6 +18,9 @@ useful for others too.
     bubble_sort
         Study about bubble sort algorithm using x86 Assembly.
 
+    file_operation
+        File operations such as create, read, write, and open files.
+
     lehmer_random_numbers
         Generate random numbers using Lehmer algorithm.
 

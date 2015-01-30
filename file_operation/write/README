@@ -1,0 +1,192 @@
+         1         2         3         4         5         6         7
+1234567890123456789012345678901234567890123456789012345678901234567890
+======================================================================
+---------------------------------------------+------------------------
+ TITLE: File operation (Write a file).       |
+                                             |    
+                                             |    #file_operation
+                                             |    #x86assembly 
+AUTHOR: Nik Mohamad Aizuddin bin Nik Azmi    |
+ EMAIL: nickaizuddin93@gmail.com             |
+  DATE: 30-JAN-2015, Friday                  |
+---------------------------------------------+------------------------
+
+TARGET
+    KERNEL       : Linux x86
+    ARCHITECTURE : x86_64
+    ASSEMBLER    : NASM
+
+REQUIRED EXTERNAL FILES
+    ---
+
+NOTES
+
+  These references are taken from book:
+  "Professional Assembly Language by Richard Blum".
+
+
+  Quick reference about the systemcall number:
+  +-------------+-------+------------------------------------------+
+  | System Call | Value |               Description                |
+  +-------------+-------+------------------------------------------+
+  | Open        | 5     | Open file for access.                    |
+  +-------------+-------+------------------------------------------+
+  | Read        | 3     | Read an open file.                       |
+  +-------------+-------+------------------------------------------+
+  | Write       | 4     | Write to the file.                       |
+  +-------------+-------+------------------------------------------+
+  | Close       | 6     | Close the file.                          |
+  +-------------+-------+------------------------------------------+
+
+
+  Parameters for the systemcall Open:
+      EBX = address to the null-terminated filename string.
+      ECX = type of access to the file.
+      EDX = UNIX permissions used if a new file is created.
+
+
+  Quick reference about the file access type:
+  +------------+-------------+-------------------------------------+
+  | C Constant | Octal Value |             Description             |
+  +------------+-------------+-------------------------------------+
+  | O_RDONLY   |         0q0 | Read-only access.                   |
+  +------------+-------------+-------------------------------------+
+  | O_WRONLY   |         0q1 | Write-only access.                  |
+  +------------+-------------+-------------------------------------+
+  | O_RDWR     |         0q2 | Read and write access.              |
+  +------------+-------------+-------------------------------------+
+  | O_CREAT    |       0q100 | Create the file if it doesn't exist.|
+  +------------+-------------+-------------------------------------+
+  | O_EXCL     |       0q200 | When used with O_CREAT, if the file |
+  |            |             | exist, do not open it.              |
+  +------------+-------------+-------------------------------------+
+  | O_TRUNC    |      0q1000 | If file exists and is open in write |
+  |            |             | mode, truncate it to a length of 0. |
+  +------------+-------------+-------------------------------------+
+  | O_APPEND   |      0q2000 | Append data to the end of the file. |
+  +------------+-------------+-------------------------------------+
+  | O_NONBLOCK |      0q4000 | Open the file in nonblocking mode.  |
+  +------------+-------------+-------------------------------------+
+  | O_SYNC     |     0q10000 | Open the file in synchronous mode   |
+  |            |             | (allow only one write at a time).   |
+  +------------+-------------+-------------------------------------+
+  | O_ASYNC    |     0q20000 | Open the file in asynchronous mode  |
+  |            |             | (allow multiple writes at a time).  |
+  +------------+-------------+-------------------------------------+
+  Note: '0q' is a prefix for octal number.
+
+
+  Quick reference about UNIX permissions:
+
+  Owner   Group   Everyone
+  A B C   A B C   A B C     <----- 3 bit binary values
+  |   |   |   |   |   |
+  +---+   +---+   +---+
+    |       |       |
+    |       |       |
+    |       |       |
+    |       |       |
+    +---- X Y Z ----+       <----- 3 digit octal value
+
+  A = Read bit
+  B = Write bit
+  C = Execute bit
+
+  +-----------------+-------+--------------------------------------+
+  | Permission bits | Value |               Access                 |
+  +-----------------+-------+--------------------------------------+
+  | 001             | 1     | Execute privileges                   |
+  +-----------------+-------+--------------------------------------+
+  | 010             | 2     | Write privileges                     |
+  +-----------------+-------+--------------------------------------+
+  | 011             | 3     | Execute and write privileges         |
+  +-----------------+-------+--------------------------------------+
+  | 100             | 4     | Read privileges                      |
+  +-----------------+-------+--------------------------------------+
+  | 101             | 5     | Execute and read privileges          |
+  +-----------------+-------+--------------------------------------+
+  | 110             | 6     | Read and write privileges            |
+  +-----------------+-------+--------------------------------------+
+  | 111             | 7     | Execute, write, and read privileges  |
+  +-----------------+-------+--------------------------------------+
+
+
+  Quick reference about error codes return by the system calls:
+  +---------------+-------------+----------------------------------+
+  |  Error Name   | Error Value |           Description            |
+  +---------------+-------------+----------------------------------+
+  | EPERM         | -1          | Operation not permitted          |
+  +---------------+-------------+----------------------------------+
+  | ENOENT        | -2          | No such file                     |
+  +---------------+-------------+----------------------------------+
+  | EBADF         | -9          | Bad file handle number           |
+  +---------------+-------------+----------------------------------+
+  | EACCES        | -13         | Permission denied                |
+  +---------------+-------------+----------------------------------+
+  | EFAULT        | -14         | Bad file address                 |
+  +---------------+-------------+----------------------------------+
+  | EBUSY         | -16         | Device or resource busy          |
+  +---------------+-------------+----------------------------------+
+  | EEXIST        | -17         | File exists                      |
+  +---------------+-------------+----------------------------------+
+  | EISDIR        | -21         | Is a directory                   |
+  +---------------+-------------+----------------------------------+
+  | EMFILE        | -24         | Too many open files              |
+  +---------------+-------------+----------------------------------+
+  | EFBIG         | -27         | File too large                   |
+  +---------------+-------------+----------------------------------+
+  | EROFS         | -30         | Read-only file system            |
+  +---------------+-------------+----------------------------------+
+  | ENAMERTOOLONG | -36         | File name is too long            |
+  +---------------+-------------+----------------------------------+
+  Notes: Error codes are always returned as a negative number.
+
+
+----------------------------------------------------------------------
+
+PROCESS DESCRIPTION:
+
+  +----------------------------------------------------------------+
+  |                    BSS SEGMENT INFORMATION                     |
+  +-------------+---------------+----------------------------------+
+  |     Data    |      Size     |           Description            |
+  +-------------+---------------+----------------------------------+
+  | file_handle | 32-bit * 1    | A file handle.                   |
+  +-------------+---------------+----------------------------------+
+
+  +----------------------------------------------------------------+
+  |                   RODATA SEGMENT INFORMATION                   |
+  +------------+------------+-------------------+------------------+
+  |    Data    |    Size    |       Value       |   Description    |
+  +------------+------------+-------------------+------------------+
+  | wb         | 8-bit * 8  | "Oyeah! ", 0xa    | Write buffer.    |
+  +------------+------------+-------------------+------------------+
+  | wb_length  | 32-bit * 1 | 8                 | Write buffer len.|
+  +------------+------------+-------------------+------------------+
+  | filename   | 8-bit * 14 | "text_file.txt",0 | The filename.    |
+  +------------+------------+-------------------+------------------+
+
+       begin
+
+           ##
+           ## Open file as write-only,
+           ## create the file if not exists, and
+           ## append data to the end of file.
+           ##
+
+  001:     OPEN( @filename, 0q2101, 0q644 );
+  002:     if EAX is negative, goto exit_failure;
+  003:     file_handle = EAX;
+
+  004:     WRITE( file_handle, @wb, wb_length );
+
+           exit_success:
+  005:         CLOSE( @file_handle );
+  006:         EXIT( -1 );
+
+           exit_failure:
+  007:         EXIT( 0 );
+
+       end.
+
+======================================================================
