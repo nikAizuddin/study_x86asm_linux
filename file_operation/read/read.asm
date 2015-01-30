@@ -82,9 +82,9 @@ _start:
 ;
 ;          exit_success:
 ;   007:       CLOSE( @file_handle );
-;   008:       EXIT( -1 );
+;   008:       EXIT( 0 );
 ;          exit_failure:
-;   009:       EXIT( 0 );
+;   009:       EXIT( -1 );
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 exit_success:

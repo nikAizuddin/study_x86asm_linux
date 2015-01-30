@@ -59,9 +59,9 @@ _start:
 ;
 ;          exit_success:
 ;   004:       CLOSE( @file_handle );
-;   005:       EXIT( -1 );
+;   005:       EXIT( 0 );
 ;          exit_failure:
-;   006:       EXIT( 0 );
+;   006:       EXIT( -1 );
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 exit_success:

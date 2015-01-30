@@ -76,9 +76,9 @@ _start:
 ;
 ;          exit_success:
 ;   005:       CLOSE( @file_handle );
-;   006:       EXIT( -1 );
+;   006:       EXIT( 0 );
 ;          exit_failure:
-;   007:       EXIT( 0 );
+;   007:       EXIT( -1 );
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 exit_success:
