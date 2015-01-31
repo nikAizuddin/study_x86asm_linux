@@ -181,7 +181,7 @@ PROCESS DESCRIPTION:
   006:     WRITE( stdout, @rb, rb_length );
 
            exit_success:
-  007:         CLOSE( @file_handle );
+  007:         CLOSE( file_handle );
   008:         EXIT( 0 );
 
            exit_failure:

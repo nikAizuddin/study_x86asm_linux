@@ -1,0 +1,164 @@
+         1         2         3         4         5         6         7
+1234567890123456789012345678901234567890123456789012345678901234567890
+======================================================================
+---------------------------------------------+------------------------
+ TITLE: Simple networking, for example       |
+        download a webpage.                  |    #x86assembly
+                                             |    #research
+                                             |    #networking
+AUTHOR: Nik Mohamad Aizuddin bin Nik Azmi    |    #datacommunication
+ EMAIL: nickaizuddin93@gmail.com             |    #webprogramming
+  DATE: 31-JAN-2015, Saturday                |
+---------------------------------------------+------------------------
+
+TARGET
+    KERNEL       : Linux x86
+    ARCHITECTURE : x86_64
+    ASSEMBLER    : NASM
+
+REQUIRED EXTERNAL FILES
+    ---
+
+NOTES
+
+    If you want to experiment with a different website, just
+    change these values:
+        1) server_addr.ip
+        2) request.str "Host: <your_website.com>"
+        3) request.len
+        4) send.addrlen
+
+    Quick reference about the systemcall:
+    socketcall( mode, arguments )
+        mode =  0 -- socket_subcall
+        mode =  1 -- socket
+        mode =  2 -- bind
+        mode =  3 -- connect
+        mode =  4 -- listen
+        mode =  5 -- accept
+        mode =  6 -- getsockname
+        mode =  7 -- getpeername
+        mode =  8 -- socketpair
+        mode =  9 -- send
+        mode = 10 -- recv
+        mode = 11 -- sendto
+        ... (try n error with "$ strace" command to find out more)
+
+    Note: Linux x64 don't have socketcall(). Use syscall socket(),
+          connect(), bind(), and others.
+          Standard port number for internet is port 80.
+
+    Refer error codes to this file:
+        "/usr/include/asm-generic/errno.h"
+        "/usr/include/asm-generic/errno-base.h"
+
+    References:
+        1) "System Programming with C and Unix" by Adam Hoover.
+        2) http://coding.debuntu.org/
+           c-linux-socket-programming-tcp-simple-http-client
+        3) /usr/include/netinet/in.h
+        4) man socket
+
+----------------------------------------------------------------------
+
+PROCESS DESCRIPTION:
+
+  +----------------------------------------------------------------+
+  |                    BSS SEGMENT INFORMATION                     |
+  +---------------+---------------+--------------------------------+
+  |     Data      |     Size      |          Description           |
+  +---------------+---------------+--------------------------------+
+  | socket        | 32-bit *    1 | Socket number.                 |
+  +---------------+---------------+--------------------------------+
+  | webpage       |               | Content of the webpage.        |
+  | .str          | 32-bit *  512 |                                |
+  | .len          | 32-bit *    1 |                                |
+  +---------------+---------------+--------------------------------+
+
+  +----------------------------------------------------------------+
+  |                   RODATA SEGMENT INFORMATION                   |
+  +---------------+-------------+----------------------------------+
+  |     Data      |    Size     |              Value               |
+  +---------------+-------------+----------------------------------+
+  | socket_create |             |                                  |
+  | .domain       | 32-bit *  1 | 2 (AF_INET)                      |
+  | .type         | 32-bit *  1 | 1 (SOCK_STREAM)                  |
+  | .protocol     | 32-bit *  1 | 6 (IPPROTO_TCP)                  |
+  +---------------+-------------+----------------------------------+
+  | server_addr   |             |                                  |
+  | .domain       | 16-bit *  1 | 2                                |
+  | .port         | 16-bit *  1 | 0x5000 (PORT 80)                 |
+  | .ip           |  8-bit *  4 | 198,35,26,96 (198.35.26.96)      |
+  | .padding      | 32-bit *  1 | 0 (Pad server_addr to 16 bytes)  |
+  +---------------+-------------+----------------------------------+
+  | request       |             |                                  |
+  | .str          |  8-bit * 65 | "GET / HTTP/1.0",                |
+  |               |             | 0xd, 0xa,                        |
+  |               |             | "Host: www.wikipedia.org",       |
+  |               |             | 0xd, 0xa,                        |
+  |               |             | "User-Agent: HTMLGET 1.0",       |
+  |               |             | 0xd, 0xa, 0xd, 0xa, 0x0          |
+  | .len          | 32-bit * 1  | 70                               |
+  +---------------+-------------+----------------------------------+
+
+  +----------------------------------------------------------------+
+  |                   DATA SEGMENT INFORMATION                     |
+  +---------------+---------------+--------------------------------+
+  |     Data      |      Size     |             Value              |
+  +---------------+---------------+--------------------------------+
+  | connect       |               |                                |
+  | .socketfd     | 32-bit *    1 | 0                              |
+  | .addr         | 32-bit *    1 | @server_addr                   |
+  | .addrlen      | 32-bit *    1 | 16                             |
+  +---------------+---------------+--------------------------------+
+  | send          |               |                                |
+  | .socketfd     | 32-bit *    1 | 0                              |
+  | .addr         | 32-bit *    1 | @request.str                   |
+  | .addrlen      | 32-bit *    1 | 70                             |
+  | .flags        | 32-bit *    1 | 0                              |
+  +---------------+---------------+--------------------------------+
+  | receive       |               |                                |
+  | .socketfd     | 32-bit *    1 | 0                              |
+  | .addr         | 32-bit *    1 | @webpage.str                   |
+  | .addrlen      | 32-bit *    1 | 2048                           |
+  | .flags        | 32-bit *    1 | 0                              |
+  +---------------+---------------+--------------------------------+
+
+       begin
+
+  001:     SOCKETCALL( 1, @socket_create );
+  002:     if EAX is negative, goto socket_create_fail;
+  003:     goto socket_create_success;
+           socket_create_fail:
+  004:         goto exit_failure;
+           socket_create_success:
+  005:     socket = EAX;
+
+  006:     connect.socketfd = socket;
+  007:     SOCKETCALL( 3, @connect );
+  008:     if EAX is negative, goto socket_connect_fail;
+  009:     goto socket_connect_success;
+           socket_connect_fail:
+  010:         goto exit_failure;
+           socket_connect_success:
+
+  011:     send.socketfd = socket;
+  012:     SOCKETCALL( 9, @send );
+
+  013:     receive.socketfd = socket;
+           loop_receive:
+  014:         webpage.len = SOCKETCALL( 10, @receive );
+  015:         if EAX == 0, goto endloop_receive;
+  016:         WRITE( stdout, @webpage.str, webpage.len );
+  017:         goto .loop_receive;
+           endloop_receive:
+
+           exit_success:
+  018:         CLOSE( socket );
+  019:         EXIT(0);
+           exit_failure:
+  020:         EXIT(-1);
+
+       end.
+
+======================================================================

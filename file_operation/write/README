@@ -181,7 +181,7 @@ PROCESS DESCRIPTION:
   004:     WRITE( file_handle, @wb, wb_length );
 
            exit_success:
-  005:         CLOSE( @file_handle );
+  005:         CLOSE( file_handle );
   006:         EXIT( 0 );
 
            exit_failure:

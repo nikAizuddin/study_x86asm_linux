@@ -173,7 +173,7 @@ PROCESS DESCRIPTION:
   003:     file_handle = EAX;
 
            exit_success:
-  004:         CLOSE( @file_handle );
+  004:         CLOSE( file_handle );
   005:         EXIT( 0 );
 
            exit_failure:

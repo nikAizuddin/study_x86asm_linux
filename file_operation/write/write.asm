@@ -75,7 +75,7 @@ _start:
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;          exit_success:
-;   005:       CLOSE( @file_handle );
+;   005:       CLOSE( file_handle );
 ;   006:       EXIT( 0 );
 ;          exit_failure:
 ;   007:       EXIT( -1 );
@@ -83,7 +83,7 @@ _start:
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 exit_success:
     mov    eax, 6                   ;systemcall close
-    lea    ebx, [file_handle]
+    mov    ebx, [file_handle]
     int    0x80
 
     mov    eax, 0x01                ;systemcall exit
