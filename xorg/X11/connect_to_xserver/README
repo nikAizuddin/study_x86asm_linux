@@ -1,0 +1,447 @@
+         1         2         3         4         5         6         7
+1234567890123456789012345678901234567890123456789012345678901234567890
+======================================================================
+---------------------------------------------+------------------------
+ TITLE: Connect to X Server.                 |
+        ( Connection based on cookie )       |    #x86assembly
+                                             |    #research
+                                             |    #xorg
+AUTHOR: Nik Mohamad Aizuddin bin Nik Azmi    |    #prototype
+ EMAIL: nickaizuddin93@gmail.com             |    #xprotocol
+  DATE: 29-JAN-2015, Thursday                |
+---------------------------------------------+------------------------
+
+TARGET
+    KERNEL       : Linux x86
+    ARCHITECTURE : x86_64
+    ASSEMBLER    : NASM
+
+REQUIRED EXTERNAL FILES
+    ---
+
+NOTES
+
+    Useful information of XOpenDisplay via "strace" cmd:
+
+        socket( PF_LOCAL,
+                SOCK_STREAM | SOCK_CLOEXEC, 0 ) = 3;
+
+        connect( 3, // socket number
+                 {sa_family=AF_LOCAL, sun_path=@"/tmp/.X11-unix/X0"},
+                 20 ) = 0
+
+    The values in my Xauthority file:
+    (in my Fedora 19 x86_64 OS, the location of the file is
+    "/var/run/lightdm/nlck/xauthority").
+
+    NOTE! \001 in ASCII is an octal value
+
+        +--------+---------------------------------+
+        | Offset |             Value               |
+        |        +------+-----+--------+-----------+
+        |        | Hex  | Dec | ASCII  |   Binary  |
+        +--------+------+-----+--------+-----------+
+        | + 0000 | 0x01 |   1 | '\001' | 0000 0001 |
+        | + 0001 | 0x00 |   0 | '\000' | 0000 0000 |
+        | + 0002 | 0x00 |   0 | '\000' | 0000 0000 |
+        | + 0003 | 0x0a |  10 | '\n'   | 0000 1010 |
+        | + 0004 |      |  67 | 'C'    |           |
+        | + 0005 |      | 111 | 'o'    |           |
+        | + 0006 |      | 100 | 'd'    |           |
+        | + 0007 |      | 101 | 'e'    |           |
+        | + 0008 |      |  68 | 'D'    |           |
+        | + 0009 |      | 101 | 'e'    |           |
+        | + 0010 |      | 118 | 'v'    |           |
+        | + 0011 |      | 105 | 'i'    |           |
+        | + 0012 |      |  99 | 'c'    |           |
+        | + 0013 |      | 101 | 'e'    |           |
+        | + 0014 | 0x00 |   0 | '\000' | 0000 0000 |
+        | + 0015 | 0x01 |   1 | '\001' | 0000 0001 |
+        | + 0016 | 0x30 |  48 | '0'    |           |
+        | + 0017 | 0x00 |   0 | '\000' | 0000 0000 |
+        | + 0018 |      |  18 | '\022' |           |
+        | + 0019 |      |  77 | 'M'    |           |
+        | + 0020 |      |  73 | 'I'    |           |
+        | + 0021 |      |  84 | 'T'    |           |
+        | + 0022 |      |  45 | '-'    |           |
+        | + 0023 |      |  77 | 'M'    |           |
+        | + 0024 |      |  65 | 'A'    |           |
+        | + 0025 |      |  71 | 'G'    |           |
+        | + 0026 |      |  73 | 'I'    |           |
+        | + 0027 |      |  67 | 'C'    |           |
+        | + 0028 |      |  45 | '-'    |           |
+        | + 0029 |      |  67 | 'C'    |           |
+        | + 0030 |      |  79 | 'O'    |           |
+        | + 0031 |      |  79 | 'O'    |           |
+        | + 0032 |      |  75 | 'K'    |           |
+        | + 0033 |      |  73 | 'I'    |           |
+        | + 0034 |      |  69 | 'E'    |           |
+        | + 0035 |      |  45 | '-'    |           |
+        | + 0036 | 0x31 |  49 | '1'    |           |
+        | + 0037 | 0x00 |   0 | '\000' | 0000 0000 |
+        | + 0038 |      |  16 | '\020' |           |
+        | + 0039 | 0xd9 | -39 | '\331' |           |
+        | + 0040 |      | -19 | '\355' |           |
+        | + 0041 |      | -13 | '\363' |           |
+        | + 0042 |      |   2 | '\002' |           |
+        | + 0043 |      | -69 | '\273' |           |
+        | + 0044 |      |   2 | '\002' |           |
+        | + 0045 |      |  -5 | '\373' |           |
+        | + 0046 |      |  55 | '7'    |           |
+        | + 0047 |      | -50 | '\316' |           |
+        | + 0048 |      | -44 | '\324' |           |
+        | + 0049 |      | -73 | '\267' |           |
+        | + 0050 |      | -64 | '\300' |           |
+        | + 0051 |      | -15 | '\361' |           |
+        | + 0052 |      | -63 | '\301' |           |
+        | + 0053 |      |  94 | '^'    |           |
+        | + 0054 |      | -32 | '\340' |           |
+        | + 0055 | 0x00 |   0 | '\000' | 0000 0000 |
+        +--------+------+-----+--------+-----------+
+    Note: Offset is only up to +55 because the size of the
+          Xauthority file is 55 bytes.
+    
+
+    Refer error codes to this file:
+        "/usr/include/asm-generic/errno.h"
+        "/usr/include/asm-generic/errno-base.h"
+
+    Refer constant values in:
+        "/usr/include/netinet/in.h"
+        "/usr/include/bits/socket.h"
+        "/usr/include/bits/socket_type.h"
+        "/usr/include/bits/fcntl-linux.h"
+        "/usr/include/unistd.h"
+        "/usr/include/bits/poll.h"
+
+    Refer X Window System structure in:
+        "/usr/include/X11/Xauth.h"
+
+    Find X opcodes in:
+        at the end of "/usr/include/X11/Xproto.h"
+
+
+----------------------------------------------------------------------
+
+PROCESS DESCRIPTION:
+
+  +----------------------------------------------------------------+
+  |                           CONSTANTS                            |
+  +-----------------------+-------+--------------------------------+
+  |     Constant Name     | Value |          Description           |
+  +-----------------------+-------+--------------------------------+
+  | _F_OK_                | 0     | Test for existence.            |
+  | _X_OK_                | 1     | Test for execute permission.   |
+  | _W_OK_                | 2     | Test for write permission.     |
+  | _R_OK_                | 4     | Test for read permission.      |
+  +-----------------------+-------+--------------------------------+
+  | _O_RDONLY_            | 0q0   |                                |
+  | _O_RDWR_              | 0q2   |                                |
+  | _O_NONBLOCK_          | 0q4000|                                |
+  +-----------------------+-------+--------------------------------+
+  | _PF_LOCAL_            | 1     | Local host                     |
+  | _AF_LOCAL_            | 1     |                                |
+  +-----------------------+-------+--------------------------------+
+  | _IPPROTO_IP_          | 0     | Dummy protocol                 |
+  +-----------------------+-------+--------------------------------+
+  | _F_GETFL_             | 3     |                                |
+  | _F_SETFL_             | 4     |                                |
+  | _F_SETFD_             | 2     |                                |
+  +-----------------------+-------+--------------------------------+
+  | _FD_CLOEXEC_          | 1     |                                |
+  +-----------------------+-------+--------------------------------+
+  | _POLLIN_              | 0x001 |                                |
+  | _POLLOUT_             | 0x004 |                                |
+  +-----------------------+-------+--------------------------------+
+  | _SOCK_STREAM_         | 1     | Socket type stream             |
+  +-----------------------+-------+--------------------------------+
+  | _SYSCALL_EXIT_        | 1     |                                |
+  | _SYSCALL_SOCKET_      | 1     | Redirected by SOCKETCALL().    |
+  | _SYSCALL_CONNECT_     | 3     | Redirected by SOCKETCALL().    |
+  | _SYSCALL_READ_        | 3     |                                |
+  | _SYSCALL_OPEN_        | 5     |                                |
+  | _SYSCALL_CLOSE_       | 6     |                                |
+  | _SYSCALL_GETSOCKNAME_ | 6     | Redirected by SOCKETCALL().    |
+  | _SYSCALL_GETPEERNAME_ | 7     | Redirected by SOCKETCALL().    |
+  | _SYSCALL_ACCESS_      | 33    |                                |
+  | _SYSCALL_SOCKETCALL_  | 102   |                                |
+  | _SYSCALL_UNAME_       | 122   |                                |
+  | _SYSCALL_WRITEV       | 146   |                                |
+  | _SYSCALL_POLL_        | 168   |                                |
+  | _SYSCALL_FSTAT64_     | 197   |                                |
+  | _SYSCALL_FCNTL64_     | 221   |                                |
+  +-----------------------+-------+--------------------------------+
+
+  +----------------------------------------------------------------+
+  |                    BSS SEGMENT INFORMATION                     |
+  +---------------+---------------+--------------------------------+
+  |     Data      |     Size      |          Description           |
+  +---------------+---------------+--------------------------------+
+  | socket        | 32-bit *    1 | Socket number.                 |
+  +---------------+---------------+--------------------------------+
+  | args          |               | Parameters for socketcall      |
+  | .param1       | 32-bit *    1 | redirects.                     |
+  | .param2       | 32-bit *    1 |                                |
+  | .param3       | 32-bit *    1 |                                |
+  +---------------+---------------+--------------------------------+
+  | kernel_info   | 32-bit *  128 | Kernel name and information.   |
+  +---------------+---------------+--------------------------------+
+  | xauth_fd      | 32-bit *    1 | Xauthority file handle.        |
+  +---------------+---------------+--------------------------------+
+  | xauth_fstat   |               |                                |
+  | .st_dev       | 32-bit *    2 |                                |
+  | .padding0     | 32-bit *    1 |                                |
+  | .st_ino       | 32-bit *    1 |                                |
+  | .st_mode      | 32-bit *    1 |                                |
+  | .st_nlink     | 32-bit *    1 |                                |
+  | .st_uid       | 32-bit *    1 |                                |
+  | .st_gid       | 32-bit *    1 |                                |
+  | .padding1     | 32-bit *    1 |                                |
+  | .padding2     | 32-bit *    1 |                                |
+  | .padding3     | 32-bit *    1 |                                |
+  | .st_size      | 32-bit *    2 |                                |
+  | .st_blksize   | 32-bit *    1 |                                |
+  | .st_blocks    | 32-bit *    2 |                                |
+  | .st_atime     | 32-bit *    2 |                                |
+  | .st_mtime     | 32-bit *    2 |                                |
+  | .st_ctime     | 32-bit *    2 |                                |
+  +---------------+---------------+--------------------------------+
+  | xauth_data    | 32-bit * 1024 |                                |
+  +---------------+---------------+--------------------------------+
+  | auth_status   |               |                                |
+  | .success      |  8-bit *    1 |                                |
+  | .byte         |  8-bit *    1 |                                |
+  | .majorVersion | 16-bit *    1 |                                |
+  | .minorVersion | 16-bit *    1 |                                |
+  | .pad0         |  8-bit *    1 |                                |
+  | .pad1         |  8-bit *    1 |                                |
+  +---------------+---------------+--------------------------------+
+  | pollfd        |               |                                |
+  | .fd           | 32-bit *    1 |                                |
+  | .events       | 16-bit *    1 |                                |
+  | .revents      | 16-bit *    1 |                                |
+  +---------------+---------------+--------------------------------+
+  | writebuffer1  | 32-bit *  128 |                                |
+  | writebuffer2  | 32-bit *  128 |                                |
+  | writebuffer3  | 32-bit *  128 |                                |
+  +---------------+---------------+--------------------------------+
+  | writev        |               |                                |
+  | .buffer1      | 32-bit *    1 |                                |
+  | .buffer1_len  | 32-bit *    1 |                                |
+  | .buffer2      | 32-bit *    1 |                                |
+  | .buffer2_len  | 32-bit *    1 |                                |
+  | .buffer3      | 32-bit *    1 |                                |
+  | .buffer3_len  | 32-bit *    1 |                                |
+  | .buffer4      | 32-bit *    1 |                                |
+  | .buffer4_len  | 32-bit *    1 |                                |
+  +---------------+---------------+--------------------------------+
+
+  +----------------------------------------------------------------+
+  |                   DATA SEGMENT INFORMATION                     |
+  +------------------+---------------+-----------------------------+
+  |       Data       |      Size     |           Value             |
+  +------------------+---------------+-----------------------------+
+  | xserver          |               |                             |
+  | .family          | 16-bit *    1 | 1 (AF_LOCAL)                |
+  | .path            |  8-bit *   18 | "/tmp/.X11-unix/X0",0       |
+  +------------------+---------------+-----------------------------+
+  | xserver_len      | 32-bit *    1 | 20                          |
+  +------------------+---------------+-----------------------------+
+  | xauth_file       |  8-bit *   33 | "/var/run/lightdm/nlck/     |
+  |                  |               |  xauthority",0              |
+  +------------------+---------------+-----------------------------+
+  | socketname       |               |                             |
+  | .family          | 16-bit *    1 | AF_LOCAL                    |
+  | .data            | 32-bit *    4 | 0                           |
+  | socketname_len   | 32-bit *    1 | 2                           |
+  +------------------+---------------+-----------------------------+
+  | timeout          | 32-bit *    1 | 4294967295                  |
+  +------------------+---------------+-----------------------------+
+  | auth_request     |               |                             |
+  | .byteOrder       |  8-bit *    1 | 0x6c "l"                    |
+  | .pad0            |  8-bit *    1 | 0                           |
+  | .majorVersion    | 16-bit *    1 | 11 (The X11 version)        |
+  | .minorVersion    | 16-bit *    1 | 0                           |
+  | .nbytesAuthProto | 16-bit *    1 | 0                           |
+  | .nbytesAuthStr   | 16-bit *    1 | 0                           |
+  | .pad1            |  8-bit *    1 | 0                           |
+  | .pad2            |  8-bit *    1 | 0                           |
+  +------------------+---------------+-----------------------------+
+  | auth_request_len | 32-bit *    1 | 12                          |
+  +------------------+---------------+-----------------------------+
+
+       begin
+
+           ## Create socket
+  ???:     args.param1 = _PF_LOCAL_;    ##Protocol Family
+  ???:     args.param2 = _SOCK_STREAM_; ##Socket type
+  ???:     args.param3 = _IPPROTO_IP_;  ##Protocol
+  ???:     SOCKETCALL( _SYSCALL_SOCKET_ , @args );
+  ???:     if EAX is negative, goto socket_create_fail;
+  ???:     goto socket_create_success;
+           socket_create_fail:
+  ???:         goto exit_failure;
+           socket_create_success:
+  ???:         socket = EAX;
+
+           ## Connect to the X Server
+  ???:     args.param1 = socket;     ##Socketfd
+  ???:     args.param2 = @xserver;   ##Address
+  ???:     args.param3 = 20;         ##Length of the Address
+  ???:     SOCKETCALL( _SYSCALL_CONNECT_ , @args );
+  ???:     if EAX is negative, goto socket_connect_fail;
+  ???:     goto socket_connect_success;
+           socket_connect_fail:
+  ???:         CLOSE( socket );
+  ???:         goto exit_failure;
+           socket_connect_success:
+
+           ## Get peer name
+  ???:     args.param1 = socket;       ##Socketfd = socket
+  ???:     args.param2 = @xserver;     ##Address
+  ???:     args.param3 = @xserver_len; ##Length of the Address
+  ???:     SOCKETCALL( _SYSCALL_GETPEERNAME_ , @args );
+  ???:     if EAX is negative, goto getpeername_fail;
+  ???:     goto getpeername_success;
+           getpeername_fail:
+  ???:         CLOSE( socket );
+  ???:         goto exit_failure;
+           getpeername_success:
+
+           ## Get kernel name and information
+  ???:     UNAME( @kernel_info );
+  ???:     if EAX is negative, goto uname_fail;
+  ???:     goto uname_success;
+           uname_fail:
+  ???:         CLOSE( socket );
+  ???:         goto exit_failure;
+           uname_success:
+
+           ## Check permission to access Xauthority file
+  ???:     ACCESS( @xauth_file, _R_OK_ );
+  ???:     if EAX is negative, goto access_xauth_fail;
+  ???:     goto access_xauth_success;
+           access_xauth_fail:
+  ???:         CLOSE( socket );
+  ???:         goto exit_failure;
+           access_xauth_success:
+
+           ## Open the Xauthority file
+  ???:     OPEN( @xauth_file, _O_RDONLY );
+  ???:     if EAX is negative, goto open_xauth_file;
+  ???:     goto open_xauth_success;
+           open_xauth_fail:
+  ???:         CLOSE( socket );
+  ???:         goto exit_failure;
+           open_xauth_success:
+  ???:         xauth_fd = EAX;
+
+           ## Get Xauthority file status
+  ???:     FSTAT64( xauth_fd, @xauth_fstat );
+  ???:     if EAX is negative, goto fstat64_xauth_fail;
+  ???:     goto fstat64_xauth_success;
+           fstat64_xauth_fail:
+  ???:         CLOSE( socket );
+  ???:         CLOSE( xauth_fd );
+  ???:         goto exit_failure;
+           fstat64_xauth_success:
+
+           ## Read Xauthority file
+  ???:     READ( xauth_fd, @xauth_data, 4096 );
+  ???:     if EAX is negative, goto read_xauth_fail;
+  ???:     goto read_xauth_success;
+           read_xauth_fail:
+  ???:         CLOSE( socket );
+  ???:         CLOSE( xauth_fd );
+  ???:         goto exit_failure;
+           read_xauth_success:
+
+           ## Close Xauthority file
+  ???:     CLOSE( xauth_fd );
+
+           ## Get Xserver socket name
+  ???:     args.param1 = socket;
+  ???:     args.param2 = @socketname;
+  ???:     args.param3 = @socketname_len;
+  ???:     SOCKETCALL( _SYSCALL_GETSOCKNAME_ , @args );
+  ???:     if EAX is negative, goto getsockname_fail;
+  ???:     goto getsockname_success;
+           getsockname_fail:
+  ???:         CLOSE( socket );
+  ???:         goto exit_failure;
+           getsockname_success:
+
+           ## Get socket access mode and status flag
+  ???:     FCNTL64( socket, _F_GETFL_ );
+  ???:     if EAX is negative, goto fcntl64_getstatus_fail;
+  ???:     goto fcntl64_getstatus_success;
+           fcntl64_getstatus_fail:
+  ???:         CLOSE( socket );
+  ???:         goto exit_failure;
+           fcntl64_getstatus_success:
+
+           ## Set socket non-blocking
+  ???:     FCNTL64( socket, _F_SETFL_, _O_RDWR | _O_NONBLOCK_ );
+  ???:     if EAX is negative, goto fcntl64_setflag_fail;
+  ???:     goto fcntl64_setflag_success;
+           fcntl64_setflag_fail:
+  ???:         CLOSE( socket );
+  ???:         goto exit_failure;
+           fcntl64_setflag_success:
+
+           ## Set socket file descriptor flag
+  ???:     FCNTL64( socket, _F_SETFD_, _FD_CLOEXEC_ );
+  ???:     if EAX is negative, goto fcntl64_setfd_fail;
+  ???:     goto fcntl64_setfd_success;
+           fcntl64_setfd_fail:
+  ???:         CLOSE( socket );
+  ???:         goto exit_failure;
+           fcntl64_setfd_success:
+
+           ## Wait for the socket to become ready for output
+  ???:     pollfd.fd = socket;
+  ???:     pollfd.events = _POLLIN_ | _POLLOUT_;
+  ???:     pollfd.revents = _POLLOUT_;
+  ???:     POLL( @pollfd, 1, timeout );
+
+           ## Authenticate the connection
+  ???:     auth_request.nbytesAuthProto = xauth_data[18];
+  ???:     auth_request.nbytesAuthStr   = xauth_data[38];
+  ???:     writev.buffer1     = @auth_request;
+  ???:     writev.buffer1_len = auth_request_len;
+
+  ???:     writebuffer1       = xauth_data[19 ... 36];
+  ???:     writev.buffer2     = @writebuffer1;
+  ???:     writev.buffer2_len = 18;
+
+  ???:     writev.buffer2     = @writebuffer2;
+  ???:     writev.buffer2_len = 2;
+
+  ???:     writebuffer3       = xauth_data[39 ... 54];
+  ???:     writev.buffer4     = @writebuffer3;
+  ???:     writev.buffer4_len = 16;
+
+  ???:     WRITEV( socket, @writev, 4 );
+
+           ## Wait for the socket to become ready for input
+  ???:     pollfd.fd = socket;
+  ???:     pollfd.events = _POLLIN_
+  ???:     POLL( @pollfd, 1, timeout );
+
+           ## Get the first 8 bytes of data, to check
+           ## whether the authentication is success or fail
+  ???:     
+
+           ## If success, receive all the remaining data
+
+           ## 
+
+           exit_success:
+  ???:         CLOSE( socket );
+  ???:         EXIT( 0 );
+           exit_failure:
+  ???:         EXIT( -1 );
+
+       end.
+
+======================================================================

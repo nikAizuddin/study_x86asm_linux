@@ -52,12 +52,19 @@ NOTES
         "/usr/include/asm-generic/errno.h"
         "/usr/include/asm-generic/errno-base.h"
 
+    Refer constant values in: 
+        "/usr/include/netinet/in.h"
+        "/usr/include/bits/socket.h"
+        "/usr/include/bits/socket_type.h"
+
+    Refer X Window System structure in: 
+        "/usr/include/X11/Xauth.h"
+
     References:
         1) "System Programming with C and Unix" by Adam Hoover.
         2) http://coding.debuntu.org/
            c-linux-socket-programming-tcp-simple-http-client
-        3) /usr/include/netinet/in.h
-        4) man socket
+        3) man socket
 
 ----------------------------------------------------------------------
 
@@ -81,12 +88,12 @@ PROCESS DESCRIPTION:
   |     Data      |    Size     |              Value               |
   +---------------+-------------+----------------------------------+
   | socket_create |             |                                  |
-  | .domain       | 32-bit *  1 | 2 (AF_INET)                      |
+  | .domain       | 32-bit *  1 | 2 (PF_INET)                      |
   | .type         | 32-bit *  1 | 1 (SOCK_STREAM)                  |
   | .protocol     | 32-bit *  1 | 6 (IPPROTO_TCP)                  |
   +---------------+-------------+----------------------------------+
   | server_addr   |             |                                  |
-  | .domain       | 16-bit *  1 | 2                                |
+  | .family       | 16-bit *  1 | 2 (AF_INET)                      |
   | .port         | 16-bit *  1 | 0x5000 (PORT 80)                 |
   | .ip           |  8-bit *  4 | 198,35,26,96 (198.35.26.96)      |
   | .padding      | 32-bit *  1 | 0 (Pad server_addr to 16 bytes)  |

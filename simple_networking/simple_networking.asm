@@ -32,12 +32,12 @@ section .bss
 section .rodata
 
     socket_create:
-        .domain:       dd 2                ;AF_INET
+        .domain:       dd 2                ;PF_INET
         .type:         dd 1                ;SOCK_STREAM
         .protocol:     dd 6                ;IPPROTO_TCP
 
     server_addr:
-        .domain:       dw 2                ;AF_INET
+        .family:       dw 2                ;AF_INET
         .port:         dw 0x5000           ;PORT 80
         .ip:           db 198,35,26,96     ;www.wikipedia.org ip-addr
         .padding:      dd 0
@@ -54,7 +54,7 @@ section .data
     connect:
         .socketfd:     dd 0
         .addr:         dd server_addr
-        .addrlen:      dd 16
+        .addrlen:      dd 16               ;sizeof server_addr
 
     send:
         .socketfd:     dd 0
