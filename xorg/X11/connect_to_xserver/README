@@ -30,7 +30,7 @@ NOTES
                  {sa_family=AF_LOCAL, sun_path=@"/tmp/.X11-unix/X0"},
                  20 ) = 0
 
-    The values in my Xauthority file:
+    The table below shows the value in my Xauthority file:
     (in my Fedora 19 x86_64 OS, the location of the file is
     "/var/run/lightdm/nlck/xauthority").
 
@@ -100,6 +100,13 @@ NOTES
         +--------+------+-----+--------+-----------+
     Note: Offset is only up to +55 because the size of the
           Xauthority file is 55 bytes.
+
+    From the table,
+        Offset  4 -> 13 = Hostname
+        Offset 19 -> 36 = Protocol name
+        Offset 39 -> 54 = Protocol string (the secret key)
+        Offset 18 = Length of protocol name
+        Offset 38 = Length of protocol string (secret key length)
     
 
     Refer error codes to this file:
@@ -119,6 +126,8 @@ NOTES
 
     Find X opcodes in:
         at the end of "/usr/include/X11/Xproto.h"
+
+    Please read "proto.pdf" page 111 for Connection Setup.
 
 
 ----------------------------------------------------------------------
@@ -156,20 +165,19 @@ PROCESS DESCRIPTION:
   | _SOCK_STREAM_         | 1     | Socket type stream             |
   +-----------------------+-------+--------------------------------+
   | _SYSCALL_EXIT_        | 1     |                                |
-  | _SYSCALL_SOCKET_      | 1     | Redirected by SOCKETCALL().    |
-  | _SYSCALL_CONNECT_     | 3     | Redirected by SOCKETCALL().    |
   | _SYSCALL_READ_        | 3     |                                |
   | _SYSCALL_OPEN_        | 5     |                                |
   | _SYSCALL_CLOSE_       | 6     |                                |
-  | _SYSCALL_GETSOCKNAME_ | 6     | Redirected by SOCKETCALL().    |
-  | _SYSCALL_GETPEERNAME_ | 7     | Redirected by SOCKETCALL().    |
   | _SYSCALL_ACCESS_      | 33    |                                |
   | _SYSCALL_SOCKETCALL_  | 102   |                                |
-  | _SYSCALL_UNAME_       | 122   |                                |
   | _SYSCALL_WRITEV       | 146   |                                |
   | _SYSCALL_POLL_        | 168   |                                |
   | _SYSCALL_FSTAT64_     | 197   |                                |
   | _SYSCALL_FCNTL64_     | 221   |                                |
+  +-----------------------+-------+--------------------------------+
+  | _CALL_SOCKET_         | 1     | Redirected by SOCKETCALL().    |
+  | _CALL_CONNECT_        | 3     | Redirected by SOCKETCALL().    |
+  | _CALL_RECV_           | 10    | Redirected by SOCKETCALL().    |
   +-----------------------+-------+--------------------------------+
 
   +----------------------------------------------------------------+
@@ -183,8 +191,7 @@ PROCESS DESCRIPTION:
   | .param1       | 32-bit *    1 | redirects.                     |
   | .param2       | 32-bit *    1 |                                |
   | .param3       | 32-bit *    1 |                                |
-  +---------------+---------------+--------------------------------+
-  | kernel_info   | 32-bit *  128 | Kernel name and information.   |
+  | .param4       | 32-bit *    1 |                                |
   +---------------+---------------+--------------------------------+
   | xauth_fd      | 32-bit *    1 | Xauthority file handle.        |
   +---------------+---------------+--------------------------------+
@@ -235,6 +242,8 @@ PROCESS DESCRIPTION:
   | .buffer4      | 32-bit *    1 |                                |
   | .buffer4_len  | 32-bit *    1 |                                |
   +---------------+---------------+--------------------------------+
+  | xserver_info  | 32-bit *  128 |                                |
+  +---------------+---------------+--------------------------------+
 
   +----------------------------------------------------------------+
   |                   DATA SEGMENT INFORMATION                     |
@@ -249,11 +258,6 @@ PROCESS DESCRIPTION:
   +------------------+---------------+-----------------------------+
   | xauth_file       |  8-bit *   33 | "/var/run/lightdm/nlck/     |
   |                  |               |  xauthority",0              |
-  +------------------+---------------+-----------------------------+
-  | socketname       |               |                             |
-  | .family          | 16-bit *    1 | AF_LOCAL                    |
-  | .data            | 32-bit *    4 | 0                           |
-  | socketname_len   | 32-bit *    1 | 2                           |
   +------------------+---------------+-----------------------------+
   | timeout          | 32-bit *    1 | 4294967295                  |
   +------------------+---------------+-----------------------------+
@@ -276,7 +280,7 @@ PROCESS DESCRIPTION:
   ???:     args.param1 = _PF_LOCAL_;    ##Protocol Family
   ???:     args.param2 = _SOCK_STREAM_; ##Socket type
   ???:     args.param3 = _IPPROTO_IP_;  ##Protocol
-  ???:     SOCKETCALL( _SYSCALL_SOCKET_ , @args );
+  ???:     SOCKETCALL( _CALL_SOCKET_ , @args );
   ???:     if EAX is negative, goto socket_create_fail;
   ???:     goto socket_create_success;
            socket_create_fail:
@@ -288,34 +292,13 @@ PROCESS DESCRIPTION:
   ???:     args.param1 = socket;     ##Socketfd
   ???:     args.param2 = @xserver;   ##Address
   ???:     args.param3 = 20;         ##Length of the Address
-  ???:     SOCKETCALL( _SYSCALL_CONNECT_ , @args );
+  ???:     SOCKETCALL( _CALL_CONNECT_ , @args );
   ???:     if EAX is negative, goto socket_connect_fail;
   ???:     goto socket_connect_success;
            socket_connect_fail:
   ???:         CLOSE( socket );
   ???:         goto exit_failure;
            socket_connect_success:
-
-           ## Get peer name
-  ???:     args.param1 = socket;       ##Socketfd = socket
-  ???:     args.param2 = @xserver;     ##Address
-  ???:     args.param3 = @xserver_len; ##Length of the Address
-  ???:     SOCKETCALL( _SYSCALL_GETPEERNAME_ , @args );
-  ???:     if EAX is negative, goto getpeername_fail;
-  ???:     goto getpeername_success;
-           getpeername_fail:
-  ???:         CLOSE( socket );
-  ???:         goto exit_failure;
-           getpeername_success:
-
-           ## Get kernel name and information
-  ???:     UNAME( @kernel_info );
-  ???:     if EAX is negative, goto uname_fail;
-  ???:     goto uname_success;
-           uname_fail:
-  ???:         CLOSE( socket );
-  ???:         goto exit_failure;
-           uname_success:
 
            ## Check permission to access Xauthority file
   ???:     ACCESS( @xauth_file, _R_OK_ );
@@ -358,18 +341,6 @@ PROCESS DESCRIPTION:
 
            ## Close Xauthority file
   ???:     CLOSE( xauth_fd );
-
-           ## Get Xserver socket name
-  ???:     args.param1 = socket;
-  ???:     args.param2 = @socketname;
-  ???:     args.param3 = @socketname_len;
-  ???:     SOCKETCALL( _SYSCALL_GETSOCKNAME_ , @args );
-  ???:     if EAX is negative, goto getsockname_fail;
-  ???:     goto getsockname_success;
-           getsockname_fail:
-  ???:         CLOSE( socket );
-  ???:         goto exit_failure;
-           getsockname_success:
 
            ## Get socket access mode and status flag
   ???:     FCNTL64( socket, _F_GETFL_ );
@@ -430,11 +401,32 @@ PROCESS DESCRIPTION:
 
            ## Get the first 8 bytes of data, to check
            ## whether the authentication is success or fail
-  ???:     
+  ???:     args.param1 = socket;            ##Socketfd
+  ???:     args.param2 = @readbuffer.data;  ##Buffer
+  ???:     args.param3 = 8;                 ##Bytes to receive.
+  ???:     args.param4 = 0;                 ##Flag
+  ???:     SOCKETCALL( _CALL_RECV_, @args );
+  ???:     if EAX is negative, goto get_authstatus_fail;
+  ???:     goto get_authstatus_success;
+           get_authstatus_fail:
+  ???:         CLOSE( socket );
+  ???:         goto exit_failure;
+           get_authstatus_success:
+  ???:         readbuffer.len = EAX;
 
-           ## If success, receive all the remaining data
-
-           ## 
+           ## Check our authentication  status, if success
+           ## receive all the remaining data. If fail, exit_failure
+  ???:     if auth_status.success == 0, goto auth_status_fail;
+  ???:     goto auth_status_success;
+           auth_status_fail:
+  ???:         CLOSE( socket );
+  ???:         goto exit_failure;
+           auth_status_success:
+  ???:         args.param1 = socket;
+  ???:         args.param2 = @xserver_info;
+  ???:         args.param3 = 512;
+  ???:         args.param4 = 0;
+  ???:         SOCKETCALL( _CALL_RECV_, @args );
 
            exit_success:
   ???:         CLOSE( socket );

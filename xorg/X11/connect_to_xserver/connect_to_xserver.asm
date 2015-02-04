@@ -37,20 +37,19 @@
 %define    _POLLOUT_                0x004
 %define    _SOCK_STREAM_            1
 %define    _SYSCALL_EXIT_           1
-%define    _SYSCALL_SOCKET_         1
-%define    _SYSCALL_CONNECT_        3
 %define    _SYSCALL_READ_           3
 %define    _SYSCALL_OPEN_           5
 %define    _SYSCALL_CLOSE_          6
-%define    _SYSCALL_GETSOCKNAME_    6
-%define    _SYSCALL_GETPEERNAME_    7
 %define    _SYSCALL_ACCESS_         33
 %define    _SYSCALL_SOCKETCALL_     102
-%define    _SYSCALL_UNAME_          122
 %define    _SYSCALL_WRITEV_         146
 %define    _SYSCALL_POLL_           168
 %define    _SYSCALL_FSTAT64_        197
 %define    _SYSCALL_FCNTL64_        221
+
+%define    _CALL_SOCKET_            1
+%define    _CALL_CONNECT_           3
+%define    _CALL_RECV_              10
 
 global _start
 
@@ -62,8 +61,7 @@ section .bss
         .param1:             resd 1
         .param2:             resd 1
         .param3:             resd 1
-
-    kernel_info:             resd 128
+        .param4:             resd 1
 
     xauth_fd:                resd 1
 
@@ -87,6 +85,14 @@ section .bss
 
     xauth_data:              resd 1024
 
+    auth_status:
+        .success:            resb 1
+        .byte:               resb 1
+        .majorVersion:       resw 1
+        .minorVersion:       resw 1
+        .pad0:               resb 1
+        .pad1:               resb 1
+
     pollfd:
         .fd:                 resd 1
         .events:             resw 1
@@ -106,6 +112,53 @@ section .bss
         .buffer4:            resd 1
         .buffer4_len:        resd 1
 
+    xserver_info:
+        .release:            resd 1    ;11.40.4000
+        .ridBase:            resd 1    ;resource id base
+        .ridMask:            resd 1    ;resource id mask
+        .motionBufferSize:   resd 1    ;256
+        .nbytesVendor:       resw 1    ;14 ("Fedora Project")
+        .maxRequestSize:     resw 1    ;65535
+        .numRoots:           resb 1    ;1
+        .numFormats:         resb 1    ;7
+        .imageByteOrder:     resb 1    ;0 (LSBFirst)
+        .bitmapBitOrder:     resb 1    ;0 (LeastSignificant)
+        .bitmapScanlineUnit: resb 1    ;32
+        .bitmapScanlinePad:  resb 1    ;32
+        .minKeyCode:         resb 1    ;8
+        .maxKeyCode:         resb 1    ;65535
+        .pad_00:             resd 1
+        .vendorStr:          resd 4    ;"Fedora Project"
+        .unknown_01:         resb 1    ;1
+        .unknown_02:         resb 1    ;1
+        .unknown_03:         resb 1    ;32
+        .unknown_04:         resb 1    ;0
+        .pad_01:             resd 1
+    xPixmapFormat:
+        .depth:              resb 1    ;4
+        .bitsPerPixel:       resb 1    ;8
+        .scanLinePad:        resb 1    ;32
+        .pad_02:             resb 1
+        .pad_03:             resd 1
+    xWindowRoot:
+        .windowId:           resd 1
+        .defaultColormap:    resd 1
+        .whitePixel:         resd 1
+        .blackPixel:         resd 1
+        .currentInputMask:   resd 1
+        .pixWidth:           resw 1    ;width-in-pixels
+        .pixHeight:          resw 1    ;height-in-pixels
+        .mmWidth:            resw 1    ;width-in-millimeters
+        .mmHeight:           resw 1    ;height-in-millimeters
+        .minInstalledMaps:   resw 1    ;0
+        .maxInstalledMaps:   resw 1    ;0
+        .rootVisualID:       resd 1
+        .backingStore:       resb 1    ;0
+        .saveUnders:         resb 1    ;0
+        .rootDepth:          resb 1    ;0
+        .nDepths:            resb 1    ;0
+        .unknown:            resd 128  ;undiscoverd values :(
+
 section .data
 
     xserver:
@@ -115,11 +168,6 @@ section .data
     xserver_len:             dd 20
 
     xauth_file:              db "/var/run/lightdm/nlck/xauthority",0
-
-    socketname:
-        .family:             dw _AF_LOCAL_
-        .data:               dd 0,0,0,0
-    socketname_len:          dd 2
 
     timeout:                 dd 300 ;default=4294967295
 
@@ -145,7 +193,7 @@ _start:
 ;   ???:   args.param1 = _PF_LOCAL_;    ##Protocol Family
 ;   ???:   args.param2 = _SOCK_STREAM_; ##Socket type
 ;   ???:   args.param3 = _IPPROTO_IP_;  ##Protocol
-;   ???:   SOCKETCALL( _SYSCALL_SOCKET_ , @args );
+;   ???:   SOCKETCALL( _CALL_SOCKET_ , @args );
 ;   ???:   if EAX is negative, goto socket_create_fail;
 ;   ???:   goto socket_create_success;
 ;          socket_create_fail:
@@ -159,7 +207,7 @@ _start:
     mov    dword [args.param3], _IPPROTO_IP_
 
     mov    eax, _SYSCALL_SOCKETCALL_
-    mov    ebx, _SYSCALL_SOCKET_
+    mov    ebx, _CALL_SOCKET_
     lea    ecx, [args]
     int    0x80
 
@@ -179,7 +227,7 @@ socket_create_success:
 ;   ???:   args.param1 = socket;     ##Socketfd
 ;   ???:   args.param2 = @xserver;   ##Address
 ;   ???:   args.param3 = 20;         ##Length of the Address
-;   ???:   SOCKETCALL( _SYSCALL_CONNECT_ , @args );
+;   ???:   SOCKETCALL( _CALL_CONNECT_ , @args );
 ;   ???:   if EAX is negative, goto socket_connect_fail;
 ;   ???:   goto socket_connect_success;
 ;          socket_connect_fail:
@@ -195,7 +243,7 @@ socket_create_success:
     mov    dword [args.param3], 20
 
     mov    eax, _SYSCALL_SOCKETCALL_
-    mov    ebx, _SYSCALL_CONNECT_
+    mov    ebx, _CALL_CONNECT_
     lea    ecx, [args]
     int    0x80
 
@@ -209,73 +257,6 @@ socket_connect_fail:
     int    0x80
     jmp    exit_failure
 socket_connect_success:
-
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;          ## Get peer name
-;   ???:   args.param1 = socket;       ##Socketfd = socket
-;   ???:   args.param2 = @xserver;     ##Address
-;   ???:   args.param3 = @xserver_len; ##Length of the Address
-;   ???:   SOCKETCALL( _SYSCALL_GETPEERNAME_ , @args );
-;   ???:   if EAX is negative, goto getpeername_fail;
-;   ???:   goto getpeername_success;
-;          getpeername_fail:
-;   ???:       CLOSE( socket );
-;   ???:       goto exit_failure;
-;          getpeername_success:
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    eax, [socket]
-    lea    ebx, [xserver]
-    lea    ecx, [xserver_len]
-    mov    [args.param1], eax
-    mov    [args.param2], ebx
-    mov    [args.param3], ecx
-
-    mov    eax, _SYSCALL_SOCKETCALL_
-    mov    ebx, _SYSCALL_GETPEERNAME_
-    lea    ecx, [args]
-    int    0x80
-
-    test   eax, eax
-    js     getpeername_fail
-    jmp    getpeername_success
-
-getpeername_fail:
-    mov    eax, _SYSCALL_CLOSE_
-    mov    ebx, [socket]
-    int    0x80
-    jmp    exit_failure
-getpeername_success:
-
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;          ## Get kernel name and information
-;   ???:   UNAME( @kernel_info );
-;   ???:   if EAX is negative, goto uname_fail;
-;   ???:   goto uname_success;
-;          uname_fail:
-;   ???:       CLOSE( socket );
-;   ???:       goto exit_failure;
-;          uname_success:
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    eax, _SYSCALL_UNAME_
-    lea    ebx, [kernel_info]
-    int    0x80
-
-    test   eax, eax
-    js     uname_fail
-    jmp    uname_success
-
-uname_fail:
-    mov    eax, _SYSCALL_CLOSE_
-    mov    ebx, [socket]
-    int    0x80
-    jmp    exit_failure
-uname_success:
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -413,45 +394,6 @@ read_xauth_success:
     mov    eax, _SYSCALL_CLOSE_
     mov    ebx, [xauth_fd]
     int    0x80
-
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;          ## Get Xserver socket name
-;   ???:   args.param1 = socket;
-;   ???:   args.param2 = @socketname;
-;   ???:   args.param3 = @socketname_len;
-;   ???:   SOCKETCALL( _SYSCALL_GETSOCKNAME_ , @args );
-;   ???:   if EAX is negative, goto getsockname_fail;
-;   ???:   goto getsockname_success;
-;          getsockname_fail:
-;   ???:       CLOSE( socket );
-;   ???:       goto exit_failure;
-;          getsockname_success:
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    eax, [socket]
-    lea    ebx, [socketname]
-    lea    ecx, [socketname_len]
-    mov    [args.param1], eax
-    mov    [args.param2], ebx
-    mov    [args.param3], ecx
-
-    mov    eax, _SYSCALL_SOCKETCALL_
-    mov    ebx, _SYSCALL_GETSOCKNAME_
-    lea    ecx, [args]
-    int    0x80
-
-    test   eax, eax
-    js     getsockname_fail
-    jmp    getsockname_success
-
-getsockname_fail:
-    mov    eax, _SYSCALL_CLOSE_
-    mov    ebx, [socket]
-    int    0x80
-    jmp    exit_failure
-getsockname_success:
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -646,6 +588,90 @@ fcntl64_setfd_success:
     lea    ebx, [pollfd]
     mov    ecx, 1
     mov    edx, [timeout]
+    int    0x80
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;          ## Get the first 8 bytes of data, to check
+;          ## whether the authentication is success or fail
+;   ???:   args.param1 = socket;            ##Socketfd
+;   ???:   args.param2 = @auth_status;      ##Buffer
+;   ???:   args.param3 = 8;                 ##Bytes to receive.
+;   ???:   args.param4 = 0;                 ##Flag
+;   ???:   SOCKETCALL( _CALL_RECV_, @args );
+;   ???:   if EAX is negative, goto get_authstatus_fail;
+;   ???:   goto get_authstatus_success;
+;          get_authstatus_fail:
+;   ???:       CLOSE( socket );
+;   ???:       goto exit_failure;
+;          get_authstatus_success:
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    mov    eax, [socket]
+    mov    [args.param1], eax
+    mov    dword [args.param2], auth_status
+    mov    dword [args.param3], 8
+    mov    dword [args.param4], 0
+
+    mov    eax, _SYSCALL_SOCKETCALL_
+    mov    ebx, _CALL_RECV_
+    lea    ecx, [args]
+    int    0x80
+
+    test   eax, eax
+    js     get_authstatus_fail
+    jmp    get_authstatus_success
+
+get_authstatus_fail:
+    mov    eax, _SYSCALL_CLOSE_
+    mov    ebx, [socket]
+    int    0x80
+    jmp   exit_failure
+get_authstatus_success:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;          ## Check our authentication  status, if success
+;          ## receive all the remaining data. If fail, exit_failure
+;   ???:   if auth_status.success == 0, goto auth_status_fail;
+;   ???:   goto auth_status_success;
+;          auth_status_fail:
+;   ???:       CLOSE( socket );
+;   ???:       goto exit_failure;
+;          auth_status_success:
+;   ???:       args.param1 = socket;
+;   ???:       args.param2 = @xserver_info;
+;   ???:       args.param3 = 512;
+;   ???:       args.param4 = 0;
+;   ???:       SOCKETCALL( _CALL_RECV_, @args );
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    xor    eax, eax
+    mov    al, [auth_status.success]
+    test   eax, eax
+    js     auth_status_fail
+    jmp    auth_status_success
+
+auth_status_fail:
+    mov    eax, _SYSCALL_CLOSE_
+    mov    ebx, [socket]
+    int    0x80
+    jmp    exit_failure
+auth_status_success:
+    mov    eax, [socket]
+    lea    ebx, [xserver_info]
+    mov    ecx, 512
+    xor    edx, edx
+    mov    [args.param1], eax
+    mov    [args.param2], ebx
+    mov    [args.param3], ecx
+    mov    [args.param4], edx
+
+    mov    eax, _SYSCALL_SOCKETCALL_
+    mov    ebx, _CALL_RECV_
+    lea    ecx, [args]
     int    0x80
 
 
