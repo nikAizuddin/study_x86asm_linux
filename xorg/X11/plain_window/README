@@ -2,13 +2,13 @@
 1234567890123456789012345678901234567890123456789012345678901234567890
 ======================================================================
 ---------------------------------------------+------------------------
- TITLE: Connect to X Server.                 |
-        ( Connection based on cookie )       |    #x86assembly
+ TITLE: Create a plain window.               |
+                                             |    #x86assembly
                                              |    #research
                                              |    #xorg
 AUTHOR: Nik Mohamad Aizuddin bin Nik Azmi    |    #prototype
  EMAIL: nickaizuddin93@gmail.com             |    #xprotocol
-  DATE: 29-JAN-2015, Thursday                |
+  DATE: 05-FEB-2015, Thursday                |
 ---------------------------------------------+------------------------
 
 TARGET

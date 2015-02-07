@@ -2,27 +2,24 @@ ASSEMBLER = nasm
 LINKER    = ld
 FORMAT    = elf32
 MACHINE   = elf_i386
-_START    = xlib_plainwindow.asm
+_START    = plain_window.asm
 BIN       = exe
-OBJ       = xlib_plainwindow.o
-DLL       = /lib/ld-linux.so.2 \
-            /lib/libX11.so.6
+OBJ       = plain_window.o
 
 .PHONY: all clean
 all:
 	@${ASSEMBLER} \
 		${_START} \
-		-o xlib_plainwindow.o \
-		-f ${FORMAT}
+		-o plain_window.o \
+		-f ${FORMAT} \
+		-g -Fstabs
 
 	@${LINKER} \
 		${OBJ} \
 		-o ${BIN} \
-		-m ${MACHINE} \
-		-dynamic-linker ${DLL}
+		-m ${MACHINE}
 
 clean:
 	@rm \
 		${OBJ} \
 		${BIN}
-

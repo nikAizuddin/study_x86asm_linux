@@ -2,13 +2,13 @@
 ;234567890123456789012345678901234567890123456789012345678901234567890
 ;=====================================================================
 ;
-;                      Connect to X Server
+;                      Create a plain window
 ;
 ;---------------------------------------------------------------------
 ;
 ;         AUTHOR: Nik Mohamad Aizuddin bin Nik Azmi
 ;          EMAIL: nickaizuddin93@gmail.com
-;   DATE CREATED: 29-JAN-2015
+;   DATE CREATED: 05-FEB-2015
 ;
 ;       LANGUAGE: x86 Assembly Language
 ;      ASSEMBLER: NASM
@@ -378,10 +378,6 @@ section .data
         .class:              dw 1    ;InputOutput
         .visual:             dd 0
         .valueMask:          dd 0
-        .valuelist:          db 0x10, 0x00, 0x05, 0x00, 0x0c, 0x00
-                             db 0x00, 0x00, 0x57, 0x4d, 0x5f, 0x50
-                             db 0x52, 0x4f, 0x54, 0x4f, 0x43, 0x4f
-                             db 0x4c, 0x53
 
     mapWindow:
         .opcode:             db 8
@@ -923,9 +919,9 @@ auth_status_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;          ## Check if our request status. If our request is
+;          ## Check createWindow requests. If the request is
 ;          ## fail, the server will complain. Otherwise, the
-;          ## server just keep quiet.
+;          ## server will just keep quiet.
 ;   ???:   pollfd.fd = socket;
 ;   ???:   pollfd.events = _POLLIN_ | _POLLOUT_;
 ;   ???:   POLL( @pollfd, 1, timeout );
