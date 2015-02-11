@@ -19,371 +19,10 @@
 ;
 ;=====================================================================
 
-%define    _F_OK_                   0
-%define    _X_OK_                   1
-%define    _W_OK_                   2
-%define    _R_OK_                   4
-%define    _O_RDONLY_               0q0
-%define    _O_RDWR_                 0q2
-%define    _O_NONBLOCK_             0q4000
-%define    _PF_LOCAL_               1
-%define    _AF_LOCAL_               1
-%define    _IPPROTO_IP_             0
-%define    _F_GETFL_                3
-%define    _F_SETFL_                4
-%define    _F_SETFD_                2
-%define    _FD_CLOEXEC_             1
-%define    _POLLIN_                 0x001
-%define    _POLLOUT_                0x004
-%define    _SOCK_STREAM_            1
-%define    _SYSCALL_EXIT_           1
-%define    _SYSCALL_READ_           3
-%define    _SYSCALL_WRITE_          4
-%define    _SYSCALL_OPEN_           5
-%define    _SYSCALL_CLOSE_          6
-%define    _SYSCALL_ACCESS_         33
-%define    _SYSCALL_SOCKETCALL_     102
-%define    _SYSCALL_WRITEV_         146
-%define    _SYSCALL_POLL_           168
-%define    _SYSCALL_FSTAT64_        197
-%define    _SYSCALL_FCNTL64_        221
-
-%define    _CALL_SOCKET_            1
-%define    _CALL_CONNECT_           3
-%define    _CALL_RECV_              10
+%include "constants.inc"
+%include "data.inc"
 
 global _start
-
-section .bss
-
-    socket:                  resd 1
-
-    args:
-        .param1:             resd 1
-        .param2:             resd 1
-        .param3:             resd 1
-        .param4:             resd 1
-
-    xauth_fd:                resd 1
-
-    xauth_fstat:
-        .st_dev:             resd 2
-        .padding0:           resd 1
-        .st_ino:             resd 1
-        .st_mode:            resd 1
-        .st_nlink:           resd 1
-        .st_uid:             resd 1
-        .st_gid:             resd 1
-        .padding1:           resd 1
-        .padding2:           resd 1
-        .padding3:           resd 1
-        .st_size:            resd 2
-        .st_blksize:         resd 1
-        .st_blocks:          resd 2
-        .st_atime:           resd 2
-        .st_mtime:           resd 2
-        .st_ctime:           resd 2
-
-    xauth_data:              resd 1024
-
-    connection:
-        .status:             resb 1
-        .unused:             resb 1
-        .majorVersion:       resw 1    ;protocol major version
-        .minorVersion:       resw 1    ;protocol minor version
-        .lenAddData:         resw 1    ;length of additional data
-
-    pollfd:
-        .fd:                 resd 1
-        .events:             resw 1
-        .revents:            resw 1
-
-    writebuffer1:            resd 128
-    writebuffer2:            resd 128
-    writebuffer3:            resd 128
-
-    writev:
-        .buffer1:            resd 1
-        .buffer1_len:        resd 1
-        .buffer2:            resd 1
-        .buffer2_len:        resd 1
-        .buffer3:            resd 1
-        .buffer3_len:        resd 1
-        .buffer4:            resd 1
-        .buffer4_len:        resd 1
-
-    xserver_info:
-        .release:            resd 1    ;11.40.4000
-        .ridBase:            resd 1    ;resource id base
-        .ridMask:            resd 1    ;resource id mask
-        .motionBufferSize:   resd 1    ;256
-        .nbytesVendor:       resw 1    ;14 ("Fedora Project")
-        .maxRequestLen:      resw 1    ;65535
-        .numRoots:           resb 1    ;1
-        .numFormats:         resb 1    ;7 (format_01 -> 07)
-        .imageByteOrder:     resb 1    ;0 (LSBFirst)
-        .bitmapBitOrder:     resb 1    ;0 (LeastSignificant)
-        .bitmapScanlineUnit: resb 1    ;32
-        .bitmapScanlinePad:  resb 1    ;32
-        .minKeyCode:         resb 1    ;8
-        .maxKeyCode:         resb 1    ;255
-        .unused_01:          resd 1
-        .vendorStr:          resd 4    ;"Fedora Project"
-    format_01:
-        .depth:              resb 1    ;1
-        .bitsPerPx:          resb 1    ;1
-        .scanlinePad:        resb 1    ;32
-        .unused_01:          resb 1
-        .unused_02:          resd 1
-    format_02:
-        .depth:              resb 1    ;4
-        .bitsPerPx:          resb 1    ;8
-        .scanlinePad:        resb 1    ;32
-        .unused_01:          resb 1
-        .unused_02:          resd 1
-    format_03:
-        .depth:              resb 1    ;8
-        .bitsPerPx:          resb 1    ;8
-        .scanlinePad:        resb 1    ;32
-        .unused_01:          resb 1
-        .unused_02:          resd 1
-    format_04:
-        .depth:              resb 1    ;15
-        .bitsPerPx:          resb 1    ;16
-        .scanlinePad:        resb 1    ;32
-        .unused_01:          resb 1
-        .unused_02:          resd 1
-    format_05:
-        .depth:              resb 1    ;16
-        .bitsPerPx:          resb 1    ;16
-        .scanlinePad:        resb 1    ;32
-        .unused_01:          resb 1
-        .unused_02:          resd 1
-    format_06:
-        .depth:              resb 1    ;24
-        .bitsPerPx:          resb 1    ;32
-        .scanlinePad:        resb 1    ;32
-        .unused_01:          resb 1
-        .unused_02:          resd 1
-    format_07:
-        .depth:              resb 1    ;32
-        .bitsPerPx:          resb 1    ;32
-        .scanlinePad:        resb 1    ;32
-        .unused_01:          resb 1
-        .unused_02:          resd 1
-    screen:
-        .root:               resd 1    ;0x00000081
-        .defaultColormap:    resd 1    ;0x00000020
-        .whitePx:            resd 1    ;0x00ffffff
-        .blackPx:            resd 1    ;0x00000000
-        .eventInputMask:     resd 1    ;0x00fac03f
-        .widthInPx:          resw 1    ;1366
-        .heightInPx:         resw 1    ;768
-        .widthInMM:          resw 1    ;361
-        .heightInMM:         resw 1    ;203
-        .minInstalledMaps:   resw 1    ;1
-        .maxInstalledMaps:   resw 1    ;1
-        .rootVisual:         resd 1    ;0x00000021
-        .backingStores:      resb 1    ;0
-        .saveUnders:         resb 1    ;0
-        .rootDepth:          resb 1    ;24
-        .numDepth:           resb 1    ;7
-    depth_01:
-        .depth:              resb 1    ;24
-        .unused_01:          resb 1
-        .numVisualtypes:     resw 1    ;11
-        .unused_02:          resd 1
-    visual_01_01:
-        .visualID:           resd 1    ;0x00000021
-        .class:              resb 1    ;4
-        .bitsPerRGBval:      resb 1    ;8
-        .colormapEntries:    resw 1    ;256
-        .redMask:            resd 1    ;0x00ff0000
-        .greenMask:          resd 1    ;0x0000ff00
-        .blueMask:           resd 1    ;0x000000ff
-        .unused:             resd 1
-    visual_01_02:
-        .visualID:           resd 1    ;0x00000022
-        .class:              resb 1    ;5
-        .bitsPerRGBval:      resb 1    ;8
-        .colormapEntries:    resw 1    ;256
-        .redMask:            resd 1    ;0x00ff0000
-        .greenMask:          resd 1    ;0x0000ff00
-        .blueMask:           resd 1    ;0x000000ff
-        .unused:             resd 1
-    visual_01_03:
-        .visualID:           resd 1    ;0x00000077
-        .class:              resb 1    ;4
-        .bitsPerRGBval:      resb 1    ;8
-        .colormapEntries:    resw 1    ;256
-        .redMask:            resd 1    ;0x00ff0000
-        .greenMask:          resd 1    ;0x0000ff00
-        .blueMask:           resd 1    ;0x000000ff
-        .unused:             resd 1
-    visual_01_04:
-        .visualID:           resd 1    ;0x00000078
-        .class:              resb 1    ;4
-        .bitsPerRGBval:      resb 1    ;8
-        .colormapEntries:    resw 1    ;256
-        .redMask:            resd 1    ;0x00ff0000
-        .greenMask:          resd 1    ;0x0000ff00
-        .blueMask:           resd 1    ;0x000000ff
-        .unused:             resd 1
-    visual_01_05:
-        .visualID:           resd 1    ;0x00000079
-        .class:              resb 1    ;4
-        .bitsPerRGBval:      resb 1    ;8
-        .colormapEntries:    resw 1    ;256
-        .redMask:            resd 1    ;0x00ff0000
-        .greenMask:          resd 1    ;0x0000ff00
-        .blueMask:           resd 1    ;0x000000ff
-        .unused:             resd 1
-    visual_01_06:
-        .visualID:           resd 1    ;0x0000007a
-        .class:              resb 1    ;4
-        .bitsPerRGBval:      resb 1    ;8
-        .colormapEntries:    resw 1    ;256
-        .redMask:            resd 1    ;0x00ff0000
-        .greenMask:          resd 1    ;0x0000ff00
-        .blueMask:           resd 1    ;0x000000ff
-        .unused:             resd 1
-    visual_01_07:
-        .visualID:           resd 1    ;0x0000007b
-        .class:              resb 1    ;5
-        .bitsPerRGBval:      resb 1    ;8
-        .colormapEntries:    resw 1    ;256
-        .redMask:            resd 1    ;0x00ff0000
-        .greenMask:          resd 1    ;0x0000ff00
-        .blueMask:           resd 1    ;0x000000ff
-        .unused:             resd 1
-    visual_01_08:
-        .visualID:           resd 1    ;0x0000007c
-        .class:              resb 1    ;5
-        .bitsPerRGBval:      resb 1    ;8
-        .colormapEntries:    resw 1    ;256
-        .redMask:            resd 1    ;0x00ff0000
-        .greenMask:          resd 1    ;0x0000ff00
-        .blueMask:           resd 1    ;0x000000ff
-        .unused:             resd 1
-    visual_01_09:
-        .visualID:           resd 1    ;0x0000007d
-        .class:              resb 1    ;5
-        .bitsPerRGBval:      resb 1    ;8
-        .colormapEntries:    resw 1    ;256
-        .redMask:            resd 1    ;0x00ff0000
-        .greenMask:          resd 1    ;0x0000ff00
-        .blueMask:           resd 1    ;0x000000ff
-        .unused:             resd 1
-    visual_01_10:
-        .visualID:           resd 1    ;0x0000007e
-        .class:              resb 1    ;5
-        .bitsPerRGBval:      resb 1    ;8
-        .colormapEntries:    resw 1    ;256
-        .redMask:            resd 1    ;0x00ff0000
-        .greenMask:          resd 1    ;0x0000ff00
-        .blueMask:           resd 1    ;0x000000ff
-        .unused:             resd 1
-    visual_01_11:
-        .visualID:           resd 1    ;0x0000007f
-        .class:              resb 1    ;5
-        .bitsPerRGBval:      resb 1    ;8
-        .colormapEntries:    resw 1    ;256
-        .redMask:            resd 1    ;0x00ff0000
-        .greenMask:          resd 1    ;0x0000ff00
-        .blueMask:           resd 1    ;0x000000ff
-        .unused:             resd 1
-    depth_02:
-        .depth:              resb 1    ;1
-        .unused_01:          resb 1
-        .numVisualtypes:     resw 1    ;0
-        .unused_02:          resd 1
-    depth_03:
-        .depth:              resb 1    ;4
-        .unused_01:          resb 1
-        .numVisualtypes:     resw 1    ;0
-        .unused_02:          resd 1
-    depth_04:
-        .depth:              resb 1    ;8
-        .unused_01:          resb 1
-        .numVisualtypes:     resw 1    ;0
-        .unused_02:          resd 1
-    depth_05:
-        .depth:              resb 1    ;15
-        .unused_01:          resb 1
-        .numVisualtypes:     resw 1    ;0
-        .unused_02:          resd 1
-    depth_06:
-        .depth:              resb 1    ;16
-        .unused_01:          resb 1
-        .numVisualtypes:     resw 1    ;0
-        .unused_02:          resd 1
-    depth_07:
-        .depth:              resb 1    ;32
-        .unused_01:          resb 1
-        .numVisualtypes:     resw 1    ;1
-        .unused_02:          resd 1
-    visual_07_01:
-        .visualID:           resd 1    ;0x0000005e
-        .class:              resb 1    ;4
-        .bitsPerRGBval:      resb 1    ;8
-        .colormapEntries:    resw 1    ;256
-        .redMask:            resd 1    ;0x00ff0000
-        .greenMask:          resd 1    ;0x0000ff00
-        .blueMask:           resd 1    ;0x000000ff
-        .unused:             resd 1
-
-    requestStatus:
-        .success:            resb 1
-        .code:               resb 1
-        .sequenceNumber:     resw 1
-        .unused_01:          resd 1
-        .minorOpcode:        resw 1
-        .majorOpcode:        resb 1
-        .unused_02:          resb 21
-
-section .data
-
-    xserver:
-        .family:             dw 1          ;AF_LOCAL
-        .path:               db "/tmp/.X11-unix/X0",0
-
-    xserver_len:             dd 20
-
-    xauth_file:              db "/var/run/lightdm/nlck/xauthority",0
-
-    timeout:                 dd 0xffffffff ;4294967295 milliseconds
-
-    auth_request:
-        .byteOrder:          db 0x6c
-        .pad0:               db 0
-        .majorVersion:       dw 11
-        .minorVersion:       dw 0
-        .nbytesAuthProto:    dw 0
-        .nbytesAuthStr:      dw 0
-        .pad1:               db 0
-        .pad2:               db 0
-    auth_request_len:        dd 12
-
-    createWindow:
-        .opcode:             db 1
-        .depth:              db 0
-        .requestLength:      dw 8 ;(8+24)
-        .wid:                dd 0
-        .parent:             dd 0
-        .x:                  dw 100
-        .y:                  dw 100
-        .width:              dw 640
-        .height:             dw 480
-        .borderWidth:        dw 4
-        .class:              dw 1    ;InputOutput
-        .visual:             dd 0
-        .valueMask:          dd 0
-
-    mapWindow:
-        .opcode:             db 8
-        .unused:             db 0
-        .requestLength:      dw 2
-        .window:             dd 0
 
 section .text
 
@@ -392,23 +31,16 @@ _start:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;          ## Create socket
-;   ???:   args.param1 = _PF_LOCAL_;    ##Protocol Family
-;   ???:   args.param2 = _SOCK_STREAM_; ##Socket type
-;   ???:   args.param3 = _IPPROTO_IP_;  ##Protocol
-;   ???:   SOCKETCALL( _CALL_SOCKET_ , @args );
-;   ???:   if EAX is negative, goto socket_create_fail;
-;   ???:   goto socket_create_success;
-;          socket_create_fail:
-;   ???:       goto exit_failure;
-;          socket_create_success:
-;   ???:       socket = EAX;
+;   Create socket
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    dword [args.param1], _PF_LOCAL_
-    mov    dword [args.param2], _SOCK_STREAM_
-    mov    dword [args.param3], _IPPROTO_IP_
 
+; Setup parameters for the systemcall socket
+    mov    dword [args.param1], _PF_LOCAL_    ;protocol family
+    mov    dword [args.param2], _SOCK_STREAM_ ;socket type
+    mov    dword [args.param3], _IPPROTO_IP_  ;protocol used
+
+; SOCKETCALL( _CALL_SOCKET_, @args )
     mov    eax, _SYSCALL_SOCKETCALL_
     mov    ebx, _CALL_SOCKET_
     lea    ecx, [args]
@@ -421,30 +53,24 @@ _start:
 socket_create_fail:
     jmp    exit_failure
 socket_create_success:
-    mov    [socket], eax
+    mov    [socketX], eax
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;          ## Connect to the X Server
-;   ???:   args.param1 = socket;     ##Socketfd
-;   ???:   args.param2 = @xserver;   ##Address
-;   ???:   args.param3 = 20;         ##Length of the Address
-;   ???:   SOCKETCALL( _CALL_CONNECT_ , @args );
-;   ???:   if EAX is negative, goto socket_connect_fail;
-;   ???:   goto socket_connect_success;
-;          socket_connect_fail:
-;   ???:       CLOSE( socket );
-;   ???:       goto exit_failure;
-;          socket_connect_success:
+;   Connect to X Server
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    eax, [socket]
-    lea    ebx, [xserver]
+
+; Setup parameters for the systemcall connect
+    mov    eax, [socketX]
+    lea    ebx, [contactX]
+    mov    ecx, [contactX_len]
     mov    [args.param1], eax
     mov    [args.param2], ebx
-    mov    dword [args.param3], 20
+    mov    [args.param3], ecx
 
+; SOCKETCALL( _CALL_CONNECT_, @args )
     mov    eax, _SYSCALL_SOCKETCALL_
     mov    ebx, _CALL_CONNECT_
     lea    ecx, [args]
@@ -455,193 +81,19 @@ socket_create_success:
     jmp    socket_connect_success
 
 socket_connect_fail:
-    mov    eax, _SYSCALL_CLOSE_
-    mov    ebx, [socket]
-    int    0x80
     jmp    exit_failure
 socket_connect_success:
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;          ## Check permission to access Xauthority file
-;   ???:   ACCESS( @xauth_file, _R_OK_ );
-;   ???:   if EAX is negative, goto access_xauth_fail;
-;   ???:   goto access_xauth_success;
-;          access_xauth_fail:
-;   ???:       CLOSE( socket );
-;   ???:       goto exit_failure;
-;          access_xauth_success:
+;   Set socketX non-blocking
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    eax, _SYSCALL_ACCESS_
-    lea    ebx, [xauth_file]
-    mov    ecx, _R_OK_
-    int    0x80
 
-    test   eax, eax
-    js     access_xauth_fail
-    jmp    access_xauth_success
-
-access_xauth_fail:
-    mov    eax, _SYSCALL_CLOSE_
-    mov    ebx, [socket]
-    int    0x80
-    jmp    exit_failure
-access_xauth_success:
-
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;          ## Open the Xauthority file
-;   ???:   OPEN( @xauth_file, _O_RDONLY );
-;   ???:   if EAX is negative, goto open_xauth_file;
-;   ???:   goto open_xauth_success;
-;          open_xauth_fail:
-;   ???:       CLOSE( socket );
-;   ???:       goto exit_failure;
-;          open_xauth_success:
-;   ???:       xauth_fd = EAX;
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    eax, _SYSCALL_OPEN_
-    lea    ebx, [xauth_file]
-    mov    ecx, _O_RDONLY_
-    int    0x80
-
-    test   eax, eax
-    js     open_xauth_fail
-    jmp    open_xauth_success
-
-open_xauth_fail:
-    mov    eax, _SYSCALL_CLOSE_
-    mov    ebx, [socket]
-    int    0x80
-    jmp    exit_failure
-open_xauth_success:
-    mov    [xauth_fd], eax
-
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;           ## Get Xauthority file status
-;  ???:     FSTAT64( xauth_fd, @xauth_fstat );
-;  ???:     if EAX is negative, goto fstat64_xauth_fail;
-;  ???:     goto fstat64_xauth_success;
-;           fstat64_xauth_fail:
-;  ???:         CLOSE( socket );
-;  ???:         CLOSE( xauth_fd );
-;  ???:         goto exit_failure;
-;           fstat64_xauth_success:
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    eax, _SYSCALL_FSTAT64_
-    mov    ebx, [xauth_fd]
-    lea    ecx, [xauth_fstat]
-    int    0x80
-
-    test   eax, eax
-    js     fstat64_xauth_fail
-    jmp    fstat64_xauth_success
-
-fstat64_xauth_fail:
-    mov    eax, _SYSCALL_CLOSE_
-    mov    ebx, [socket]
-    int    0x80
-    mov    eax, _SYSCALL_CLOSE_
-    mov    ebx, [xauth_fd]
-    int    0x80
-    jmp    exit_failure
-fstat64_xauth_success:
-
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;          ## Read Xauthority file
-;   ???:   READ( xauth_fd, @xauth_data, 4096 );
-;   ???:   if EAX is negative, goto read_xauth_fail;
-;   ???:   goto read_xauth_success;
-;          read_xauth_fail:
-;   ???:       CLOSE( socket );
-;   ???:       CLOSE( xauth_fd );
-;   ???:       goto exit_failure;
-;          read_xauth_success:
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    eax, _SYSCALL_READ_
-    mov    ebx, [xauth_fd]
-    lea    ecx, [xauth_data]
-    mov    edx, 4096
-    int    0x80
-
-    test   eax, eax
-    js     read_xauth_fail
-    jmp    read_xauth_success
-
-read_xauth_fail:
-    mov    eax, _SYSCALL_CLOSE_
-    mov    ebx, [socket]
-    int    0x80
-    mov    eax, _SYSCALL_CLOSE_
-    mov    ebx, [xauth_fd]
-    int    0x80
-    jmp    exit_failure
-read_xauth_success:
-
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;   ???:   CLOSE( xauth_fd );
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    eax, _SYSCALL_CLOSE_
-    mov    ebx, [xauth_fd]
-    int    0x80
-
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;          ## Get socket access mode and status flag
-;   ???:   FCNTL64( socket, _F_GETFL_ );
-;   ???:   if EAX is negative, goto fcntl64_getstatus_fail;
-;   ???:   goto fcntl64_getstatus_success;
-;          fcntl64_getstatus_fail:
-;   ???:       CLOSE( socket );
-;   ???:       goto exit_failure;
-;          fcntl64_getstatus_success:
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+; FCNTL64( socketX, _F_SETFL_, _O_RDWR_ | _O_NONBLOCK_ )
     mov    eax, _SYSCALL_FCNTL64_
-    mov    ebx, [socket]
-    mov    ecx, _F_GETFL_
-    int    0x80
-
-    test   eax, eax
-    js     fcntl64_getstatus_fail
-    jmp    fcntl64_getstatus_success
-
-fcntl64_getstatus_fail:
-    mov    eax, _SYSCALL_CLOSE_
-    mov    ebx, [socket]
-    int    0x80
-    jmp    exit_failure
-fcntl64_getstatus_success:
-
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;          ## Set socket non-blocking
-;   ???:   FCNTL64( socket, _F_SETFL_, _O_RDWR | _O_NONBLOCK_ );
-;   ???:   if EAX is negative, goto fcntl64_setflag_fail;
-;   ???:   goto fcntl64_setflag_success;
-;          fcntl64_setflag_fail:
-;   ???:       CLOSE( socket );
-;   ???:       goto exit_failure;
-;          fcntl64_setflag_success:
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    eax, _SYSCALL_FCNTL64_
-    mov    ebx, [socket]
+    mov    ebx, [socketX]
     mov    ecx, _F_SETFL_
     lea    edx, [_O_RDWR_ + _O_NONBLOCK_]
     int    0x80
@@ -651,175 +103,74 @@ fcntl64_getstatus_success:
     jmp    fcntl64_setflag_success
 
 fcntl64_setflag_fail:
-    mov    eax, _SYSCALL_CLOSE_
-    mov    ebx, [socket]
-    int    0x80
     jmp    exit_failure
 fcntl64_setflag_success:
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;          ## Set socket file descriptor flag
-;   ???:   FCNTL64( socket, _F_SETFD_, _FD_CLOEXEC_ );
-;   ???:   if EAX is negative, goto fcntl64_setfd_fail;
-;   ???:   goto fcntl64_setfd_success;
-;          fcntl64_setfd_fail:
-;   ???:       CLOSE( socket );
-;   ???:       goto exit_failure;
-;          fcntl64_setfd_success:
+;   Wait for the socketX to become ready for writing
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    eax, _SYSCALL_FCNTL64_
-    mov    ebx, [socket]
-    mov    ecx, _F_SETFD_
-    mov    edx, _FD_CLOEXEC_
-    int    0x80
 
-    test   eax, eax
-    js     fcntl64_setfd_fail
-    jmp    fcntl64_setfd_success
+; Setup parameters for systemcall poll
+    mov    eax, [socketX]
+    mov    [poll.fd], eax
+    mov    word [poll.events], _POLLOUT_
 
-fcntl64_setfd_fail:
-    mov    eax, _SYSCALL_CLOSE_
-    mov    ebx, [socket]
-    int    0x80
-    jmp    exit_failure
-fcntl64_setfd_success:
-
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;          ## Wait for the socket to become ready for I/O 
-;   ???:   pollfd.fd = socket;
-;   ???:   pollfd.events = _POLLIN_ | _POLLOUT_;
-;   ???:   pollfd.revents = _POLLOUT_;
-;   ???:   POLL( @pollfd, 1, timeout );
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    eax, [socket]
-    lea    ebx, [_POLLIN_+ _POLLOUT_]
-    mov    [pollfd.fd], eax
-    mov    [pollfd.events], bx
-    mov    word [pollfd.revents], _POLLOUT_
-
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
-    lea    ebx, [pollfd]
+    lea    ebx, [poll]
     mov    ecx, 1
-    mov    edx, [timeout]
+    mov    edx, _POLL_INFINITE_TIMEOUT_
     int    0x80
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;          ## Authenticate the connection
-;   ???:   auth_request.nbytesAuthProto = xauth_data[18];
-;   ???:   auth_request.nbytesAuthStr   = xauth_data[38];
-;   ???:   writev.buffer1     = @auth_request;
-;   ???:   writev.buffer1_len = auth_request_len;
-;
-;   ???:   writebuffer1       = xauth_data[19 ... 36];
-;   ???:   writev.buffer2     = @writebuffer1;
-;   ???:   writev.buffer2_len = 18; 
-;
-;   ???:   writev.buffer2     = @writebuffer2;
-;   ???:   writev.buffer2_len = 2;
-;
-;   ???:   writebuffer3       = xauth_data[39 ... 54];
-;   ???:   writev.buffer4     = @writebuffer3;
-;   ???:   writev.buffer4_len = 16; 
-;
-;   ???:   WRITEV( socket, @writev, 4 );
+;   Authenticate our connection to the X Server
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    xor    eax, eax
-    xor    ebx, ebx
-    mov    al, [xauth_data + 18]
-    mov    bl, [xauth_data + 38]
-    lea    ecx, [auth_request]
-    mov    edx, [auth_request_len]
-    mov    [auth_request.nbytesAuthProto], ax
-    mov    [auth_request.nbytesAuthStr], bx
-    mov    [writev.buffer1], ecx
-    mov    [writev.buffer1_len], edx
 
-    lea    esi, [xauth_data + 19]
-    lea    edi, [writebuffer1]
-    mov    ebx, edi
-    xor    ecx, ecx
-    xor    eax, eax
-    mov    cx, [auth_request.nbytesAuthProto]
-    mov    ax, cx
-    rep    movsb
-    mov    [writev.buffer2], ebx
-    mov    [writev.buffer2_len], eax
-
-    mov    dword [writev.buffer3], writebuffer2
-    mov    dword [writev.buffer3_len], 2
-
-    lea    esi, [xauth_data + 39]
-    lea    edi, [writebuffer3]
-    mov    ebx, edi
-    xor    ecx, ecx
-    xor    eax, eax
-    mov    cx, [auth_request.nbytesAuthStr]
-    mov    ax, cx
-    rep    movsb
-    mov    [writev.buffer4], ebx
-    mov    [writev.buffer4_len], eax
-
-    mov    eax, _SYSCALL_WRITEV_
-    mov    ebx, [socket]
-    lea    ecx, [writev]
-    mov    edx, 4
+; WRITE( socketX, @authenticateX, authenticateX_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [authenticateX]
+    mov    edx, [authenticateX_len]
     int    0x80
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;          ## Wait for the socket to become ready for input
-;   ???:   pollfd.fd = socket;
-;   ???:   pollfd.events = _POLLIN_
-;   ???:   POLL( @pollfd, 1, timeout );
+;   Wait for the socketX to become ready for reading
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    eax, [socket]
-    mov    [pollfd.fd], eax
-    mov    word [pollfd.events], _POLLIN_
 
+; Setup parameters for the systemcall poll
+    mov    eax, [socketX]
+    mov    [poll.fd], eax
+    mov    word [poll.events], _POLLIN_
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
-    lea    ebx, [pollfd]
+    lea    ebx, [poll]
     mov    ecx, 1
-    mov    edx, [timeout]
+    mov    edx, _POLL_INFINITE_TIMEOUT_
     int    0x80
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;          ## Get the first 8 bytes of data, to check
-;          ## whether the authentication is success or fail
-;   ???:   args.param1 = socket;            ##Socketfd
-;   ???:   args.param2 = @connection;       ##Buffer
-;   ???:   args.param3 = 8;                 ##Bytes to receive.
-;   ???:   args.param4 = 0;                 ##Flag
-;   ???:   SOCKETCALL( _CALL_RECV_, @args );
-;   ???:   if EAX is negative, goto get_authstatus_fail;
-;   ???:   goto get_authstatus_success;
-;          get_authstatus_fail:
-;   ???:       CLOSE( socket );
-;   ???:       goto exit_failure;
-;          get_authstatus_success:
+;   Receive the first 2 bytes of data, to check
+;   whether the authentication is success or fail
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    eax, [socket]
-    mov    [args.param1], eax
-    mov    dword [args.param2], connection
-    mov    dword [args.param3], 8
-    mov    dword [args.param4], 0
 
-    mov    eax, _SYSCALL_SOCKETCALL_
-    mov    ebx, _CALL_RECV_
-    lea    ecx, [args]
+; READ( socketX, @authenticateStatus, 2 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [authenticateStatus]
+    mov    edx, 2
     int    0x80
 
     test   eax, eax
@@ -827,178 +178,224 @@ fcntl64_setfd_success:
     jmp    get_authstatus_success
 
 get_authstatus_fail:
-    mov    eax, _SYSCALL_CLOSE_
-    mov    ebx, [socket]
-    int    0x80
     jmp   exit_failure
 get_authstatus_success:
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;          ## Check our authentication  status, if success
-;          ## receive all the remaining data. If fail, exit_failure
-;   ???:   if connection.status != 1, goto auth_status_fail;
-;   ???:   goto auth_status_success;
-;          auth_status_fail:
-;   ???:       CLOSE( socket );
-;   ???:       goto exit_failure;
-;          auth_status_success:
-;   ???:       args.param1 = socket;
-;   ???:       args.param2 = @xserver_info;
-;   ???:       args.param3 = 512;
-;   ???:       args.param4 = 0;
-;   ???:       SOCKETCALL( _CALL_RECV_, @args );
+;   Check our authentication status.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
     xor    eax, eax
-    mov    al, [connection.status]
+    mov    al, [authenticateStatus]
     cmp    eax, 1
     jne    auth_status_fail
     jmp    auth_status_success
 
 auth_status_fail:
-    mov    eax, _SYSCALL_CLOSE_
-    mov    ebx, [socket]
-    int    0x80
     jmp    exit_failure
 auth_status_success:
-    mov    eax, [socket]
-    lea    ebx, [xserver_info]
-    mov    ecx, 512
+; READ( socketX, @authenticateSuccess, 6 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [authenticateSuccess]
+    mov    edx, 6
+    int    0x80
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Receive the additional data
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; READ( socketX, @additionalData, authenticateSuccess.lenAddData*4 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [additionalData]
+    mov    edx, [authenticateSuccess.lenAddData]
+    lea    edx, [edx * 4]
+    int    0x80
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Extract useful values from the additional data
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [additionalData]
+
+; Fill additional data in our XServer data structure
+    lea    edi, [XServer]
+    movsd  ;get release number
+    movsd  ;get base resource id
+    movsd  ;get resource id mask
+    movsd  ;get motion buffer size
+    movsw  ;get length of vendor name
+    movsw  ;get max request length
+    movsb  ;get number of roots
+    movsb  ;get number of formats
+    movsb  ;get image byte order
+    movsb  ;get bitmap bit order
+    movsb  ;get bitmap scanline unit
+    movsb  ;get bitmap scanline pad
+    movsb  ;get minimum key code
+    movsb  ;get maximum key code
+    movsd  ;unused
+
+; Get vendor name and fill into XServer.vendorStr
+    xor    eax, eax
     xor    edx, edx
-    mov    [args.param1], eax
-    mov    [args.param2], ebx
-    mov    [args.param3], ecx
-    mov    [args.param4], edx
+    mov    ebx, 4
+    mov    ax, [XServer.nbytesVendor]
+    div    ebx
+    shr    edx, 1
+    add    eax, edx
+    mov    ecx, eax
+    rep    movsd
 
-    mov    eax, _SYSCALL_SOCKETCALL_
-    mov    ebx, _CALL_RECV_
-    lea    ecx, [args]
-    int    0x80
+; Get screen structure from the additional data
+    mov    eax, [XServer.numFormats]
+    mov    ebx, 8
+    xor    edx, edx
+    mul    ebx
+    add    esi, eax
+    lea    edi, [XScreen]
+    movsd  ;get root window id
+    movsd  ;get default colormap
+    movsd  ;get white pixel value
+    movsd  ;get black pixel value
+    movsd  ;get current event input mask
+    movsw  ;get screen resolution width in pixel
+    movsw  ;get screen resolution height in pixel
+    movsw  ;get screen resolution width in millimeters
+    movsw  ;get screen resolution height in millimeters
+    movsw  ;get minimum installed maps
+    movsw  ;get maximum installed maps
+    movsd  ;get root visual id
+    movsb  ;get backing store value
+    movsb  ;get save unders flag
+    movsb  ;get root depth
+    movsb  ;get number of depths
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;          ## Wait for the socket to become ready for output
-;   ???:   pollfd.fd = socket;
-;   ???:   pollfd.events = _POLLOUT_;
-;   ???:   POLL( @pollfd, 1, timeout );
+;   Wait for the socket to become ready for writing
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    eax, [socket]
-    mov    [pollfd.fd], eax
-    mov    dword [pollfd.events], _POLLOUT_
 
+; Setup parameters for the systemcall poll
+    mov    eax, [socketX]
+    mov    [poll.fd], eax
+    mov    dword [poll.events], _POLLOUT_
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
-    lea    ebx, [pollfd]
+    lea    ebx, [poll]
     mov    ecx, 1
-    mov    edx, [timeout]
+    mov    edx, _POLL_INFINITE_TIMEOUT_
     int    0x80
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;          ## Request CreateWindow
-;   ???:   createWindow.wid = xserver_info.ridBase;
-;   ???:   createWindow.parent = screen.root;
-;   ???:   WRITE( socket, @createWindow, 32 );
+;   Request CreateWindow
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    eax, [screen.root]
-    mov    ebx, [xserver_info.ridBase]
-    mov    [createWindow.wid], ebx ;0x04800001
-    mov    [createWindow.parent], eax
 
+; Setup mainWindow structure
+    mov    eax, [XServer.ridBase]
+    mov    ebx, [XScreen.root]
+    mov    ecx, [XScreen.blackPixel]
+    mov    edx, [XScreen.whitePixel]
+    mov    [mainWindow.wid], eax
+    mov    [mainWindow.parent], ebx
+    mov    [mainWindow.backgroundPixel], ecx
+    mov    [mainWindow.borderPixel], edx
+
+; WRITE( socketX, @mainWindow, mainWindow_size )
     mov    eax, _SYSCALL_WRITE_
-    mov    ebx, [socket]
-    lea    ecx, [createWindow]
-    mov    edx, 32
+    mov    ebx, [socketX]
+    lea    ecx, [mainWindow]
+    mov    edx, [mainWindow_size]
     int    0x80
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;          ## Check createWindow requests. If the request is
-;          ## fail, the server will complain. Otherwise, the
-;          ## server will just keep quiet.
-;   ???:   pollfd.fd = socket;
-;   ???:   pollfd.events = _POLLIN_ | _POLLOUT_;
-;   ???:   POLL( @pollfd, 1, timeout );
-;   ???:   if pollfd.revents == _POLLIN_, goto createWindow_fail;
-;   ???:   goto createWindow_success;
-;          createWindow_fail:
-;   ???:       READ( socket, @requestStatus, 32 );
-;   ???:       CLOSE( socket );
-;   ???:       goto exit_failure;
-;          createWindow_success:
+;   Check createWindow requests. If the request is
+;   fail, the server will complain. Otherwise, the
+;   server will just keep quiet.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    eax, [socket]
+
+; Setup parameters for the systemcall poll
+    mov    eax, [socketX]
     lea    ebx, [_POLLIN_ + _POLLOUT_]
-    mov    [pollfd.fd], eax
-    mov    [pollfd.events], ebx
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
 
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
-    lea    ebx, [pollfd]
+    lea    ebx, [poll]
     mov    ecx, 1
-    mov    edx, [timeout]
+    mov    edx, _POLL_INFINITE_TIMEOUT_
     int    0x80
 
-    mov    eax, [pollfd.revents]
+    xor    eax, eax
+    mov    ax, [poll.revents]
     mov    ebx, _POLLIN_
     cmp    eax, ebx
     je     createWindow_fail
     jmp    createWindow_success
 
 createWindow_fail:
-
+; READ( socketX, @requestStatus, 32 )
     mov    eax, _SYSCALL_READ_
-    mov    ebx, [socket]
+    mov    ebx, [socketX]
     lea    ecx, [requestStatus]
     mov    edx, 32
     int    0x80
-
-    mov    eax, _SYSCALL_CLOSE_
-    mov    ebx, [socket]
-    int    0x80
-
     jmp    exit_failure
-
 createWindow_success:
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;          ## Wait for the socket to become ready for output
-;   ???:   pollfd.fd = socket;
-;   ???:   pollfd.events = _POLLOUT_;
-;   ???:   POLL( @pollfd, 1, timeout );
+;   Wait for the socket to become ready for writing
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    eax, [socket]
-    mov    [pollfd.fd], eax
-    mov    dword [pollfd.events], _POLLOUT_
 
+; Setup parameters for the systemcall poll
+    mov    eax, [socketX]
+    mov    [poll.fd], eax
+    mov    dword [poll.events], _POLLOUT_
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
-    lea    ebx, [pollfd]
+    lea    ebx, [poll]
     mov    ecx, 1
-    mov    edx, [timeout]
+    mov    edx, _POLL_INFINITE_TIMEOUT_
     int    0x80
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;          ## Requst map the window
-;   ???:   mapWindow.window = xserver_info.ridBase;
-;   ???:   WRITE( socket, @mapWindow, 8 );
+;   Requst map the mainWindow
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    eax, [xserver_info.ridBase]
-    mov    [mapWindow.window], eax
 
+; Setup mapWindow structure
+    mov    eax, [mainWindow.wid]
+    mov    [mapWindow.wid], eax
+
+; WRITE( socketX, @mapWindow, 8 )
     mov    eax, _SYSCALL_WRITE_
-    mov    ebx, [socket]
+    mov    ebx, [socketX]
     lea    ecx, [mapWindow]
     mov    edx, 8
     int    0x80
@@ -1006,85 +403,478 @@ createWindow_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;          ## Check if mapWindow request failed.
-;   ???:   pollfd.fd = socket;
-;   ???:   pollfd.events = _POLLIN_ | _POLLOUT_;
-;   ???:   POLL( @pollfd, 1, timeout );
-;   ???:   if pollfd.revents == _POLLIN_, goto mapWindow_fail;
-;   ???:   goto mapWindow_success;
-;          mapWindow_fail:
-;   ???:       READ( socket, @requestStatus, 32 );
-;   ???:       CLOSE( socket );
-;   ???:       goto exit_failure;
-;          mapWindow_success:
+;   Check if mapWindow request failed.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    eax, [socket]
-    lea    ebx, [_POLLIN_ + _POLLOUT_]
-    mov    [pollfd.fd], eax
-    mov    [pollfd.events], ebx
 
+; Setup parameters for the systemcall poll
+    mov    eax, [socketX]
+    lea    ebx, [_POLLIN_ + _POLLOUT_]
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+
+; WRITE( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
-    lea    ebx, [pollfd]
+    lea    ebx, [poll]
     mov    ecx, 1
-    mov    edx, [timeout]
+    mov    edx, _POLL_INFINITE_TIMEOUT_
     int    0x80
 
-    mov    eax, [pollfd.revents]
+    xor    eax, eax
+    mov    ax, [poll.revents]
     mov    ebx, _POLLIN_
+    cmp    eax, ebx
     je     mapWindow_fail
     jmp    mapWindow_success
 
 mapWindow_fail:
-
+; READ( socketX, @requestStatus, 32 )
     mov    eax, _SYSCALL_READ_
-    mov    ebx, [socket]
+    mov    ebx, [socketX]
     lea    ecx, [requestStatus]
     mov    edx, 32
     int    0x80
-
-    mov    eax, _SYSCALL_CLOSE_
-    mov    ebx, [socket]
-    int    0x80
-
     jmp    exit_failure
-
 mapWindow_success:
 
 
+
+
+mainloop:
+
+
+
+
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;          ## Wait for 5 seconds
-;   ???:   pollfd.fd = socket;
-;   ???:   pollfd.events = _POLLIN_;
-;   ???:   POLL( @pollfd, 1, 5000 );
+;   Wait for Xevents from the socketX
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    dword [pollfd.events], _POLLIN_
+
+; Setup parameters for the systemcall poll
+    mov    eax, [socketX]
+    mov    ebx, _POLLIN_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
-    lea    ebx, [pollfd]
+    lea    ebx, [poll]
     mov    ecx, 1
-    mov    edx, 5000
+    mov    edx, _POLL_INFINITE_TIMEOUT_
     int    0x80
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;          exit_success:
-;   ???:       CLOSE( socket );
-;   ???:       EXIT( 0 );
-;          exit_failure:
-;   ???:       EXIT( -1 );
+;   Check the type of Xevent received
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; READ( socketX, @XEventReply, 1 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEventReply]
+    mov    edx, 1
+    int    0x80
+
+; If the READ() == 0, exit the mainloop
+    test   eax, eax
+    jz     mainloop_end
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Process the Xevent received
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    mov    eax, [XEventReply.code]
+
+
+    cmp    eax, _KeyPress_
+    jne    not_KeyPress
+; ************************************************ KeyPress Event ****
+is_KeyPress:
+    lea    esi, [XEvent_KeyPress]
+    lea    edi, [evtmsg_KeyPress]
+    jmp    fill_XEvent_structure
+not_KeyPress:
+
+
+    cmp    eax, _KeyRelease_
+    jne    not_KeyRelease
+; ********************************************** KeyRelease Event ****
+is_KeyRelease:
+    lea    esi, [XEvent_KeyRelease]
+    lea    edi, [evtmsg_KeyRelease]
+    jmp    fill_XEvent_structure
+not_KeyRelease:
+
+
+    cmp    eax, _ButtonPress_
+    jne    not_ButtonPress
+; ********************************************* ButtonPress Event ****
+is_ButtonPress:
+    lea    esi, [XEvent_ButtonPress]
+    lea    edi, [evtmsg_ButtonPress]
+    jmp    fill_XEvent_structure
+not_ButtonPress:
+
+
+    cmp    eax, _ButtonRelease_
+    jne    not_ButtonRelease
+; ******************************************* ButtonRelease Event ****
+is_ButtonRelease:
+    lea    esi, [XEvent_ButtonRelease]
+    lea    edi, [evtmsg_ButtonRelease]
+    jmp    fill_XEvent_structure
+not_ButtonRelease:
+
+
+    cmp    eax, _MotionNotify_
+    jne    not_MotionNotify
+; ******************************************** MotionNotify Event ****
+is_MotionNotify:
+    lea    esi, [XEvent_MotionNotify]
+    lea    edi, [evtmsg_MotionNotify]
+    jmp    fill_XEvent_structure
+not_MotionNotify:
+
+
+    cmp    eax, _EnterNotify_
+    jne    not_EnterNotify
+; ********************************************* EnterNotify Event ****
+is_EnterNotify:
+    lea    esi, [XEvent_EnterNotify]
+    lea    edi, [evtmsg_EnterNotify]
+    jmp    fill_XEvent_structure
+not_EnterNotify:
+
+
+    cmp    eax, _LeaveNotify_
+    jne    not_LeaveNotify
+; ********************************************* LeaveNotify Event ****
+is_LeaveNotify:
+    lea    esi, [XEvent_LeaveNotify]
+    lea    edi, [evtmsg_LeaveNotify]
+    jmp    fill_XEvent_structure
+not_LeaveNotify:
+
+
+    cmp    eax, _FocusIn_
+    jne    not_FocusIn
+; ************************************************* FocusIn Event ****
+is_FocusIn:
+    lea    esi, [XEvent_FocusIn]
+    lea    edi, [evtmsg_FocusIn]
+    jmp    fill_XEvent_structure
+not_FocusIn:
+
+
+    cmp    eax, _FocusOut_
+    jne    not_FocusOut
+; ************************************************ FocusOut Event ****
+is_FocusOut:
+    lea    esi, [XEvent_FocusOut]
+    lea    edi, [evtmsg_FocusOut]
+    jmp    fill_XEvent_structure
+not_FocusOut:
+
+
+    cmp    eax, _KeymapNotify_
+    jne    not_KeymapNotify
+; ******************************************** KeymapNotify Event ****
+is_KeymapNotify:
+    lea    esi, [XEvent_KeymapNotify]
+    lea    edi, [evtmsg_KeymapNotify]
+    jmp    fill_XEvent_structure
+not_KeymapNotify:
+
+
+    cmp    eax, _Expose_
+    jne    not_Expose
+; ************************************************** Expose Event ****
+is_Expose:
+    lea    esi, [XEvent_Expose]
+    lea    edi, [evtmsg_Expose]
+    jmp    fill_XEvent_structure
+not_Expose:
+
+
+    cmp    eax, _GraphicsExposure_
+    jne    not_GraphicsExposure
+; **************************************** GraphicsExposure Event ****
+is_GraphicsExposure:
+    lea    esi, [XEvent_GraphicsExposure]
+    lea    edi, [evtmsg_GraphicsExposure]
+    jmp    fill_XEvent_structure
+not_GraphicsExposure:
+
+
+    cmp    eax, _NoExposure_
+    jne    not_NoExposure
+; ********************************************** NoExposure Event ****
+is_NoExposure:
+    lea    esi, [XEvent_NoExposure]
+    lea    edi, [evtmsg_NoExposure]
+    jmp    fill_XEvent_structure
+not_NoExposure:
+
+
+    cmp    eax, _VisibilityNotify_
+    jne    not_VisibilityNotify
+; **************************************** VisibilityNotify Event ****
+is_VisibilityNotify:
+    lea    esi, [XEvent_VisibilityNotify]
+    lea    edi, [evtmsg_VisibilityNotify]
+    jmp    fill_XEvent_structure
+not_VisibilityNotify:
+
+
+    cmp    eax, _CreateNotify_
+    jne    not_CreateNotify
+; ******************************************** CreateNotify Event ****
+is_CreateNotify:
+    lea    esi, [XEvent_CreateNotify]
+    lea    edi, [evtmsg_CreateNotify]
+    jmp    fill_XEvent_structure
+not_CreateNotify:
+
+
+    cmp    eax, _DestroyNotify_
+    jne    not_DestroyNotify
+; ******************************************* DestroyNotify Event ****
+is_DestroyNotify:
+    lea    esi, [XEvent_DestroyNotify]
+    lea    edi, [evtmsg_DestroyNotify]
+    jmp    fill_XEvent_structure
+not_DestroyNotify:
+
+
+    cmp    eax, _UnmapNotify_
+    jne    not_UnmapNotify
+; ********************************************* UnmapNotify Event ****
+is_UnmapNotify:
+    lea    esi, [XEvent_UnmapNotify]
+    lea    edi, [evtmsg_UnmapNotify]
+    jmp    fill_XEvent_structure
+not_UnmapNotify:
+
+
+    cmp    eax, _MapNotify_
+    jne    not_MapNotify
+; *********************************************** MapNotify Event ****
+is_MapNotify:
+    lea    esi, [XEvent_MapNotify]
+    lea    edi, [evtmsg_MapNotify]
+    jmp    fill_XEvent_structure
+not_MapNotify:
+
+
+    cmp    eax, _MapRequest_
+    jne    not_MapRequest
+; ********************************************** MapRequest Event ****
+is_MapRequest:
+    lea    esi, [XEvent_MapRequest]
+    lea    edi, [evtmsg_MapRequest]
+    jmp    fill_XEvent_structure
+not_MapRequest:
+
+
+    cmp    eax, _ReparentNotify_
+    jne    not_ReparentNotify
+; ****************************************** ReparentNotify Event ****
+is_ReparentNotify:
+    lea    esi, [XEvent_ReparentNotify]
+    lea    edi, [evtmsg_ReparentNotify]
+    jmp    fill_XEvent_structure
+not_ReparentNotify:
+
+
+    cmp    eax, _ConfigureNotify_
+    jne    not_ConfigureNotify
+; ***************************************** ConfigureNotify Event ****
+is_ConfigureNotify:
+    lea    esi, [XEvent_ConfigureNotify]
+    lea    edi, [evtmsg_ConfigureNotify]
+    jmp    fill_XEvent_structure
+not_ConfigureNotify:
+
+
+    cmp    eax, _ConfigureRequest_
+    jne    not_ConfigureRequest
+; **************************************** ConfigureRequest Event ****
+is_ConfigureRequest:
+    lea    esi, [XEvent_ConfigureRequest]
+    lea    edi, [evtmsg_ConfigureRequest]
+    jmp    fill_XEvent_structure
+not_ConfigureRequest:
+
+
+    cmp    eax, _GravityNotify_
+    jne    not_GravityNotify
+; ******************************************* GravityNotify Event ****
+is_GravityNotify:
+    lea    esi, [XEvent_GravityNotify]
+    lea    edi, [evtmsg_GravityNotify]
+    jmp    fill_XEvent_structure
+not_GravityNotify:
+
+
+    cmp    eax, _ResizeRequest_
+    jne    not_ResizeRequest
+; ************************************************* ResizeRequest ****
+is_ResizeRequest:
+    lea    esi, [XEvent_ResizeRequest]
+    lea    edi, [evtmsg_ResizeRequest]
+    jmp    fill_XEvent_structure
+not_ResizeRequest:
+
+
+    cmp    eax, _CirculateNotify_
+    jne    not_CirculateNotify
+; ***************************************** CirculateNotify Event ****
+is_CirculateNotify:
+    lea    esi, [XEvent_CirculateNotify]
+    lea    edi, [evtmsg_CirculateNotify]
+    jmp    fill_XEvent_structure
+not_CirculateNotify:
+
+
+    cmp    eax, _CirculateRequest_
+    jne    not_CirculateRequest
+; **************************************** CirculateRequest Event ****
+is_CirculateRequest:
+    lea    esi, [XEvent_CirculateRequest]
+    lea    edi, [evtmsg_CirculateRequest]
+    jmp    fill_XEvent_structure
+not_CirculateRequest:
+
+
+    cmp    eax, _PropertyNotify_
+    jne    not_PropertyNotify
+; ****************************************** PropertyNotify Event ****
+is_PropertyNotify:
+    lea    esi, [XEvent_PropertyNotify]
+    lea    edi, [evtmsg_PropertyNotify]
+    jmp    fill_XEvent_structure
+not_PropertyNotify:
+
+
+    cmp    eax, _SelectionClear_
+    jne    not_SelectionClear
+; ****************************************** SelectionClear Event ****
+is_SelectionClear:
+    lea    esi, [XEvent_SelectionClear]
+    lea    edi, [evtmsg_SelectionClear]
+    jmp    fill_XEvent_structure
+not_SelectionClear:
+
+
+    cmp    eax, _SelectionRequest_
+    jne    not_SelectionRequest
+; **************************************** SelectionRequest Event ****
+is_SelectionRequest:
+    lea    esi, [XEvent_SelectionRequest]
+    lea    edi, [evtmsg_SelectionRequest]
+    jmp    fill_XEvent_structure
+not_SelectionRequest:
+
+
+    cmp    eax, _SelectionNotify_
+    jne    not_SelectionNotify
+; ***************************************** SelectionNotify Event ****
+is_SelectionNotify:
+    lea    esi, [XEvent_SelectionNotify]
+    lea    edi, [evtmsg_SelectionNotify]
+    jmp    fill_XEvent_structure
+not_SelectionNotify:
+
+
+    cmp    eax, _ColormapNotify_
+    jne    not_ColormapNotify
+; ****************************************** ColormapNotify Event ****
+is_ColormapNotify:
+    lea    esi, [XEvent_ColormapNotify]
+    lea    edi, [evtmsg_ColormapNotify]
+    jmp    fill_XEvent_structure
+not_ColormapNotify:
+
+
+    cmp    eax, _ClientMessage_
+    jne    not_ClientMessage
+; ******************************************* ClientMessage Event ****
+is_ClientMessage:
+    lea    esi, [XEvent_ClientMessage]
+    lea    edi, [XEvent_ClientMessage]
+    jmp    fill_XEvent_structure
+not_ClientMessage:
+
+
+    cmp    eax, _MappingNotify_
+    jne    not_MappingNotify
+; ******************************************* MappingNotify Event ****
+is_MappingNotify:
+    lea    esi, [XEvent_MappingNotify]
+    lea    edi, [XEvent_MappingNotify]
+    jmp    fill_XEvent_structure
+not_MappingNotify:
+
+
+; ************************************************* Unknown Event ****
+    lea    esi, [XEvent_unknown]
+    lea    edi, [evtmsg_unknown]
+
+
+fill_XEvent_structure:
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    mov    ecx, esi
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    mov    ecx, edi
+    mov    edx, [evtmsg_len]
+    int    0x80
+
+
+
+
+    jmp    mainloop
+
+
+
+
+mainloop_end:
+
+
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Exit the program
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 exit_success:
+; CLOSE( socketX )
     mov    eax, _SYSCALL_CLOSE_
-    mov    ebx, [socket]
+    mov    ebx, [socketX]
     int    0x80
+; EXIT( 0 )
     mov    eax, _SYSCALL_EXIT_
-    xor    ebx, ebx                 ;exit status 0
+    xor    ebx, ebx
     int    0x80
+
 exit_failure:
+; CLOSE( socketX )
+    mov    eax, _SYSCALL_CLOSE_
+    mov    ebx, [socketX]
+    int    0x80
+; EXIT( -1 )
     mov    eax, _SYSCALL_EXIT_
-    mov    ebx, -1                  ;exit status -1
+    mov    ebx, -1
     int    0x80
