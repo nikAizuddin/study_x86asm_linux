@@ -21,6 +21,10 @@ REQUIRED EXTERNAL FILES
 
 NOTES
 
+    No need to specify authentication name and data, just tell
+    the protocol major version and minor version, during
+    connection initiation.
+
     Useful information of XOpenDisplay via "strace" cmd:
 
         socket( PF_LOCAL,
