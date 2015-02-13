@@ -45,8 +45,9 @@ REFERENCES
         5) "/usr/include/unistd.h"
         6) "/usr/include/bits/poll.h"
 
-    X Window System structure:
+    X Window System structures and constants:
         1) "/usr/include/X11/Xauth.h"
+        2) "/usr/include/X11/Xatom.h"
 
     X Server opcodes:
         1) at the end of "/usr/include/X11/Xproto.h"

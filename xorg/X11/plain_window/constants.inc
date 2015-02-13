@@ -4,7 +4,7 @@
 ;
 ; constants.inc
 ;
-; This header file containts constant symbols.
+; This header file contains constant symbols.
 ;
 ;=====================================================================
 
@@ -25,11 +25,30 @@ _SYSCALL_FCNTL64_       equ    221 ;configure socket
 _STDIN_                 equ      0
 _STDOUT_                equ      1
 
+; Standard Boolean values
+_TRUE_                  equ      1
+_FALSE_                 equ      0
+
 ; Constant values for systemcall socketcall()
 _CALL_SOCKET_           equ      1 ;create socket
+_CALL_BIND_             equ      2 ;bind socket
 _CALL_CONNECT_          equ      3 ;connect socket
+_CALL_LISTEN_           equ      4 ;listen
+_CALL_ACCEPT_           equ      5 ;accept request
+_CALL_GETSOCKNAME_      equ      6 ;get socket name
+_CALL_GETPEERNAME_      equ      7 ;get peer name
+_CALL_SOCKETPAIR_       equ      8
+_CALL_SEND_             equ      9 ;send data through socket
 _CALL_RECV_             equ     10 ;receive data from socket
+_CALL_SENDTO_           equ     11
+_CALL_RECVFROM_         equ     12
+_CALL_SHUTDOWN_         equ     13
 _SOCK_STREAM_           equ      1 ;sequenced byte stream
+
+; Constant values for socketcall shutdown()
+_SHUT_RD_               equ      0
+_SHUT_WR_               equ      1
+_SHUT_RDWR_             equ      2
 
 ; Constant values for systemcall access()
 _F_OK_                  equ      0 ;is file exist?
@@ -81,9 +100,88 @@ _NotUseful_             equ      0
 _WhenMapped_            equ      1
 _Always_                equ      2
 
+; Constant values for ChangeProperty request
+_Replace_               equ      0
+_Prepend_               equ      1
+_Append_                equ      2
+_NormalState_           equ      1
+
 ; Constant values for X Server Request Opcodes
-_REQUEST_CREATEWINDOW_  equ      1
-_REQUEST_MAPWINDOW_     equ      8
+_REQUEST_CreateWindow_  equ      1
+_REQUEST_MapWindow_     equ      8
+_REQUEST_InternAtom_    equ     16
+_REQUEST_ChangeProperty_ equ    18
+
+; Constant values ChangeProperty request
+_XA_PRIMARY_            equ      1
+_XA_SECONDARY_          equ      2
+_XA_ARC_                equ      3
+_XA_ATOM_               equ      4
+_XA_BITMAP_             equ      5
+_XA_CARDINAL_           equ      6
+_XA_COLORMAP_           equ      7
+_XA_CURSOR_             equ      8
+_XA_CUT_BUFFER0_        equ      9
+_XA_CUT_BUFFER1_        equ     10
+_XA_CUT_BUFFER2_        equ     11
+_XA_CUT_BUFFER3_        equ     12
+_XA_CUT_BUFFER4_        equ     13
+_XA_CUT_BUFFER5_        equ     14
+_XA_CUT_BUFFER6_        equ     15
+_XA_CUT_BUFFER7_        equ     16
+_XA_DRAWABLE_           equ     17
+_XA_FONT_               equ     18
+_XA_INTEGER_            equ     19
+_XA_PIXMAP_             equ     20
+_XA_POINT_              equ     21
+_XA_RECTANGLE_          equ     22
+_XA_RESOURCE_MANAGER_   equ     23
+_XA_RGB_COLOR_MAP_      equ     24
+_XA_RGB_BEST_MAP_       equ     25
+_XA_RGB_BLUE_MAP_       equ     26
+_XA_RGB_DEFAULT_MAP_    equ     27
+_XA_RGB_GRAY_MAP_       equ     28
+_XA_RGB_GREEN_MAP_      equ     29
+_XA_RGB_RED_MAP_        equ     30
+_XA_STRING_             equ     31
+_XA_VISUALID_           equ     32
+_XA_WINDOW_             equ     33
+_XA_WM_COMMAND_         equ     34
+_XA_WM_HINTS_           equ     35
+_XA_WM_CLIENT_MACHINE_  equ     36
+_XA_WM_ICON_NAME_       equ     37
+_XA_WM_ICON_SIZE_       equ     38
+_XA_WM_NAME_            equ     39
+_XA_WM_NORMAL_HINTS_    equ     40
+_XA_WM_SIZE_HINTS_      equ     41
+_XA_WM_ZOOM_HINTS_      equ     42
+_XA_MIN_SPACE_          equ     43
+_XA_NORM_SPACE_         equ     44
+_XA_MAX_SPACE_          equ     45
+_XA_END_SPACE_          equ     46
+_XA_SUPERSCRIPT_X_      equ     47
+_XA_SUPERSCRIPT_Y_      equ     48
+_XA_SUBSCRIPT_X_        equ     49
+_XA_SUBSCRIPT_Y_        equ     50
+_XA_UNDERLINE_POSITION_ equ     51
+_XA_UNDERLINE_THICKNESS_ equ    52
+_XA_STRIKEOUT_ASCENT_   equ     53
+_XA_STRIKEOUT_DESCENT_  equ     54
+_XA_ITALIC_ANGLE_       equ     55
+_XA_X_HEIGHT_           equ     56
+_XA_QUAD_WIDTH_         equ     57
+_XA_WEIGHT_             equ     58
+_XA_POINT_SIZE_         equ     59
+_XA_RESOLUTION_         equ     60
+_XA_COPYRIGHT_          equ     61
+_XA_NOTICE_             equ     62
+_XA_FONT_NAME_          equ     63
+_XA_FAMILY_NAME_        equ     64
+_XA_FULL_NAME_          equ     65
+_XA_CAP_HEIGHT_         equ     66
+_XA_WM_CLASS_           equ     67
+_XA_WM_TRANSIENT_FOR_   equ     68
+_XA_LAST_PREDEFINED_    equ     68
 
 ; Constant values for X Event received
 _KeyPress_              equ      2 ;when key from Keyboard is pressed
@@ -117,5 +215,5 @@ _SelectionClear_        equ     29
 _SelectionRequest_      equ     30
 _SelectionNotify_       equ     31
 _ColormapNotify_        equ     32
-_ClientMessage_         equ     33
+_ClientMessage_         equ     33 ;unused
 _MappingNotify_         equ     34

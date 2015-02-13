@@ -20,7 +20,11 @@
 ;=====================================================================
 
 %include "constants.inc"
-%include "data.inc"
+%include "data_kernel.inc"
+%include "data_strings.inc"
+%include "data_XServer.inc"
+%include "data_XRequests.inc"
+%include "data_XEvent.inc"
 
 global _start
 
@@ -366,7 +370,7 @@ createWindow_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Wait for the socket to become ready for writing
+;   Wait for the socketX to become ready for writing
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -385,7 +389,123 @@ createWindow_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Requst map the mainWindow
+;   Request WM_DELETE_WINDOW atom message
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; WRITE( socketX, @getWMDeleteMessage, 24 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [getWMDeleteMessage]
+    mov    edx, 24
+    int    0x80
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Wait for the socketX to become ready for reading
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; Setup parameters for the systemcall poll
+    mov    eax, [socketX]
+    mov    ebx, _POLLIN_
+    mov    [poll.fd], eax
+    mov    [poll.events], bx
+
+; POLL( [poll.fd, poll.events], 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Receive the requested atom message
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; READ( socketX, @InternAtom_reply, 32 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [InternAtom_reply]
+    mov    edx, 32
+    int    0x80
+
+    mov    eax, [InternAtom_reply.atom]
+    mov    [WMDeleteMessage], eax
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Wait for the socketX to become ready for writing
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; Setup parameters for the systemcall poll
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], bx
+
+; POLL( [poll.fd, poll.events], 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Request ChangeProperty, to modify the mainWindow protocol,
+;   and window manager properties
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    mov    eax, [mainWindow.wid]
+    mov    ebx, [WMDeleteMessage]
+; Setup setWindowDeleteMsg structure
+    mov    [setWindowDeleteMsg.window], eax
+    mov    [setWindowDeleteMsg.data], ebx
+; Setup setWindowName structure
+    mov    [setWindowName.window], eax
+; Setup setWindowSizeHints structure
+    mov    [setWindowSizeHints.window], eax
+; Setup setWindowManagerHints
+    mov    [setWindowManagerHints.window], eax
+
+; WRITE( socketX, @setWindowDeleteMsg, 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [setWindowDeleteMsg]
+    mov    edx, 28 ;setWindowDeleteMsg.requestLength * 4
+    int    0x80
+; WRITE( socketX, @setWindowName, 44 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [setWindowName]
+    mov    edx, 44 ;setWindowName.requestLength * 4
+    int    0x80
+; WRITE( socketX, @setWindowSizeHints, 96 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [setWindowSizeHints]
+    mov    edx, 96 ;setWindowSizeHints.requestLength * 4
+    int    0x80
+; WRITE( socketX, @setWindowManagerHints, 60 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [setWindowManagerHints]
+    mov    edx, 60
+    int    0x80
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Requst map mainWindow
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -447,7 +567,7 @@ mainloop:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Wait for Xevents from the socketX
+;   Wait for XEvents from the socketX
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -478,372 +598,243 @@ mainloop:
     mov    edx, 1
     int    0x80
 
-; If the READ() == 0, exit the mainloop
-    test   eax, eax
-    jz     mainloop_end
-
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Process the Xevent received
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mov    eax, [XEventReply.code]
+    mov    esi, [XEventReply.code]
 
 
-    cmp    eax, _KeyPress_
+    cmp    esi, _KeyPress_
     jne    not_KeyPress
-; ************************************************ KeyPress Event ****
 is_KeyPress:
-    lea    esi, [XEvent_KeyPress]
-    lea    edi, [evtmsg_KeyPress]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_KeyPress
 not_KeyPress:
 
 
-    cmp    eax, _KeyRelease_
+    cmp    esi, _KeyRelease_
     jne    not_KeyRelease
-; ********************************************** KeyRelease Event ****
 is_KeyRelease:
-    lea    esi, [XEvent_KeyRelease]
-    lea    edi, [evtmsg_KeyRelease]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_KeyRelease
 not_KeyRelease:
 
 
-    cmp    eax, _ButtonPress_
+    cmp    esi, _ButtonPress_
     jne    not_ButtonPress
-; ********************************************* ButtonPress Event ****
 is_ButtonPress:
-    lea    esi, [XEvent_ButtonPress]
-    lea    edi, [evtmsg_ButtonPress]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_ButtonPress
 not_ButtonPress:
 
 
-    cmp    eax, _ButtonRelease_
+    cmp    esi, _ButtonRelease_
     jne    not_ButtonRelease
-; ******************************************* ButtonRelease Event ****
 is_ButtonRelease:
-    lea    esi, [XEvent_ButtonRelease]
-    lea    edi, [evtmsg_ButtonRelease]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_ButtonRelease
 not_ButtonRelease:
 
 
-    cmp    eax, _MotionNotify_
+    cmp    esi, _MotionNotify_
     jne    not_MotionNotify
-; ******************************************** MotionNotify Event ****
 is_MotionNotify:
-    lea    esi, [XEvent_MotionNotify]
-    lea    edi, [evtmsg_MotionNotify]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_MotionNotify
 not_MotionNotify:
 
 
-    cmp    eax, _EnterNotify_
+    cmp    esi, _EnterNotify_
     jne    not_EnterNotify
-; ********************************************* EnterNotify Event ****
 is_EnterNotify:
-    lea    esi, [XEvent_EnterNotify]
-    lea    edi, [evtmsg_EnterNotify]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_EnterNotify
 not_EnterNotify:
 
 
-    cmp    eax, _LeaveNotify_
+    cmp    esi, _LeaveNotify_
     jne    not_LeaveNotify
-; ********************************************* LeaveNotify Event ****
 is_LeaveNotify:
-    lea    esi, [XEvent_LeaveNotify]
-    lea    edi, [evtmsg_LeaveNotify]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_LeaveNotify
 not_LeaveNotify:
 
 
-    cmp    eax, _FocusIn_
+    cmp    esi, _FocusIn_
     jne    not_FocusIn
-; ************************************************* FocusIn Event ****
 is_FocusIn:
-    lea    esi, [XEvent_FocusIn]
-    lea    edi, [evtmsg_FocusIn]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_FocusIn
 not_FocusIn:
 
 
-    cmp    eax, _FocusOut_
+    cmp    esi, _FocusOut_
     jne    not_FocusOut
-; ************************************************ FocusOut Event ****
 is_FocusOut:
-    lea    esi, [XEvent_FocusOut]
-    lea    edi, [evtmsg_FocusOut]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_FocusOut
 not_FocusOut:
 
 
-    cmp    eax, _KeymapNotify_
+    cmp    esi, _KeymapNotify_
     jne    not_KeymapNotify
-; ******************************************** KeymapNotify Event ****
 is_KeymapNotify:
-    lea    esi, [XEvent_KeymapNotify]
-    lea    edi, [evtmsg_KeymapNotify]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_KeymapNotify
 not_KeymapNotify:
 
 
-    cmp    eax, _Expose_
+    cmp    esi, _Expose_
     jne    not_Expose
-; ************************************************** Expose Event ****
 is_Expose:
-    lea    esi, [XEvent_Expose]
-    lea    edi, [evtmsg_Expose]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_Expose
 not_Expose:
 
 
-    cmp    eax, _GraphicsExposure_
+    cmp    esi, _GraphicsExposure_
     jne    not_GraphicsExposure
-; **************************************** GraphicsExposure Event ****
 is_GraphicsExposure:
-    lea    esi, [XEvent_GraphicsExposure]
-    lea    edi, [evtmsg_GraphicsExposure]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_GraphicsExposure
 not_GraphicsExposure:
 
 
-    cmp    eax, _NoExposure_
+    cmp    esi, _NoExposure_
     jne    not_NoExposure
-; ********************************************** NoExposure Event ****
 is_NoExposure:
-    lea    esi, [XEvent_NoExposure]
-    lea    edi, [evtmsg_NoExposure]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_NoExposure
 not_NoExposure:
 
 
-    cmp    eax, _VisibilityNotify_
+    cmp    esi, _VisibilityNotify_
     jne    not_VisibilityNotify
-; **************************************** VisibilityNotify Event ****
 is_VisibilityNotify:
-    lea    esi, [XEvent_VisibilityNotify]
-    lea    edi, [evtmsg_VisibilityNotify]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_VisibilityNotify
 not_VisibilityNotify:
 
 
-    cmp    eax, _CreateNotify_
+    cmp    esi, _CreateNotify_
     jne    not_CreateNotify
-; ******************************************** CreateNotify Event ****
 is_CreateNotify:
-    lea    esi, [XEvent_CreateNotify]
-    lea    edi, [evtmsg_CreateNotify]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_CreateNotify
 not_CreateNotify:
 
 
-    cmp    eax, _DestroyNotify_
+    cmp    esi, _DestroyNotify_
     jne    not_DestroyNotify
-; ******************************************* DestroyNotify Event ****
 is_DestroyNotify:
-    lea    esi, [XEvent_DestroyNotify]
-    lea    edi, [evtmsg_DestroyNotify]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_DestroyNotify
 not_DestroyNotify:
 
 
-    cmp    eax, _UnmapNotify_
+    cmp    esi, _UnmapNotify_
     jne    not_UnmapNotify
-; ********************************************* UnmapNotify Event ****
 is_UnmapNotify:
-    lea    esi, [XEvent_UnmapNotify]
-    lea    edi, [evtmsg_UnmapNotify]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_UnmapNotify
 not_UnmapNotify:
 
 
-    cmp    eax, _MapNotify_
+    cmp    esi, _MapNotify_
     jne    not_MapNotify
-; *********************************************** MapNotify Event ****
 is_MapNotify:
-    lea    esi, [XEvent_MapNotify]
-    lea    edi, [evtmsg_MapNotify]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_MapNotify
 not_MapNotify:
 
 
-    cmp    eax, _MapRequest_
+    cmp    esi, _MapRequest_
     jne    not_MapRequest
-; ********************************************** MapRequest Event ****
 is_MapRequest:
-    lea    esi, [XEvent_MapRequest]
-    lea    edi, [evtmsg_MapRequest]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_MapRequest
 not_MapRequest:
 
 
-    cmp    eax, _ReparentNotify_
+    cmp    esi, _ReparentNotify_
     jne    not_ReparentNotify
-; ****************************************** ReparentNotify Event ****
 is_ReparentNotify:
-    lea    esi, [XEvent_ReparentNotify]
-    lea    edi, [evtmsg_ReparentNotify]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_ReparentNotify
 not_ReparentNotify:
 
 
-    cmp    eax, _ConfigureNotify_
+    cmp    esi, _ConfigureNotify_
     jne    not_ConfigureNotify
-; ***************************************** ConfigureNotify Event ****
 is_ConfigureNotify:
-    lea    esi, [XEvent_ConfigureNotify]
-    lea    edi, [evtmsg_ConfigureNotify]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_ConfigureNotify
 not_ConfigureNotify:
 
 
-    cmp    eax, _ConfigureRequest_
+    cmp    esi, _ConfigureRequest_
     jne    not_ConfigureRequest
-; **************************************** ConfigureRequest Event ****
 is_ConfigureRequest:
-    lea    esi, [XEvent_ConfigureRequest]
-    lea    edi, [evtmsg_ConfigureRequest]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_ConfigureRequest
 not_ConfigureRequest:
 
 
-    cmp    eax, _GravityNotify_
+    cmp    esi, _GravityNotify_
     jne    not_GravityNotify
-; ******************************************* GravityNotify Event ****
 is_GravityNotify:
-    lea    esi, [XEvent_GravityNotify]
-    lea    edi, [evtmsg_GravityNotify]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_GravityNotify
 not_GravityNotify:
 
 
-    cmp    eax, _ResizeRequest_
+    cmp    esi, _ResizeRequest_
     jne    not_ResizeRequest
-; ************************************************* ResizeRequest ****
 is_ResizeRequest:
-    lea    esi, [XEvent_ResizeRequest]
-    lea    edi, [evtmsg_ResizeRequest]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_ResizeRequest
 not_ResizeRequest:
 
 
-    cmp    eax, _CirculateNotify_
+    cmp    esi, _CirculateNotify_
     jne    not_CirculateNotify
-; ***************************************** CirculateNotify Event ****
 is_CirculateNotify:
-    lea    esi, [XEvent_CirculateNotify]
-    lea    edi, [evtmsg_CirculateNotify]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_CirculateNotify
 not_CirculateNotify:
 
 
-    cmp    eax, _CirculateRequest_
+    cmp    esi, _CirculateRequest_
     jne    not_CirculateRequest
-; **************************************** CirculateRequest Event ****
 is_CirculateRequest:
-    lea    esi, [XEvent_CirculateRequest]
-    lea    edi, [evtmsg_CirculateRequest]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_CirculateRequest
 not_CirculateRequest:
 
 
-    cmp    eax, _PropertyNotify_
+    cmp    esi, _PropertyNotify_
     jne    not_PropertyNotify
-; ****************************************** PropertyNotify Event ****
 is_PropertyNotify:
-    lea    esi, [XEvent_PropertyNotify]
-    lea    edi, [evtmsg_PropertyNotify]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_PropertyNotify
 not_PropertyNotify:
 
 
-    cmp    eax, _SelectionClear_
+    cmp    esi, _SelectionClear_
     jne    not_SelectionClear
-; ****************************************** SelectionClear Event ****
 is_SelectionClear:
-    lea    esi, [XEvent_SelectionClear]
-    lea    edi, [evtmsg_SelectionClear]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_SelectionClear
 not_SelectionClear:
 
 
-    cmp    eax, _SelectionRequest_
+    cmp    esi, _SelectionRequest_
     jne    not_SelectionRequest
-; **************************************** SelectionRequest Event ****
 is_SelectionRequest:
-    lea    esi, [XEvent_SelectionRequest]
-    lea    edi, [evtmsg_SelectionRequest]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_SelectionRequest
 not_SelectionRequest:
 
 
-    cmp    eax, _SelectionNotify_
+    cmp    esi, _SelectionNotify_
     jne    not_SelectionNotify
-; ***************************************** SelectionNotify Event ****
 is_SelectionNotify:
-    lea    esi, [XEvent_SelectionNotify]
-    lea    edi, [evtmsg_SelectionNotify]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_SelectionNotify
 not_SelectionNotify:
 
 
-    cmp    eax, _ColormapNotify_
+    cmp    esi, _ColormapNotify_
     jne    not_ColormapNotify
-; ****************************************** ColormapNotify Event ****
 is_ColormapNotify:
-    lea    esi, [XEvent_ColormapNotify]
-    lea    edi, [evtmsg_ColormapNotify]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_ColormapNotify
 not_ColormapNotify:
 
 
-    cmp    eax, _ClientMessage_
-    jne    not_ClientMessage
-; ******************************************* ClientMessage Event ****
-is_ClientMessage:
-    lea    esi, [XEvent_ClientMessage]
-    lea    edi, [XEvent_ClientMessage]
-    jmp    fill_XEvent_structure
-not_ClientMessage:
-
-
-    cmp    eax, _MappingNotify_
+    cmp    esi, _MappingNotify_
     jne    not_MappingNotify
-; ******************************************* MappingNotify Event ****
 is_MappingNotify:
-    lea    esi, [XEvent_MappingNotify]
-    lea    edi, [XEvent_MappingNotify]
-    jmp    fill_XEvent_structure
+    jmp    XEventFunc_MappingNotify
 not_MappingNotify:
 
 
-; ************************************************* Unknown Event ****
-    lea    esi, [XEvent_unknown]
-    lea    edi, [evtmsg_unknown]
-
-
-fill_XEvent_structure:
-; READ( socketX, ESI, 31 )
-    mov    eax, _SYSCALL_READ_
-    mov    ebx, [socketX]
-    mov    ecx, esi
-    mov    edx, 31
-    int    0x80
-; WRITE( stdout, EDI, evtmsg_len )
-    mov    eax, _SYSCALL_WRITE_
-    mov    ebx, _STDOUT_
-    mov    ecx, edi
-    mov    edx, [evtmsg_len]
-    int    0x80
-
-
-
-
-    jmp    mainloop
+; Unknown events are treated as ClientMessage in this program.
+is_ClientMessage:
+    jmp    XEventFunc_ClientMessage
+not_ClientMessage:
 
 
 
@@ -860,7 +851,16 @@ mainloop_end:
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 exit_success:
-; CLOSE( socketX )
+; SOCKETCALL( _CALL_SHUTDOWN_, @[socketX, _SHUT_RDWR_] )
+    mov    eax, [socketX]
+    mov    ebx, _SHUT_RDWR_
+    mov    [args.param1], eax
+    mov    [args.param2], ebx
+    mov    eax, _SYSCALL_SOCKETCALL_
+    mov    ebx, _CALL_SHUTDOWN_
+    lea    ecx, [args]
+    int    0x80
+; CLOSE( socketX ) 
     mov    eax, _SYSCALL_CLOSE_
     mov    ebx, [socketX]
     int    0x80
@@ -878,3 +878,604 @@ exit_failure:
     mov    eax, _SYSCALL_EXIT_
     mov    ebx, -1
     int    0x80
+
+
+
+
+; ####################################################################
+;
+;
+;
+;                          XEvent Functions
+;
+;
+;
+; ####################################################################
+
+
+
+
+XEventFunc_KeyPress:
+; ************************************************ KeyPress Event ****
+; READ( socketX, ESI, 31 ) 
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_KeyPress]
+    mov    edx, 31
+    int    0x80 
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_KeyPress]
+    mov    edx, [evtmsg_len]
+    int    0x80 
+    jmp    mainloop
+
+
+XEventFunc_KeyRelease:
+; ********************************************** KeyRelease Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_KeyRelease]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_KeyRelease]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_ButtonPress:
+; ********************************************* ButtonPress Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_ButtonPress]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_ButtonPress]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_ButtonRelease:
+; ******************************************* ButtonRelease Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_ButtonRelease]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_ButtonRelease]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_MotionNotify:
+; ******************************************** MotionNotify Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_MotionNotify]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_MotionNotify]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_EnterNotify:
+; ********************************************* EnterNotify Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_EnterNotify]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_EnterNotify]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_LeaveNotify:
+; ********************************************* LeaveNotify Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_LeaveNotify]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_LeaveNotify]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_FocusIn:
+; READ( socketX, ESI, 31 ) 
+; ************************************************* FocusIn Event ****
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_FocusIn]
+    mov    edx, 31
+    int    0x80 
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_FocusIn]
+    mov    edx, [evtmsg_len]
+    int    0x80 
+    jmp    mainloop
+
+
+XEventFunc_FocusOut:
+; ************************************************ FocusOut Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_FocusOut]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_FocusOut]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_KeymapNotify:
+; ******************************************** KeymapNotify Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_KeymapNotify]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_KeymapNotify]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_Expose:
+; ************************************************** Expose Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_Expose]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_Expose]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_GraphicsExposure:
+; **************************************** GraphicsExposure Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_GraphicsExposure]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_GraphicsExposure]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_NoExposure:
+; ********************************************** NoExposure Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_NoExposure]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_NoExposure]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_VisibilityNotify:
+; **************************************** VisibilityNotify Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_VisibilityNotify]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_VisibilityNotify]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_CreateNotify:
+; ******************************************** CreateNotify Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_CreateNotify]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_CreateNotify]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_DestroyNotify:
+; ******************************************* DestroyNotify Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_DestroyNotify]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_DestroyNotify]
+    mov    edx, [evtmsg_len]
+    int    0x80
+; If the DestroyNotify report is received from the mainWindow, exit
+    mov    eax, [XEvent_DestroyNotify.window]
+    mov    ebx, [mainWindow.wid]
+    cmp    eax, ebx
+    jne    mainWindow_isnt_destroyed
+mainWindow_is_destroyed:
+    jmp    mainloop_end
+mainWindow_isnt_destroyed:
+    jmp    mainloop
+
+
+XEventFunc_UnmapNotify:
+; ********************************************* UnmapNotify Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_UnmapNotify]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_UnmapNotify]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_MapNotify:
+; *********************************************** MapNotify Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_MapNotify]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_MapNotify]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_MapRequest:
+; ********************************************** MapRequest Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_MapRequest]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_MapRequest]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_ReparentNotify:
+; ****************************************** ReparentNotify Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_ReparentNotify]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_ReparentNotify]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_ConfigureNotify:
+; ***************************************** ConfigureNotify Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_ConfigureNotify]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_ConfigureNotify]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_ConfigureRequest:
+; **************************************** ConfigureRequest Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_ConfigureRequest]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_ConfigureRequest]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_GravityNotify:
+; ******************************************* GravityNotify Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_GravityNotify]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_GravityNotify]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_ResizeRequest:
+; ******************************************* ResizeRequest Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_ResizeRequest]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_ResizeRequest]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_CirculateNotify:
+; ***************************************** CirculateNotify Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_CirculateNotify]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_CirculateNotify]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_CirculateRequest:
+; **************************************** CirculateRequest Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_CirculateRequest]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_CirculateRequest]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_PropertyNotify:
+; ****************************************** PropertyNotify Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_PropertyNotify]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_PropertyNotify]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_SelectionClear:
+; ****************************************** SelectionClear Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_SelectionClear]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_SelectionClear]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_SelectionRequest:
+; **************************************** SelectionRequest Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_SelectionRequest]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_SelectionRequest]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_SelectionNotify:
+; ***************************************** SelectionNotify Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_SelectionNotify]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_SelectionNotify]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_ColormapNotify:
+; ****************************************** ColormapNotify Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_ColormapNotify]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_ColormapNotify]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_MappingNotify:
+; ******************************************* MappingNotify Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_MappingNotify]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_MappingNotify]
+    mov    edx, [evtmsg_len]
+    int    0x80
+    jmp    mainloop
+
+
+XEventFunc_ClientMessage:
+; ******************************************* ClientMessage Event ****
+; READ( socketX, ESI, 31 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [XEvent_ClientMessage]
+    mov    edx, 31
+    int    0x80
+; WRITE( stdout, EDI, evtmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [evtmsg_ClientMessage]
+    mov    edx, [evtmsg_len]
+    int    0x80
+; Exit mainloop if XEvent_ClientMessage.data[0] == WMDeleteMessage
+    mov    eax, [XEvent_ClientMessage.data]
+    mov    ebx, [WMDeleteMessage]
+    cmp    eax, ebx
+    jne    not_WindowDeleteMessage
+received_WindowDeleteMessage:
+; Destroy the mainWindow
+    mov    eax, [mainWindow.wid]
+    mov    [destroyWindow.window], eax
+; WRITE( socketX, @DestroyWindow, 8 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [destroyWindow]
+    mov    edx, 8
+    int    0x80
+    jmp    mainloop
+not_WindowDeleteMessage:
+    jmp    mainloop
