@@ -2,33 +2,44 @@
 ;234567890123456789012345678901234567890123456789012345678901234567890
 ;=====================================================================
 ;
-; data.inc
+; data_XServer.inc
 ;
-; This header file containts structures.
+; This header file contains important XServer structures.
 ;
 ;=====================================================================
 
 section .bss
 
+
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ; This socketX will be used to communicate with the X Server.
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     socketX:                 resd 1
 
-    authenticateStatus:      resw 1 ;used to check auth status
 
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ; This variable is used for checking authentication status.
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    authenticateStatus:      resw 1 
+
+
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ; If the connection is successfully authenticated, the
+    ; X Server will send additional data. The additional data
+    ; is very important because we need information such as
+    ; resource base id, root window id, and XScreen information.
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     authenticateSuccess:
         .majorVersion:       resw 1 ;protocol major version
         .minorVersion:       resw 1 ;protocol minor version
         .lenAddData:         resw 1 ;len of additional data in dword
-
     additionalData:          resb 4096
 
-    requestStatus:
-        .success:            resb 1
-        .code:               resb 1
-        .sequenceNumber:     resw 1
-        .ridBad:             resd 1 ;if success == 0
-        .minorOpcode:        resw 1
-        .majorOpcode:        resb 1
-        .unused_02:          resb 21
+
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ; These XServer and XScreen structure will be filled with
+    ; the additionalData received.
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     XServer:
         .release:            resd 1    ;11.40.4000
@@ -66,13 +77,24 @@ section .bss
         .rootDepth:          resb 1    ;24
         .numDepth:           resb 1    ;7
 
+
 section .data
 
+
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ; This structure is used by the socketX to contact the
+    ; X Server.
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     contactX:
         .family:             dw _AF_LOCAL_
         .fileLocation:       db "/tmp/.X11-unix/X0",0
-    contactX_len:            dd ($ - contactX)
+    contactX_size:           dd ($ - contactX)
 
+
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ; The program will send this structure to the X Server to
+    ; authenticate the connection.
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     authenticateX:
         .byteOrder:          db 0x6c
         .unused_01:          db 0
@@ -82,4 +104,4 @@ section .data
         .nbytesAuthStr:      dw 0
         .unused_02:          db 0
         .unused_03:          db 0
-    authenticateX_len:       dd ($ - authenticateX)
+    authenticateX_size:      dd ($ - authenticateX)

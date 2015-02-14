@@ -24,6 +24,34 @@ section .bss
     WMDeleteMessage:         resd 1
 
 
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ; This structure is used to stores the value returned by
+    ; InternAtom() request.
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    InternAtom_reply:
+        .status:             resb 1
+        .unused_01:          resb 1
+        .sequenceNumber:     resw 1
+        .length:             resd 1
+        .atom:               resd 1
+        .unused_02:          resb 20
+
+
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ; This structure is used to check the request status.
+    ; If our request fail, the server will send the reasons
+    ; why the request was a failure.
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    requestStatus:
+        .success:            resb 1
+        .code:               resb 1
+        .sequenceNumber:     resw 1
+        .ridBad:             resd 1 ;if success == 0
+        .minorOpcode:        resw 1
+        .majorOpcode:        resb 1
+        .unused_02:          resb 21
+
+
 section .data
 
 
@@ -60,7 +88,7 @@ section .data
                                 ;bit 12 = do-not-propagate-mask
                                 ;bit 13 = colormap
                                 ;bit 14 = cursor
-        .valueMask:          dd 0b00000000000000000111111111111111
+        .valueMask:          dd 0b111111111111111
 
         .backgroundPixmap:   dd _ParentRelative_
         .backgroundPixel:    dd 0 ;will be filled at runtime
@@ -92,7 +120,7 @@ section .data
                                 ;bit 15 = Exposure
                                 ;bit 16 = VisibilityChange
                                 ;bit 17 = StructureNotify
-                                ;bit 18 = ResizeRedirect
+                                ;bit 18 = ResizeRedirect (OFF)
                                 ;bit 19 = SubstructureNotify
                                 ;bit 20 = SubstructureRedirect
                                 ;bit 21 = FocusChange
@@ -100,7 +128,7 @@ section .data
                                 ;bit 23 = ColormapChange
                                 ;bit 24 = OwnerGrabButton
                                 ;bit 25 - 31 = unused but must zero
-        .eventMask:          dd 0b1111111111111111111111111
+        .eventMask:          dd 0b1111110111111111111111111
 
                                 ;bit  0 = unused but must zero
                                 ;bit  1 = unused but must zero

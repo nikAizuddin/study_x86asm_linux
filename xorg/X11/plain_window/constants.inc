@@ -217,3 +217,53 @@ _SelectionNotify_       equ     31
 _ColormapNotify_        equ     32
 _ClientMessage_         equ     33 ;unused
 _MappingNotify_         equ     34
+
+; Constant values for Keyboard KeyCode
+_KEY_ENTER_             equ   0x24
+_KEY_SPACE_             equ   0x41
+_KEY_LSHIFT_            equ   0x32
+_KEY_RSHIFT_            equ   0x3e
+_KEY_LCTRL_             equ   0x25
+_KEY_RCTRL_             equ   0x69
+_KEY_LALT_              equ   0x40
+_KEY_RALT_              equ   0x6c
+
+_KEY_1_                 equ   0x0a
+_KEY_2_                 equ   0x0b
+_KEY_3_                 equ   0x0c
+_KEY_4_                 equ   0x0d
+_KEY_5_                 equ   0x0e
+_KEY_6_                 equ   0x0f
+_KEY_7_                 equ   0x10
+_KEY_8_                 equ   0x11
+_KEY_9_                 equ   0x12
+_KEY_0_                 equ   0x13
+
+_KEY_Q_                 equ   0x18
+_KEY_W_                 equ   0x19
+_KEY_E_                 equ   0x1a
+_KEY_R_                 equ   0x1b
+_KEY_T_                 equ   0x1c
+_KEY_Y_                 equ   0x1d
+_KEY_U_                 equ   0x1e
+_KEY_I_                 equ   0x1f
+_KEY_O_                 equ   0x20
+_KEY_P_                 equ   0x21
+
+_KEY_A_                 equ   0x26
+_KEY_S_                 equ   0x27
+_KEY_D_                 equ   0x28
+_KEY_F_                 equ   0x29
+_KEY_G_                 equ   0x2a
+_KEY_H_                 equ   0x2b
+_KEY_J_                 equ   0x2c
+_KEY_K_                 equ   0x2d
+_KEY_L_                 equ   0x2e
+
+_KEY_Z_                 equ   0x34
+_KEY_X_                 equ   0x35
+_KEY_C_                 equ   0x36
+_KEY_V_                 equ   0x37
+_KEY_B_                 equ   0x38
+_KEY_N_                 equ   0x39
+_KEY_M_                 equ   0x3a

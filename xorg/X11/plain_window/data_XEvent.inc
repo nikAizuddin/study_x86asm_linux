@@ -2,19 +2,29 @@
 ;234567890123456789012345678901234567890123456789012345678901234567890
 ;=====================================================================
 ;
-; data.inc
+; data_XEvent.inc
 ;
-; This header file containts structures.
+; This header file contains XEvent structures.
 ;
 ;=====================================================================
 
 section .bss
 
+
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ; This variable will store the type of XEvent received.
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     XEventReply:
         .code:               resd 1
 
+
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ; The structures below will be filled based on type of
+    ; event received.
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
     XEvent_KeyPress:
-        .detail:             resb 1
+        .keyCode:            resb 1
         .sequenceNumber:     resw 1
         .timestamp:          resd 1
         .root:               resd 1
@@ -29,7 +39,7 @@ section .bss
         .unused:             resb 1
 
     XEvent_KeyRelease:
-        .detail:             resb 1
+        .keyCode:            resb 1
         .sequenceNumber:     resw 1
         .timestamp:          resd 1
         .root:               resd 1
@@ -352,11 +362,3 @@ section .bss
         .window:             resd 1
         .type:               resd 1
         .data:               resb 20
-
-    InternAtom_reply:
-        .status:             resb 1
-        .unused_01:          resb 1
-        .sequenceNumber:     resw 1
-        .length:             resd 1
-        .atom:               resd 1
-        .unused_02:          resb 20
