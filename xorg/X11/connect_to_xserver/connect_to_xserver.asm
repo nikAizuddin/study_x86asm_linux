@@ -351,7 +351,7 @@ section .data
 
     xauth_file:              db "/var/run/lightdm/nlck/xauthority",0
 
-    timeout:                 dd 0xffffffff ;4294967295 milliseconds
+    timeout:                 dd 0xffffffff ;infinite
 
     auth_request:
         .byteOrder:          db 0x6c

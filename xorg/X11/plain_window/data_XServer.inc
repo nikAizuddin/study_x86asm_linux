@@ -8,6 +8,14 @@
 ;
 ;=====================================================================
 
+
+; ---- Resource ID ---------------------------------------------------
+; mainWindow.wid       = XServer.ridBase + 0
+; graphicContext.cid   = XServer.ridBase + 1
+; testimage_pixmap.pid = XServer.ridBase + 2
+; --------------------------------------------------------------------
+
+
 section .bss
 
 

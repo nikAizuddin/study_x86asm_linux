@@ -25,6 +25,13 @@ section .bss
 
 
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ; This is WM_PROTOCOLS property, that will be used with
+    ; WMDeleteMessage to set the window WM_DELETE_MESSAGE.
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    WMProtocols:             resd 1
+
+
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ; This structure is used to stores the value returned by
     ; InternAtom() request.
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -52,6 +59,14 @@ section .bss
         .unused_02:          resb 21
 
 
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ; For image 512*512 24bit
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    testimage_fd:            resd 1
+    temporary_dataPixel:     resb 262144
+    testimage_dataPixel:     resb 262144
+
+
 section .data
 
 
@@ -61,15 +76,15 @@ section .data
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     mainWindow:
         .opcode:             db _REQUEST_CreateWindow_
-        .depth:              db _CopyFromParent_
+        .depth:              db 24;24 ;_CopyFromParent_
         .requestLength:      dw 23 ;( 8 + n ), n = no. of valuemask
         .wid:                dd 0  ;will be filled at runtime
         .parent:             dd 0  ;will be filled at runtime
         .x:                  dw 100
         .y:                  dw 100
-        .width:              dw 640
-        .height:             dw 480
-        .borderWidth:        dw 4
+        .width:              dw 512
+        .height:             dw 512
+        .borderWidth:        dw 0
         .class:              dw _InputOutput_
         .visual:             dd _CopyFromParent_
 
@@ -154,6 +169,61 @@ section .data
 
 
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ; ???
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    graphicContext:
+        .opcode:             db _REQUEST_CreateGC_
+        .unused_01:          db 0
+        .requestLength:      dw 4
+        .cid:                dd 0
+        .drawable:           dd 0 ;drawable on which window ID ?
+
+                                ;bit  0 = function
+                                ;bit  1 = plane-mask
+                                ;bit  2 = foreground
+                                ;bit  3 = background
+                                ;bit  4 = line-width
+                                ;bit  5 = line-style
+                                ;bit  6 = cap-style
+                                ;bit  7 = join-style
+                                ;bit  8 = fill-style
+                                ;bit  9 = fill-rule
+                                ;bit 10 = tile
+                                ;bit 11 = stipple
+                                ;bit 12 = tile-stipple-x-origin
+                                ;bit 13 = tile-stipple-y-origin
+                                ;bit 14 = font
+                                ;bit 15 = subwindow-mode
+                                ;bit 16 = graphics-exposures
+                                ;bit 17 = clip-x-origin
+                                ;bit 18 = clip-y-origin
+                                ;bit 19 = clip-mask
+                                ;bit 20 = dash-offset
+                                ;bit 21 = dashes
+                                ;bit 22 = arc-mode
+        .valueMask:          dd 0b00000000000000000000000
+
+
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ; ???
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    putImage:
+        .opcode:             db _REQUEST_PutImage_
+        .format:             db 2
+        .requestLength:      dw 16390 ;min=6
+        .drawable:           dd 0
+        .gc:                 dd 0
+        .width:              dw 128
+        .height:             dw 128
+        .dstX:               dw 0
+        .dstY:               dw 0
+        .leftPad:            db 0
+        .depth:              db 24
+        .unused:             dw 0
+        ;.data = testimage_dataPixel
+                             
+
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ; This structure is used for mapping window request.
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     mapWindow:
@@ -186,6 +256,18 @@ section .data
 
 
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ; Use this structure to request WM_PROTOCOLS property.
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    getWMProtocols:
+        .opcode:             db _REQUEST_InternAtom_
+        .onlyIfExist:        db 0
+        .requestLength:      dw 5 ;sizeof this / 4 
+        .lengthOfName:       dw 12
+        .unused:             dw 0
+        .name:               db "WM_PROTOCOLS"
+
+
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ; Structures setWindowDeleteMsg, setWindowName,
     ; setWindowSizeHints, and setWindowManagerHints are
     ; used to setup the window manager properties.
@@ -197,7 +279,7 @@ section .data
         .mode:               db _Replace_
         .requestLength:      dw 7
         .window:             dd 0
-        .property:           dd 0x0000012d ;_XA_???_
+        .property:           dd 0 ;will be WM_PROTOCOLS
         .type:               dd _XA_ATOM_
         .format:             db 32
         .unused_01:          db 0,0,0
@@ -252,12 +334,12 @@ section .data
         .height:             dd 0
 
         ;minimum size
-        .min_width:          dd 320
-        .min_height:         dd 240
+        .min_width:          dd 512
+        .min_height:         dd 512
 
         ;maximum size
-        .max_width:          dd 800
-        .max_height:         dd 600
+        .max_width:          dd 512
+        .max_height:         dd 512
 
         ;???
         .width_inc:          dd 0

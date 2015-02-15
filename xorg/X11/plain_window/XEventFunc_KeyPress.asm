@@ -112,7 +112,7 @@ KeyPress_is_RAlt:
 KeyPress_not_RAlt:
 
 
-; *************************** Key 0 -> 9 *****************************
+; *** Key 0 -> 9 ***
 
     cmp    eax, _KEY_1_
     jne    KeyPress_not_1
@@ -185,7 +185,7 @@ KeyPress_is_0:
 KeyPress_not_0:
 
 
-; *************************** Key Q -> P *****************************
+; *** Key Q -> P ***
 
     cmp    eax, _KEY_Q_
     jne    KeyPress_not_Q
@@ -258,7 +258,7 @@ KeyPress_is_P:
 KeyPress_not_P:
 
 
-; *************************** Key A -> L *****************************
+; *** Key A -> L ***
 
     cmp    eax, _KEY_A_
     jne    KeyPress_not_A
@@ -324,7 +324,7 @@ KeyPress_is_L:
 KeyPress_not_L:
 
 
-; *************************** Key Z -> M *****************************
+; *** Key Z -> M ***
 
     cmp    eax, _KEY_Z_
     jne    KeyPress_not_Z
@@ -376,7 +376,7 @@ KeyPress_is_M:
 KeyPress_not_M:
 
 
-; ************************** Unknown keys ****************************
+; *** Unknown keys ***
 
     lea    ecx, [msg_KeyPress_Unknown]
 

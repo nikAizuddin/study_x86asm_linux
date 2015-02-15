@@ -15,9 +15,12 @@
 ;         SYNTAX: Intel
 ;   ARCHITECTURE: x86_64
 ;         KERNEL: Linux x86
+;       X SERVER: major version 11
 ;         FORMAT: elf32
 ;
 ;=====================================================================
+
+; Include constant symbols and global variables
 
 %include "constants.inc"
 %include "data_kernel.inc"
@@ -35,7 +38,8 @@ _start:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Create socket
+;   Create a TCP socket.
+;   We need to use TCP socket to communicate with server.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -50,19 +54,32 @@ _start:
     lea    ecx, [args]
     int    0x80
 
+; Check to make sure the SOCKETCALL() have no errors
     test   eax, eax
     js     socket_create_fail
     jmp    socket_create_success
 
 socket_create_fail:
+
+; WRITE( _STDOUT_, @errmsg_socketCreate, errmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [errmsg_socketCreate]
+    mov    edx, [errmsg_len]
+    int    0x80
     jmp    exit_failure
+
 socket_create_success:
+
     mov    [socketX], eax
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Connect to X Server
+;   Connect to X Server.
+;   We will use "/tmp/.X11-unix/X0" file to contact the X Server.
+;   Without this file, we will unable to contact and connect with
+;   X Server.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -80,18 +97,36 @@ socket_create_success:
     lea    ecx, [args]
     int    0x80
 
+; Check to make sure the program successfully connect with X Server
     test   eax, eax
-    js     socket_connect_fail
-    jmp    socket_connect_success
+    js     connect_XServer_fail
+    jmp    connect_XServer_success
 
-socket_connect_fail:
+connect_XServer_fail:
+
+; WRITE( _STDOUT_, @errmsg_connect_XServer, errmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [errmsg_connect_XServer]
+    mov    edx, [errmsg_len]
+    int    0x80
     jmp    exit_failure
-socket_connect_success:
+
+connect_XServer_success:
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Set socketX non-blocking
+;   Set TCP socketX to non-blocking mode.
+;   By default, TCP socket are in blocking mode. It is important
+;   to use a non-blocking socket.
+;
+;   If TCP socket in blocking mode, when system call read is used to
+;   read data from the socket, the program waits for resources, if
+;   the resources are unavailable.
+;
+;   If TCP socket in non-blocking mode, the program does not wait
+;   for resources if they are unavailable.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -102,25 +137,37 @@ socket_connect_success:
     lea    edx, [_O_RDWR_ + _O_NONBLOCK_]
     int    0x80
 
+; Check to make sure the socket is properly set to non-blocking mode
     test   eax, eax
-    js     fcntl64_setflag_fail
-    jmp    fcntl64_setflag_success
+    js     set_nonBlocking_fail
+    jmp    set_nonBlocking_success
 
-fcntl64_setflag_fail:
+set_nonBlocking_fail:
+
+; WRITE( _STDOUT_, @errmsg_set_nonBlocking, errmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [errmsg_set_nonBlocking]
+    mov    edx, [errmsg_len]
+    int    0x80
     jmp    exit_failure
-fcntl64_setflag_success:
+
+set_nonBlocking_success:
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Wait for the socketX to become ready for writing
+;   Make sure the X Server is ready to receive requests.
+;   When the server is ready, we will authenticate
+;   our connection with the X Server.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ; Setup parameters for systemcall poll
     mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
     mov    [poll.fd], eax
-    mov    word [poll.events], _POLLOUT_
+    mov    [poll.events], bx
 
 ; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
@@ -132,7 +179,9 @@ fcntl64_setflag_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Authenticate our connection to the X Server
+;   Authenticate our connection with the X Server.
+;   We don't use Xauthority file to authenticate, but just
+;   simply tell the X Server major version is already sufficient.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -146,14 +195,16 @@ fcntl64_setflag_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Wait for the socketX to become ready for reading
+;   Wait for the X Server to process the authenticate request, and
+;   become ready for sending reply about our authentication status.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ; Setup parameters for the systemcall poll
     mov    eax, [socketX]
+    mov    ebx, _POLLIN_
     mov    [poll.fd], eax
-    mov    word [poll.events], _POLLIN_
+    mov    [poll.events], bx
 
 ; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
@@ -166,7 +217,7 @@ fcntl64_setflag_success:
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Receive the first 2 bytes of data, to check
-;   whether the authentication is success or fail
+;   whether our authentication is success or fail
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -177,30 +228,59 @@ fcntl64_setflag_success:
     mov    edx, 2
     int    0x80
 
+; Check to make sure the READ() systemcall have no errors
     test   eax, eax
-    js     get_authstatus_fail
-    jmp    get_authstatus_success
+    js     get_authStatus_fail
+    jmp    get_authStatus_success
 
-get_authstatus_fail:
-    jmp   exit_failure
-get_authstatus_success:
+get_authStatus_fail:
+
+; WRITE( _STDOUT_, @errmsg_get_authStatus, errmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [errmsg_get_authStatus]
+    mov    edx, [errmsg_len]
+    int    0x80
+    jmp    exit_failure
+
+get_authStatus_success:
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Check our authentication status.
+;   The first 2 bytes of value received, should be 1. Values
+;   other than 1 are considered as failure.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     xor    eax, eax
     mov    al, [authenticateStatus]
     cmp    eax, 1
-    jne    auth_status_fail
-    jmp    auth_status_success
+    jne    authStatus_fail
+    jmp    authStatus_success
 
-auth_status_fail:
+authStatus_fail:
+
+; WRITE( _STDOUT_, @errmsg_authStatus, errmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [errmsg_authStatus]
+    mov    edx, [errmsg_len]
+    int    0x80
     jmp    exit_failure
-auth_status_success:
+
+authStatus_success:
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Receive header information about the additional data.
+;   When the authentication is success, the server will send
+;   additional data. However, we have to get its header information
+;   first, because it contains the length of additinal data.
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 ; READ( socketX, @authenticateSuccess, 6 )
     mov    eax, _SYSCALL_READ_
     mov    ebx, [socketX]
@@ -211,7 +291,8 @@ auth_status_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Receive the additional data
+;   Receive the additional data.
+;   This additional data is needed for creating windows and others.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -226,7 +307,8 @@ auth_status_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Extract useful values from the additional data
+;   Extract useful values from the additional data.
+;   This program only extract useful values from the additional data.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -250,7 +332,9 @@ auth_status_success:
     movsb  ;get maximum key code
     movsd  ;unused
 
-; Get vendor name and fill into XServer.vendorStr
+; Get vendor name and fill into XServer.vendorStr.
+; But first we have to calculate the length of the string
+; in double word units.
     xor    eax, eax
     xor    edx, edx
     mov    ebx, 4
@@ -288,14 +372,16 @@ auth_status_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Wait for the socket to become ready for writing
+;   Make sure the X Server is ready to receive requests.
+;   When the server is ready, we will request CreateWindow.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ; Setup parameters for the systemcall poll
     mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
     mov    [poll.fd], eax
-    mov    dword [poll.events], _POLLOUT_
+    mov    [poll.events], bx
 
 ; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
@@ -307,7 +393,8 @@ auth_status_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Request CreateWindow
+;   Request CreateWindow.
+;   This request will create the mainWindow.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -331,53 +418,64 @@ auth_status_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Check createWindow requests. If the request is
-;   fail, the server will complain. Otherwise, the
-;   server will just keep quiet.
+;   Wait 100ms for the X Server to process the CreateWindow request.
+;   The X Server will send a reply if the request is fail.
+;   If the request is success, the X Server will not send any reply.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ; Setup parameters for the systemcall poll
     mov    eax, [socketX]
-    lea    ebx, [_POLLIN_ + _POLLOUT_]
+    mov    ebx, _POLLIN_
     mov    [poll.fd], eax
-    mov    [poll.events], ebx
+    mov    [poll.events], bx
 
-; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+; POLL( @poll, 1, _POLL_SHORT_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
     lea    ebx, [poll]
     mov    ecx, 1
-    mov    edx, _POLL_INFINITE_TIMEOUT_
+    mov    edx, _POLL_SHORT_TIMEOUT_
     int    0x80
 
+; Check if poll.revents == _POLLIN_
     xor    eax, eax
     mov    ax, [poll.revents]
     mov    ebx, _POLLIN_
     cmp    eax, ebx
-    je     createWindow_fail
-    jmp    createWindow_success
+    je     create_mainWindow_fail
+    jmp    create_mainWindow_success
 
-createWindow_fail:
+create_mainWindow_fail:
+
+; Get the reason why CreateWindow request fail
 ; READ( socketX, @requestStatus, 32 )
     mov    eax, _SYSCALL_READ_
     mov    ebx, [socketX]
     lea    ecx, [requestStatus]
     mov    edx, 32
     int    0x80
+; WRITE( _STDOUT_, @errmsg_createMainWindow, errmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [errmsg_createMainWindow]
+    mov    edx, [errmsg_len]
+    int    0x80
     jmp    exit_failure
-createWindow_success:
+
+create_mainWindow_success:
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Wait for the socketX to become ready for writing
+;   Make sure the X Server is ready to receive the next request.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ; Setup parameters for the systemcall poll
     mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
     mov    [poll.fd], eax
-    mov    dword [poll.events], _POLLOUT_
+    mov    [poll.events], bx
 
 ; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
@@ -389,7 +487,10 @@ createWindow_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Request WM_DELETE_WINDOW atom message
+;   Request WM_DELETE_WINDOW atom message using InternAtom request.
+;   The WM_DELETE_WINDOW atom is needed to modify the WM_PROTOCOLS,
+;   so that the connection with the X Server does not unexpectedly
+;   disconnected when the mainWindow is deleted.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -403,7 +504,8 @@ createWindow_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Wait for the socketX to become ready for reading
+;   Wait for the X Server to process the InternAtom request, and
+;   become ready to send reply.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -413,7 +515,7 @@ createWindow_success:
     mov    [poll.fd], eax
     mov    [poll.events], bx
 
-; POLL( [poll.fd, poll.events], 1, _POLL_INFINITE_TIMEOUT_ )
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
     lea    ebx, [poll]
     mov    ecx, 1
@@ -423,7 +525,7 @@ createWindow_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Receive the requested atom message
+;   Receive the requested WM_DELETE_WINDOW atom.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -440,11 +542,11 @@ createWindow_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Wait for the socketX to become ready for writing
+;   Make sure the X Server is ready to receive the next request.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Setup parameters for the systemcall poll
+; Setup parameters for systemcall poll
     mov    eax, [socketX]
     mov    ebx, _POLLOUT_
     mov    [poll.fd], eax
@@ -460,16 +562,233 @@ createWindow_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Request ChangeProperty, to modify the mainWindow protocol,
-;   and window manager properties
+;   Request WM_PROTOCOLS atom property using InternAtom request.
+;   We need the WM_PROTOCOLS atom property in order to apply the
+;   WM_DELETE_WINDOW atom.
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; WRITE( socketX, @getWMProtocols, 20 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [getWMProtocols]
+    mov    edx, 20
+    int    0x80
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Wait for the X Server to process the InternAtom request, and
+;   become ready to send reply.
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; Setup parameters for systemcall poll
+    mov    eax, [socketX]
+    mov    ebx, _POLLIN_
+    mov    [poll.fd], eax
+    mov    [poll.events], bx
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Receive the requested WM_PROTOCOLS property atom.
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; READ( socketX, @InternAtom_reply, 32 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [InternAtom_reply]
+    mov    edx, 32
+    int    0x80
+
+    mov    eax, [InternAtom_reply.atom]
+    mov    [WMProtocols], eax
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Make sure the X Server is ready to receive the next request.
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; Setup parameters for the systemcall poll
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], bx
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Create the graphic context using CreateGC request.
+;   Graphic Context (GC) is needed for PutImage request.
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; Setup graphicContext structure
+    mov    eax, [XServer.ridBase]
+    add    eax, 1
+    mov    ebx, [mainWindow.wid]
+    mov    [graphicContext.cid], eax
+    mov    [graphicContext.drawable], ebx
+
+; WRITE( socketX, @graphicContext, 16 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [graphicContext]
+    mov    edx, 16
+    int    0x80
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Load the "24bit_testimage.bmp" image file and initialize the
+;   putImage structure.
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; testimage_fd = OPEN( @path_testimage, _O_RDONLY_ )
+    mov    eax, _SYSCALL_OPEN_
+    lea    ebx, [path_testimage]
+    mov    ecx, _O_RDONLY_
+    int    0x80
+    test   eax, eax
+    js     testimage_open_fail
+    jmp    testimage_open_success
+
+testimage_open_fail:
+
+; WRITE( _STDOUT_, @errmsg_testimageOpen, errmsg_len )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [errmsg_testimageOpen]
+    mov    edx, [errmsg_len]
+    int    0x80
+    jmp    exit_failure
+
+testimage_open_success:
+
+    mov    [testimage_fd], eax
+
+; Seek to the offset 0x8a, which contains data pixels.
+; LSEEK( testimage_fd, 0x8a, _SEEK_SET_ )
+    mov    eax, _SYSCALL_LSEEK_
+    mov    ebx, [testimage_fd]
+    mov    ecx, 0x8a
+    mov    edx, _SEEK_SET_
+    int    0x80
+
+; READ( testimage_fd, @temporary_dataPixel, 262144 )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [testimage_fd]
+    lea    ecx, [temporary_dataPixel]
+    mov    edx, 262144
+    int    0x80
+
+; CLOSE( testimage_fd )
+    mov    eax, _SYSCALL_CLOSE_
+    mov    ebx, [testimage_fd]
+    int    0x80
+
+; Initialize putImage structure
+    mov    eax, [mainWindow.wid]
+    mov    ebx, [graphicContext.cid]
+    mov    [putImage.drawable], eax
+    mov    [putImage.gc], ebx
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Fix testimage_pixelData byte order (convert ABRG to RGBA).
+;   The byte order in .bmp image file usually in format ABRG, but
+;   the format needed by the X Server is RGBA.
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; Initialize the loop
+    mov    ecx, 128
+    lea    esi, [temporary_dataPixel]
+    lea    edi, [testimage_dataPixel]
+    mov    ebx, esi
+    add    esi, (65536 - (128*4))
+    xor    eax, eax
+
+loop_fix_testimage:
+
+    mov    al, [esi+2]    ;al = temporary_dataPixel[ Red Channel ]
+    mov    [edi  ], al    ;testimage_dataPixel[ Red Channel ] = al
+
+    mov    al, [esi+3]    ;al = temporary_dataPixel[ Green Channel ]
+    mov    [edi+1], al    ;testimage_dataPixel[ Green Channel ] = al
+
+    mov    al, [esi+1]    ;al = temporary_dataPixel[ Blue Channel ]
+    mov    [edi+2], al    ;testimage_dataPixel[ Blue Channel ] = al
+
+    add    esi, 4
+    add    edi, 4
+
+    sub    ecx, 1
+    jnz    loop_fix_testimage
+
+endloop_fix_testimage:
+
+    mov    ecx, 128
+    sub    esi, ((128*4) + (128*4))
+    cmp    esi, ebx
+    jge    loop_fix_testimage
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Make sure the X Server is ready to receive the next request.
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; Setup parameters for the systemcall poll
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], bx
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Request ChangeProperty, to modify the mainWindow properties.
+;   We need to use the ChangeProperty request to apply the
+;   WM_DELETE_WINDOW atom to the mainWindow.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     mov    eax, [mainWindow.wid]
     mov    ebx, [WMDeleteMessage]
+    mov    ecx, [WMProtocols]
 ; Setup setWindowDeleteMsg structure
     mov    [setWindowDeleteMsg.window], eax
     mov    [setWindowDeleteMsg.data], ebx
+    mov    [setWindowDeleteMsg.property], ecx
 ; Setup setWindowName structure
     mov    [setWindowName.window], eax
 ; Setup setWindowSizeHints structure
@@ -505,7 +824,27 @@ createWindow_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Requst map mainWindow
+;   Make sure the X Server is ready to receive the next request.
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; Setup parameters for the systemcall poll
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], bx
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Requst MapWindow to map the mainWindow.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -521,43 +860,6 @@ createWindow_success:
     int    0x80
 
 
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;   Check if mapWindow request failed.
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-; Setup parameters for the systemcall poll
-    mov    eax, [socketX]
-    lea    ebx, [_POLLIN_ + _POLLOUT_]
-    mov    [poll.fd], eax
-    mov    [poll.events], ebx
-
-; WRITE( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
-    mov    eax, _SYSCALL_POLL_
-    lea    ebx, [poll]
-    mov    ecx, 1
-    mov    edx, _POLL_INFINITE_TIMEOUT_
-    int    0x80
-
-    xor    eax, eax
-    mov    ax, [poll.revents]
-    mov    ebx, _POLLIN_
-    cmp    eax, ebx
-    je     mapWindow_fail
-    jmp    mapWindow_success
-
-mapWindow_fail:
-; READ( socketX, @requestStatus, 32 )
-    mov    eax, _SYSCALL_READ_
-    mov    ebx, [socketX]
-    lea    ecx, [requestStatus]
-    mov    edx, 32
-    int    0x80
-    jmp    exit_failure
-mapWindow_success:
-
-
 
 
 mainloop:
@@ -567,7 +869,7 @@ mainloop:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Wait for XEvents from the socketX
+;   Wait for events from the X Server.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -575,7 +877,7 @@ mainloop:
     mov    eax, [socketX]
     mov    ebx, _POLLIN_
     mov    [poll.fd], eax
-    mov    [poll.events], ebx
+    mov    [poll.events], bx
 
 ; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
@@ -587,7 +889,7 @@ mainloop:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Check the type of Xevent received
+;   Check the type of event received
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -601,9 +903,11 @@ mainloop:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Process the Xevent received
+;   Go to the function that is responsible to handle which
+;   type of event received.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
     mov    esi, [XEventReply.code]
 
 
@@ -886,7 +1190,7 @@ exit_failure:
 ;
 ;
 ;
-;                          XEvent Functions
+;                         XEvent Functions
 ;
 ;
 ;

@@ -14,6 +14,7 @@ _SYSCALL_READ_          equ      3 ;read from fd or socket
 _SYSCALL_WRITE_         equ      4 ;write to fd or socket
 _SYSCALL_OPEN_          equ      5 ;open fd
 _SYSCALL_CLOSE_         equ      6 ;close socket or fd
+_SYSCALL_LSEEK_         equ     19 ;seek fd
 _SYSCALL_ACCESS_        equ     33 ;check file permission
 _SYSCALL_SOCKETCALL_    equ    102 ;main socketcall
 _SYSCALL_WRITEV_        equ    146 ;multiple writing
@@ -24,6 +25,11 @@ _SYSCALL_FCNTL64_       equ    221 ;configure socket
 ; Standard File Descriptors
 _STDIN_                 equ      0
 _STDOUT_                equ      1
+
+; Whence values for LSEEK systemcall
+_SEEK_SET_              equ      0
+_SEEK_CUR_              equ      1
+_SEEK_END_              equ      2
 
 ; Standard Boolean values
 _TRUE_                  equ      1
@@ -74,6 +80,7 @@ _IPPROTO_IP_            equ      0 ;dummy TCP protocol
 _POLLIN_                equ  0x001 ;there is data to read
 _POLLOUT_               equ  0x004 ;writing now will not block
 _POLL_INFINITE_TIMEOUT_ equ     -1
+_POLL_SHORT_TIMEOUT_    equ    100 ;100 milliseconds
 
 ; Constant values for XWindow
 _InputOutput_           equ      1 ;window with input & output
@@ -111,6 +118,8 @@ _REQUEST_CreateWindow_  equ      1
 _REQUEST_MapWindow_     equ      8
 _REQUEST_InternAtom_    equ     16
 _REQUEST_ChangeProperty_ equ    18
+_REQUEST_CreateGC_      equ     55
+_REQUEST_PutImage_      equ     72
 
 ; Constant values ChangeProperty request
 _XA_PRIMARY_            equ      1
