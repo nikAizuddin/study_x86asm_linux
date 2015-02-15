@@ -118,7 +118,9 @@ _REQUEST_CreateWindow_  equ      1
 _REQUEST_MapWindow_     equ      8
 _REQUEST_InternAtom_    equ     16
 _REQUEST_ChangeProperty_ equ    18
+_REQUEST_CreatePixmap_  equ     53
 _REQUEST_CreateGC_      equ     55
+_REQUEST_CopyArea_      equ     62
 _REQUEST_PutImage_      equ     72
 
 ; Constant values ChangeProperty request

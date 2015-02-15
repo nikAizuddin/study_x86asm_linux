@@ -50,21 +50,15 @@ XEventFunc_Expose:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   PutImage to the mainWindow background
+;   Copy pixel?
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; WRITE( socketX, @putImage, 24 )
+; WRITE( socketX, @copyArea 28 ) 
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
-    lea    ecx, [putImage]
-    mov    edx, 24
-    int    0x80
-; WRITE( socketX, @testimage_dataPixel, 65536 )
-    mov    eax, _SYSCALL_WRITE_
-    mov    ebx, [socketX]
-    lea    ecx, [testimage_dataPixel]
-    mov    edx, 65536
+    lea    ecx, [copyArea]
+    mov    edx, 28
     int    0x80
 
     jmp    mainloop

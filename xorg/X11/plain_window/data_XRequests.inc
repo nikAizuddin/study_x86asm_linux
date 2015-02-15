@@ -60,11 +60,11 @@ section .bss
 
 
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ; For image 512*512 24bit
+    ; For image 640*480 32bit
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     testimage_fd:            resd 1
-    temporary_dataPixel:     resb 262144
-    testimage_dataPixel:     resb 262144
+    testimage_dataPixel:     resb 1228800
+    temporary_dataPixel:     resb 1228800
 
 
 section .data
@@ -82,8 +82,8 @@ section .data
         .parent:             dd 0  ;will be filled at runtime
         .x:                  dw 100
         .y:                  dw 100
-        .width:              dw 512
-        .height:             dw 512
+        .width:              dw 640
+        .height:             dw 480
         .borderWidth:        dw 0
         .class:              dw _InputOutput_
         .visual:             dd _CopyFromParent_
@@ -205,16 +205,16 @@ section .data
 
 
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ; ???
+    ; Use this structure to draw image onto pixmap or window
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     putImage:
         .opcode:             db _REQUEST_PutImage_
         .format:             db 2
-        .requestLength:      dw 16390 ;min=6
+        .requestLength:      dw 6406 ;16390 ;min=6
         .drawable:           dd 0
         .gc:                 dd 0
-        .width:              dw 128
-        .height:             dw 128
+        .width:              dw 640 ;128
+        .height:             dw 10  ;128
         .dstX:               dw 0
         .dstY:               dw 0
         .leftPad:            db 0
@@ -265,6 +265,38 @@ section .data
         .lengthOfName:       dw 12
         .unused:             dw 0
         .name:               db "WM_PROTOCOLS"
+
+
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ; Use this structure to request CreatePixmap.
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    testimage_pixmap:
+        .opcode:             db _REQUEST_CreatePixmap_
+        .depth:              db 24
+        .requestLength:      dw 4
+        .pid:                dd 0
+        .drawable:           dd 0
+        .width:              dw 640
+        .height:             dw 480
+
+
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ; Use this structure to copy image from testimage_pixmap
+    ; to mainWindow
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    copyArea:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 0
+        .dstY:               dw 0
+        .width:              dw 640
+        .height:             dw 480
 
 
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -334,12 +366,12 @@ section .data
         .height:             dd 0
 
         ;minimum size
-        .min_width:          dd 512
-        .min_height:         dd 512
+        .min_width:          dd 640
+        .min_height:         dd 480
 
         ;maximum size
-        .max_width:          dd 512
-        .max_height:         dd 512
+        .max_width:          dd 640
+        .max_height:         dd 480
 
         ;???
         .width_inc:          dd 0

@@ -658,8 +658,7 @@ create_mainWindow_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Load the "24bit_testimage.bmp" image file and initialize the
-;   putImage structure.
+;   Load the "24bit_testimage.bmp" image file.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -694,11 +693,11 @@ testimage_open_success:
     mov    edx, _SEEK_SET_
     int    0x80
 
-; READ( testimage_fd, @temporary_dataPixel, 262144 )
+; READ( testimage_fd, @temporary_dataPixel, 1228800 )
     mov    eax, _SYSCALL_READ_
     mov    ebx, [testimage_fd]
     lea    ecx, [temporary_dataPixel]
-    mov    edx, 262144
+    mov    edx, 1228800
     int    0x80
 
 ; CLOSE( testimage_fd )
@@ -706,38 +705,32 @@ testimage_open_success:
     mov    ebx, [testimage_fd]
     int    0x80
 
-; Initialize putImage structure
-    mov    eax, [mainWindow.wid]
-    mov    ebx, [graphicContext.cid]
-    mov    [putImage.drawable], eax
-    mov    [putImage.gc], ebx
-
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Fix testimage_pixelData byte order (convert ABRG to RGBA).
-;   The byte order in .bmp image file usually in format ABRG, but
+;   Fix testimage_pixelData byte order (convert ABGR to RGBA).
+;   The byte order in .bmp image file usually in format ABGR, but
 ;   the format needed by the X Server is RGBA.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ; Initialize the loop
-    mov    ecx, 128
+    mov    ecx, 640 ;128
     lea    esi, [temporary_dataPixel]
     lea    edi, [testimage_dataPixel]
     mov    ebx, esi
-    add    esi, (65536 - (128*4))
+    add    esi, (1228800 - (640*4)) ;(65536 - (128*4))
     xor    eax, eax
 
 loop_fix_testimage:
 
-    mov    al, [esi+2]    ;al = temporary_dataPixel[ Red Channel ]
+    mov    al, [esi+1]    ;al = temporary_dataPixel[ Red Channel ]
     mov    [edi  ], al    ;testimage_dataPixel[ Red Channel ] = al
 
-    mov    al, [esi+3]    ;al = temporary_dataPixel[ Green Channel ]
+    mov    al, [esi+2]    ;al = temporary_dataPixel[ Green Channel ]
     mov    [edi+1], al    ;testimage_dataPixel[ Green Channel ] = al
 
-    mov    al, [esi+1]    ;al = temporary_dataPixel[ Blue Channel ]
+    mov    al, [esi+3]    ;al = temporary_dataPixel[ Blue Channel ]
     mov    [edi+2], al    ;testimage_dataPixel[ Blue Channel ] = al
 
     add    esi, 4
@@ -748,8 +741,8 @@ loop_fix_testimage:
 
 endloop_fix_testimage:
 
-    mov    ecx, 128
-    sub    esi, ((128*4) + (128*4))
+    mov    ecx, 640 ;128
+    sub    esi, ((640*4) + (640*4)) ;((128*4) + (128*4))
     cmp    esi, ebx
     jge    loop_fix_testimage
 
@@ -773,6 +766,163 @@ endloop_fix_testimage:
     mov    edx, _POLL_INFINITE_TIMEOUT_
     int    0x80
 
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Create testimage pixmap using CreatePixmap request.
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; Setup testimage_pixmap structure
+    mov    eax, [XServer.ridBase]
+    add    eax, 2
+    mov    ebx, [mainWindow.wid]
+    mov    [testimage_pixmap.pid], eax
+    mov    [testimage_pixmap.drawable], ebx
+
+; WRITE( socketX, @testimage_pixmap, 16 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [testimage_pixmap]
+    mov    edx, 16
+    int    0x80
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Make sure the X Server is ready to receive the next request.
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; Setup parameters for the systemcall poll
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], bx
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+;
+;   Draw testimage_dataPixel to the testimage_pixmap.pid by using
+;   PutImage request.
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+; Initialize putImage structure
+    mov    eax, [testimage_pixmap.pid]
+    mov    ebx, [graphicContext.cid]
+    mov    [putImage.drawable], eax
+    mov    [putImage.gc], ebx
+
+    lea    edi, [testimage_dataPixel]
+    mov    esi, edi
+    add    esi, (25600 * 47)
+loop_fill:
+
+; POLL( {socketX, _POLLOUT_}, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax 
+    mov    [poll.events], ebx 
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+; WRITE( socketX, @putImage, 24 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [putImage]
+    mov    edx, 24
+    int    0x80
+
+    mov    eax, [putImage.dstY]
+    add    eax, 10
+    mov    [putImage.dstY], eax
+
+; WRITE( socketX, @testimage_dataPixel, 25600 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    mov    ecx, edi
+    mov    edx, 25600
+    int    0x80
+
+    add    edi, 25600
+    cmp    edi, esi
+    jbe    loop_fill
+
+endloop_fill:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Make sure the X Server is ready to receive the next request.
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; Setup parameters for the systemcall poll
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], bx
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Copy the drawed image from testimage_pixmap to the mainWindow
+;   by using CopyArea request.
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; Initialize copyArea structure
+    mov    eax, [testimage_pixmap.pid]
+    mov    ebx, [mainWindow.wid]
+    mov    ecx, [graphicContext.cid]
+    mov    [copyArea.srcDrawable], eax
+    mov    [copyArea.dstDrawable], ebx
+    mov    [copyArea.gc], ecx
+
+; WRITE( socketX, @copyArea 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea]
+    mov    edx, 28
+    int    0x80
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Make sure the X Server is ready to receive the next request.
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+; Setup parameters for the systemcall poll
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], bx
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
