@@ -22,12 +22,12 @@
 
 ; Include constant symbols and global variables
 
-%include "constants.inc"
-%include "data_kernel.inc"
-%include "data_strings.inc"
-%include "data_XServer.inc"
-%include "data_XRequests.inc"
-%include "data_XEvent.inc"
+%include "include/constants.inc"
+%include "include/data_kernel.inc"
+%include "include/data_strings.inc"
+%include "include/data_XServer.inc"
+%include "include/data_XRequests.inc"
+%include "include/data_XEvent.inc"
 
 global _start
 
@@ -715,14 +715,14 @@ testimage_open_success:
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ; Initialize the loop
-    mov    ecx, 640 ;128
+    mov    ecx, 640
     lea    esi, [temporary_dataPixel]
     lea    edi, [testimage_dataPixel]
     mov    ebx, esi
-    add    esi, (1228800 - (640*4)) ;(65536 - (128*4))
+    add    esi, ((640*480*4) - (640*4))
     xor    eax, eax
 
-loop_fix_testimage:
+loop_convert_ABGR_to_RGBA:
 
     mov    al, [esi+1]    ;al = temporary_dataPixel[ Red Channel ]
     mov    [edi  ], al    ;testimage_dataPixel[ Red Channel ] = al
@@ -737,14 +737,14 @@ loop_fix_testimage:
     add    edi, 4
 
     sub    ecx, 1
-    jnz    loop_fix_testimage
+    jnz    loop_convert_ABGR_to_RGBA
 
-endloop_fix_testimage:
+endloop_convert_ABGR_to_RGBA:
 
-    mov    ecx, 640 ;128
-    sub    esi, ((640*4) + (640*4)) ;((128*4) + (128*4))
+    mov    ecx, 640
+    sub    esi, ((640*4) + (640*4))
     cmp    esi, ebx
-    jge    loop_fix_testimage
+    jge    loop_convert_ABGR_to_RGBA
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -824,6 +824,7 @@ endloop_fix_testimage:
     lea    edi, [testimage_dataPixel]
     mov    esi, edi
     add    esi, (25600 * 47)
+
 loop_fill:
 
 ; POLL( {socketX, _POLLOUT_}, 1, _POLL_INFINITE_TIMEOUT_ )
@@ -1346,36 +1347,36 @@ exit_failure:
 ;
 ; ####################################################################
 
-%include "XEventFunc_KeyPress.asm"
-%include "XEventFunc_KeyRelease.asm"
-%include "XEventFunc_ButtonPress.asm"
-%include "XEventFunc_ButtonRelease.asm"
-%include "XEventFunc_MotionNotify.asm"
-%include "XEventFunc_EnterNotify.asm"
-%include "XEventFunc_LeaveNotify.asm"
-%include "XEventFunc_FocusIn.asm"
-%include "XEventFunc_FocusOut.asm"
-%include "XEventFunc_KeymapNotify.asm"
-%include "XEventFunc_Expose.asm"
-%include "XEventFunc_GraphicsExposure.asm"
-%include "XEventFunc_NoExposure.asm"
-%include "XEventFunc_VisibilityNotify.asm"
-%include "XEventFunc_CreateNotify.asm"
-%include "XEventFunc_DestroyNotify.asm"
-%include "XEventFunc_UnmapNotify.asm"
-%include "XEventFunc_MapNotify.asm"
-%include "XEventFunc_MapRequest.asm"
-%include "XEventFunc_ReparentNotify.asm"
-%include "XEventFunc_ConfigureNotify.asm"
-%include "XEventFunc_ConfigureRequest.asm"
-%include "XEventFunc_GravityNotify.asm"
-%include "XEventFunc_ResizeRequest.asm"
-%include "XEventFunc_CirculateNotify.asm"
-%include "XEventFunc_CirculateRequest.asm"
-%include "XEventFunc_PropertyNotify.asm"
-%include "XEventFunc_SelectionClear.asm"
-%include "XEventFunc_SelectionRequest.asm"
-%include "XEventFunc_SelectionNotify.asm"
-%include "XEventFunc_ColormapNotify.asm"
-%include "XEventFunc_MappingNotify.asm"
-%include "XEventFunc_ClientMessage.asm"
+%include "XEventFunctions/XEventFunc_KeyPress.asm"
+%include "XEventFunctions/XEventFunc_KeyRelease.asm"
+%include "XEventFunctions/XEventFunc_ButtonPress.asm"
+%include "XEventFunctions/XEventFunc_ButtonRelease.asm"
+%include "XEventFunctions/XEventFunc_MotionNotify.asm"
+%include "XEventFunctions/XEventFunc_EnterNotify.asm"
+%include "XEventFunctions/XEventFunc_LeaveNotify.asm"
+%include "XEventFunctions/XEventFunc_FocusIn.asm"
+%include "XEventFunctions/XEventFunc_FocusOut.asm"
+%include "XEventFunctions/XEventFunc_KeymapNotify.asm"
+%include "XEventFunctions/XEventFunc_Expose.asm"
+%include "XEventFunctions/XEventFunc_GraphicsExposure.asm"
+%include "XEventFunctions/XEventFunc_NoExposure.asm"
+%include "XEventFunctions/XEventFunc_VisibilityNotify.asm"
+%include "XEventFunctions/XEventFunc_CreateNotify.asm"
+%include "XEventFunctions/XEventFunc_DestroyNotify.asm"
+%include "XEventFunctions/XEventFunc_UnmapNotify.asm"
+%include "XEventFunctions/XEventFunc_MapNotify.asm"
+%include "XEventFunctions/XEventFunc_MapRequest.asm"
+%include "XEventFunctions/XEventFunc_ReparentNotify.asm"
+%include "XEventFunctions/XEventFunc_ConfigureNotify.asm"
+%include "XEventFunctions/XEventFunc_ConfigureRequest.asm"
+%include "XEventFunctions/XEventFunc_GravityNotify.asm"
+%include "XEventFunctions/XEventFunc_ResizeRequest.asm"
+%include "XEventFunctions/XEventFunc_CirculateNotify.asm"
+%include "XEventFunctions/XEventFunc_CirculateRequest.asm"
+%include "XEventFunctions/XEventFunc_PropertyNotify.asm"
+%include "XEventFunctions/XEventFunc_SelectionClear.asm"
+%include "XEventFunctions/XEventFunc_SelectionRequest.asm"
+%include "XEventFunctions/XEventFunc_SelectionNotify.asm"
+%include "XEventFunctions/XEventFunc_ColormapNotify.asm"
+%include "XEventFunctions/XEventFunc_MappingNotify.asm"
+%include "XEventFunctions/XEventFunc_ClientMessage.asm"

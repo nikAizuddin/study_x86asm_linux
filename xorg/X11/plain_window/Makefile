@@ -3,7 +3,7 @@ LINKER    = ld
 FORMAT    = elf32
 MACHINE   = elf_i386
 _START    = plain_window.asm
-BIN       = exe
+BIN       = plain_window
 OBJ       = plain_window.o
 
 .PHONY: all clean
