@@ -658,7 +658,7 @@ create_mainWindow_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Load the "24bit_testimage.bmp" image file.
+;   Load the "32bit_testimage.bmp" image file.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
