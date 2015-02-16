@@ -238,10 +238,24 @@ section .data
     ; This structure is used to destroy window
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     destroyWindow:
-        .opcode:             db 4
+        .opcode:             db _REQUEST_DestroyWindow_
         .unused:             db 0
         .requestLength:      dw 2
         .window:             dd 0
+
+
+    freePixmap:
+        .opcode:             db _REQUEST_FreePixmap_
+        .unused:             db 0
+        .requestLength:      dw 2
+        .pixmap:             dd 0
+
+
+    freeGC:
+        .opcode:             db _REQUEST_FreeGC_
+        .unused:             db 0
+        .requestLength:      dw 2
+        .gc:                 dd 0
 
 
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

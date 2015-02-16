@@ -114,14 +114,17 @@ _Append_                equ      2
 _NormalState_           equ      1
 
 ; Constant values for X Server Request Opcodes
-_REQUEST_CreateWindow_  equ      1
-_REQUEST_MapWindow_     equ      8
-_REQUEST_InternAtom_    equ     16
+_REQUEST_CreateWindow_   equ     1
+_REQUEST_DestroyWindow_  equ     4
+_REQUEST_MapWindow_      equ     8
+_REQUEST_InternAtom_     equ    16
 _REQUEST_ChangeProperty_ equ    18
-_REQUEST_CreatePixmap_  equ     53
-_REQUEST_CreateGC_      equ     55
-_REQUEST_CopyArea_      equ     62
-_REQUEST_PutImage_      equ     72
+_REQUEST_CreatePixmap_   equ    53
+_REQUEST_FreePixmap_     equ    54
+_REQUEST_CreateGC_       equ    55
+_REQUEST_FreeGC_         equ    60
+_REQUEST_CopyArea_       equ    62
+_REQUEST_PutImage_       equ    72
 
 ; Constant values ChangeProperty request
 _XA_PRIMARY_            equ      1

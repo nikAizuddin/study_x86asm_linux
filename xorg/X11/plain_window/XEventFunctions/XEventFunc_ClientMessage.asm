@@ -48,7 +48,8 @@ XEventFunc_ClientMessage:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Exit mainloop if XEvent_ClientMessage.data[0] == WMDeleteMessage
+;   Destroy the mainWindow, all X resources, and exit the program,
+;   if XEvent_ClientMessage.data[0] == WMDeleteMessage
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -59,12 +60,31 @@ XEventFunc_ClientMessage:
 
 received_WindowDeleteMessage:
 
-; Destroy the mainWindow
     mov    eax, [mainWindow.wid]
+    mov    ebx, [graphicContext.cid]
+    mov    ecx, [testimage_pixmap.pid]
     mov    [destroyWindow.window], eax
+    mov    [freeGC.gc], ebx
+    mov    [freePixmap.pixmap], ecx
+
+; Destroy the mainWindow
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
     lea    ecx, [destroyWindow]
+    mov    edx, 8
+    int    0x80
+
+; Destroy the graphicContext
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [freeGC]
+    mov    edx, 8
+    int    0x80
+
+; Destroy the testimage_pixmap
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [freePixmap]
     mov    edx, 8
     int    0x80
 

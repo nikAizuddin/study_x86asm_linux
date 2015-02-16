@@ -1286,6 +1286,13 @@ is_MappingNotify:
 not_MappingNotify:
 
 
+    cmp    esi, 0
+    jne    dont_exit_mainloop
+exit_mainloop:
+    jmp    mainloop_end
+dont_exit_mainloop: 
+
+
 ; Unknown events are treated as ClientMessage in this program.
 is_ClientMessage:
     jmp    XEventFunc_ClientMessage

@@ -44,24 +44,3 @@ XEventFunc_DestroyNotify:
     lea    ecx, [XEvent_DestroyNotify]
     mov    edx, 31
     int    0x80
-
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;   If the DestroyNotify report is received from the mainWindow,
-;   exit the mainloop.
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    mov    eax, [XEvent_DestroyNotify.window]
-    mov    ebx, [mainWindow.wid]
-    cmp    eax, ebx
-    jne    mainWindow_isnt_destroyed
-
-mainWindow_is_destroyed:
-
-    jmp    mainloop_end
-
-mainWindow_isnt_destroyed:
-
-    jmp    mainloop
