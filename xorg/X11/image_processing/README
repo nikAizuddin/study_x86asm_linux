@@ -26,14 +26,14 @@ NOTES
         $ make
 
     and then run the program using this command:
-        $ ./load_bmp_image
+        $ ./image_processing
 
-    Q = No filter
-    W = Mean filter (9*9)
-    E = SobelOperator
-    R = Equalization
-    T = Min Filter
-    Y = Max Filter
+    Q = No filter     (Not yet available)
+    W = Mean filter (15px * 15px)
+    E = SobelOperator (Not yet available)
+    R = Equalization  (Not yet available)
+    T = Min Filter    (Not yet available)
+    Y = Max Filter    (Not yet available)
 
 
 REFERENCES
