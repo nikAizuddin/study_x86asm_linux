@@ -32,14 +32,15 @@ SSE2_ImageFilter_Mean:
     pxor   xmm7, xmm7
     movdqa xmm6, [meanDivisor]
 
-    lea    esi, [imgCurrent.pixel] ;source pixels
+    lea    esi, [imgCurrent.pixel]  ;source pixels
     lea    edi, [imgFiltered.pixel] ;destination pixels
 
 ;Set the destination pixel starts at XY coordinate (7, 7).
 ;So that the destination pixels are drawed at the center of
 ;the mean filter box.
 
-    add    edi, ( (_ROWSIZE_32_ * 7) + (7 * _COLUMNSIZE_32_) )
+    add    edi, ( (_ROWSIZE_32_    * _MEANBOX_CENTER_) + \
+                  (_COLUMNSIZE_32_ * _MEANBOX_CENTER_) )
 
 
 ;These loopRow_meanFilter() and loopColumn_meanFilter() functions
@@ -80,7 +81,7 @@ loopColumn_meanFilter:
     add    ebp, 1
     mov    ecx, ebp
     and    ecx, 0xffff
-    cmp    ecx, (640 - _MEANBOX_WIDTH_)
+    cmp    ecx, (_IMG_WIDTH_ - _MEANBOX_WIDTH_)
     jb     loopColumn_meanFilter
 
 endloopColumn_meanFilter:
@@ -89,7 +90,7 @@ endloopColumn_meanFilter:
 
     ;++ row
     add    ebp, (1 << 16)
-    cmp    ebp, ((480 - _MEANBOX_WIDTH_ ) << 16)
+    cmp    ebp, ((_IMG_HEIGHT_ - _MEANBOX_WIDTH_ ) << 16)
     jb     loopRow_meanFilter
 
 endloopRow_meanFilter:
@@ -102,7 +103,7 @@ endloopRow_meanFilter:
     lea    esi, [imgFiltered.pixel]
     lea    edi, [XImage.pixel]
     lea    ebx, [imgCurrent.pixel]
-    mov    ecx, (640*480)
+    mov    ecx, (_IMG_WIDTH_ * _IMG_HEIGHT_)
 
 loop_meanFilter_saveToXImage:
 
@@ -138,8 +139,10 @@ endloop_meanFilter_saveToXImage:
     mov    [putImage.dstY], cx
 
     lea    edi, [XImage.pixel]
+
+;Loop 47 times to fill 480 lines
     mov    esi, edi
-    add    esi, (25600 * 47)
+    add    esi, (_IMG_UPLOAD_SIZE_ * ((_IMG_HEIGHT_/10) - 1))
 
 align 16, nop
 loop_upload_meanFilter:
@@ -167,14 +170,14 @@ loop_upload_meanFilter:
     add    eax, 10
     mov    [putImage.dstY], ax
 
-;WRITE( socketX, @EDI, 25600 )
+;WRITE( socketX, @EDI, _IMG_UPLOAD_SIZE_ )
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
     mov    ecx, edi
-    mov    edx, 25600
+    mov    edx, _IMG_UPLOAD_SIZE_
     int    0x80
 
-    add    edi, 25600
+    add    edi, _IMG_UPLOAD_SIZE_
     cmp    edi, esi
     jbe    loop_upload_meanFilter
 

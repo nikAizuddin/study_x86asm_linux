@@ -706,11 +706,11 @@ image_open_success:
     mov    edx, _SEEK_SET_
     int    0x80
 
-; READ( testimage_fd, @imgRaw.pixel, image_size )
+; READ( testimage_fd, @imgRaw.pixel, (640*480*4) )
     mov    eax, _SYSCALL_READ_
     mov    ebx, [image_fd]
     lea    ecx, [imgRaw.pixel]
-    mov    edx, (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
+    mov    edx, (640*480*4)
     int    0x80
 
 ; CLOSE( image_fd )
@@ -728,48 +728,35 @@ image_open_success:
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ; Initialize the loop
-    mov    ecx, _IMG_WIDTH_
+    mov    ecx, 640
     lea    esi, [imgRaw.pixel]
-    lea    edi, [XImage.pixel]
-    lea    edx, [imgOriginal.pixel]
+    lea    edi, [imgOriginal.pixel]
     mov    ebx, esi
-    add    esi, ( (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_) - \
-                  _ROWSIZE_8_ )
-    pxor   xmm7, xmm7
+    add    esi, ((640*480*4) - (640*4))
 
-align 16, nop
 loop_convert_ABGR_to_RGBA:
 
-    mov    eax, [esi]
+    mov    eax, [esi  ]
+    mov    edx, [esi+4]
+
     ror    eax, 8
+    ror    edx, 8
 
-    movd   xmm0, eax
-    punpcklbw xmm0, xmm7
-    punpcklwd xmm0, xmm7
-    cvtdq2ps xmm0, xmm0
+    mov    [edi  ], eax
+    mov    [edi+4], edx
 
-    movdqa [edx], xmm0
-    mov    [edi], eax
+    add    esi, 8
+    add    edi, 8
 
-    add    esi, _COLUMNSIZE_8_
-    add    edx, _COLUMNSIZE_32_
-    add    edi, _COLUMNSIZE_8_
-
-    sub    ecx, 1
+    sub    ecx, 2
     jnz    loop_convert_ABGR_to_RGBA
 
 endloop_convert_ABGR_to_RGBA:
 
-    mov    ecx, _IMG_WIDTH_
-    sub    esi, (_ROWSIZE_8_ + _ROWSIZE_8_)
+    mov    ecx, 640
+    sub    esi, ((640*4) + (640*4))
     cmp    esi, ebx
     jge    loop_convert_ABGR_to_RGBA
-
-;Copy pixels from imgOriginal to imgCurrent
-    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
-    lea    esi, [imgOriginal.pixel]
-    lea    edi, [imgCurrent.pixel]
-    rep    movsd
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -849,9 +836,9 @@ endloop_convert_ABGR_to_RGBA:
     mov    [putImage.drawable], eax
     mov    [putImage.gc], ebx
 
-    lea    edi, [XImage.pixel]
+    lea    edi, [imgOriginal.pixel]
     mov    esi, edi
-    add    esi, (_IMG_UPLOAD_SIZE_ * ((_IMG_HEIGHT_/10) - 1))
+    add    esi, (25600 * 47)
 
 loop_upload_imgOriginal:
 
@@ -877,14 +864,14 @@ loop_upload_imgOriginal:
     add    eax, 10
     mov    [putImage.dstY], eax
 
-; WRITE( socketX, @EDI, _IMG_UPLOAD_SIZE_ )
+; WRITE( socketX, @EDI, 25600 )
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
     mov    ecx, edi
-    mov    edx, _IMG_UPLOAD_SIZE_
+    mov    edx, 25600
     int    0x80
 
-    add    edi, _IMG_UPLOAD_SIZE_
+    add    edi, 25600
     cmp    edi, esi
     jbe    loop_upload_imgOriginal
 
@@ -1041,7 +1028,6 @@ endloop_upload_imgOriginal:
 
 
 
-align 16, nop
 mainloop:
 
 
@@ -1421,5 +1407,4 @@ exit_failure:
 ;
 ; ####################################################################
 
-%include "ImageFilters/SSE2_ImageFilter_NoFilter.asm"
-%include "ImageFilters/SSE2_ImageFilter_Mean.asm"
+%include "ImageFilters/MMX_ImageFilter_Mean.asm"

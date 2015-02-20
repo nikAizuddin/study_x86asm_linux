@@ -30,7 +30,7 @@ SSE2_ImageFilter_NoFilter:
     lea    edi, [imgCurrent.pixel]  ;destination1 pixel
     lea    ebx, [XImage.pixel]      ;destination2 pixel
 
-    mov    ecx, (640*480)
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
 
 loop_NoFilter_restore:
 
@@ -69,8 +69,10 @@ endloop_NoFilter_restore:
     mov    [putImage.dstY], cx
 
     lea    edi, [XImage.pixel]
+
+;Loop 47 times to fill 480 lines
     mov    esi, edi
-    add    esi, (25600 * 47)
+    add    esi, (_IMG_UPLOAD_SIZE_ * ((_IMG_HEIGHT_/10) - 1))
 
 align 16, nop
 loop_upload_NoFilter:
@@ -98,14 +100,14 @@ loop_upload_NoFilter:
     add    eax, 10
     mov    [putImage.dstY], ax
 
-;WRITE( socketX, @EDI, 25600 )
+;WRITE( socketX, @EDI, _IMG_UPLOAD_SIZE_ )
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
     mov    ecx, edi
-    mov    edx, 25600
+    mov    edx, _IMG_UPLOAD_SIZE_
     int    0x80
 
-    add    edi, 25600
+    add    edi, _IMG_UPLOAD_SIZE_
     cmp    edi, esi
     jbe    loop_upload_NoFilter
 

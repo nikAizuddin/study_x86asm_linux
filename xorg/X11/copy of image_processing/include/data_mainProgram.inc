@@ -44,43 +44,15 @@ section .bss
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ; Image file descriptor
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    image_fd:          resd 1
+    image_fd:                resd 1
 
 
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ; Data pixels
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    align 16, resb 1
     imgRaw:
-        .pixel:        resb (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
-
-    align 16, resb 1
-    XImage:
-        .pixel:        resb (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
-
-    align 16, resb 1
+        .pixel:              resb (640*480*4)
     imgOriginal:
-        .pixel:        resd (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
-
-    align 16, resb 1
-    imgCurrent:
-        .pixel:        resd (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
-
-    align 16, resb 1
+        .pixel:              resb (640*480*4)
     imgFiltered:
-        .pixel:        resd (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
-
-
-section .data
-
-
-    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ; Data for SSE2_ImageFilter_Mean()
-    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    align 16, db 0
-    meanDivisor:
-        .b:                  dd _MEANBOX_AREA_
-        .g:                  dd _MEANBOX_AREA_
-        .r:                  dd _MEANBOX_AREA_
-        .a:                  dd _MEANBOX_AREA_
+        .pixel:              resb (640*480*4)

@@ -280,17 +280,14 @@ _KEY_N_                 equ   0x39
 _KEY_M_                 equ   0x3a
 
 ; Constant values for image information
-_IMG_WIDTH_             equ    640 ;ONLY CHANGE THIS VALUE!
-_IMG_HEIGHT_            equ    480 ;ONLY CHANGE THIS VALUE!
-_IMG_NCHANNELS_         equ      4
-_IMG_UPLOAD_SIZE_       equ (_IMG_WIDTH_*10*_IMG_NCHANNELS_)
-_PUTIMAGE_REQ_LEN_      equ ((_IMG_UPLOAD_SIZE_/4) + 6)
-_COLUMNSIZE_32_         equ (_IMG_NCHANNELS_*4)
-_ROWSIZE_32_            equ (_IMG_WIDTH_*_COLUMNSIZE_32_)
-_COLUMNSIZE_8_          equ (_IMG_NCHANNELS_*1)
-_ROWSIZE_8_             equ (_IMG_WIDTH_*_COLUMNSIZE_8_)
+IMG_WIDTH_             equ    640
+IMG_HEIGHT_            equ    480
+IMG_UPLOAD_SIZE_       equ (_IMG_WIDTH_*10*4) ;upload to X Server
+COLUMNSIZE_32_         equ  (4*4)
+ROWSIZE_32_            equ (_IMG_WIDTH_*_COLUMNSIZE_32_)
+COLUMNSIZE_8_          equ  (4*1)
+ROWSIZE_8_             equ (_IMG_WIDTH_*_COLUMNSIZE_8_)
 
 ; Constant values for image processing
-_MEANBOX_WIDTH_         equ      9
-_MEANBOX_CENTER_        equ ((_MEANBOX_WIDTH_-1) / 2)
-_MEANBOX_AREA_          equ __float32__(81.0) ;_MEANBOX_WIDTH_^2
+MEANBOX_WIDTH_         equ     15
+MEANBOX_CENTER        equ      7 ;(_MEANBOX_WIDTH_-1) / 2

@@ -56,8 +56,8 @@ section .data
         .parent:             dd 0
         .x:                  dw 100
         .y:                  dw 100
-        .width:              dw _IMG_WIDTH_
-        .height:             dw _IMG_HEIGHT_
+        .width:              dw 640
+        .height:             dw 480
         .borderWidth:        dw 0
         .class:              dw _InputOutput_
         .visual:             dd _CopyFromParent_
@@ -178,11 +178,11 @@ section .data
     putImage:
         .opcode:             db _REQUEST_PutImage_
         .format:             db 2
-        .requestLength:      dw _PUTIMAGE_REQ_LEN_
+        .requestLength:      dw 6406 ;16390 ;min=6
         .drawable:           dd 0
         .gc:                 dd 0
-        .width:              dw _IMG_WIDTH_
-        .height:             dw 10
+        .width:              dw 640 ;128
+        .height:             dw 10  ;128
         .dstX:               dw 0
         .dstY:               dw 0
         .leftPad:            db 0
@@ -258,8 +258,8 @@ section .data
         .requestLength:      dw 4
         .pid:                dd 0
         .drawable:           dd 0
-        .width:              dw _IMG_WIDTH_
-        .height:             dw _IMG_HEIGHT_
+        .width:              dw 640
+        .height:             dw 480
 
 
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -277,12 +277,12 @@ section .data
         .srcY:               dw 0
         .dstX:               dw 0
         .dstY:               dw 0
-        .width:              dw _IMG_WIDTH_
-        .height:             dw _IMG_HEIGHT_
+        .width:              dw 640
+        .height:             dw 480
 
 
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ; Clear the area (unused)
+    ; Clear the area
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     clearArea:
         .opcode:             db _REQUEST_ClearArea_
@@ -291,8 +291,8 @@ section .data
         .window:             dd 0
         .x:                  dw 0
         .y:                  dw 0
-        .width:              dw _IMG_WIDTH_
-        .height:             dw _IMG_HEIGHT_
+        .width:              dw 640
+        .height:             dw 480
       
 
 
@@ -363,12 +363,12 @@ section .data
         .height:             dd 0
 
         ;minimum size
-        .min_width:          dd _IMG_WIDTH_
-        .min_height:         dd _IMG_HEIGHT_
+        .min_width:          dd 640
+        .min_height:         dd 480
 
         ;maximum size
-        .max_width:          dd _IMG_WIDTH_
-        .max_height:         dd _IMG_HEIGHT_
+        .max_width:          dd 640
+        .max_height:         dd 480
 
         ;???
         .width_inc:          dd 0
