@@ -127,7 +127,7 @@ _REQUEST_ClearArea_      equ    61
 _REQUEST_CopyArea_       equ    62
 _REQUEST_PutImage_       equ    72
 
-; Constant values ChangeProperty request
+; X Atom constant values for ChangeProperty request
 _XA_PRIMARY_            equ      1
 _XA_SECONDARY_          equ      2
 _XA_ARC_                equ      3
@@ -278,3 +278,10 @@ _KEY_V_                 equ   0x37
 _KEY_B_                 equ   0x38
 _KEY_N_                 equ   0x39
 _KEY_M_                 equ   0x3a
+
+; Constant values for image processing
+_MEANBOX_WIDTH_         equ     15
+_COLUMNSIZE_32_         equ  (4*4)
+_ROWSIZE_32_            equ (640*_COLUMNSIZE_32_)
+_COLUMNSIZE_8_          equ  (4*1)
+_ROWSIZE_8_             equ (640*_COLUMNSIZE_8_)

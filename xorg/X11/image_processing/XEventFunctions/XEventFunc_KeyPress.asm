@@ -198,7 +198,7 @@ KeyPress_not_Q:
     jne    KeyPress_not_W
 KeyPress_is_W:
     lea    ecx, [msg_KeyPress_W]
-    jmp    ImageFilter_Mean
+    jmp    SSE2_ImageFilter_Mean
 KeyPress_not_W:
 
     cmp    eax, _KEY_E_

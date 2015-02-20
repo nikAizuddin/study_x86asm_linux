@@ -2,19 +2,23 @@
 ;234567890123456789012345678901234567890123456789012345678901234567890
 ;=====================================================================
 ;
-; ImageFilter_Mean.asm
+; GP_ImageFilter_Mean.asm
+;
+; !!ATTENTION!!
+; This source file is no longer used by the program. But I keep this
+; file as a study reference.
 ;
 ; This source file contains function ImageFilter_Mean().
 ; The function only executed when key "W" is pressed.
 ;
-; Function ImageFilter_Mean( void ) : void
+; Function GP_ImageFilter_Mean( void ) : void
 ;
 ;=====================================================================
 
 section .text
 
 
-ImageFilter_Mean:
+GP_ImageFilter_Mean:
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

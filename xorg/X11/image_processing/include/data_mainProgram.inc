@@ -50,9 +50,37 @@ section .bss
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ; Data pixels
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    align 16, resb 1
     imgRaw:
         .pixel:              resb (640*480*4)
+
+    align 16, resb 1
+    XImage:
+        .pixel:              resb (640*480*4)
+
+    align 16, resb 1
     imgOriginal:
-        .pixel:              resb (640*480*4)
+        .pixel:              resd (640*480*4)
+
+    align 16, resb 1
+    imgCurrent:
+        .pixel:              resd (640*480*4)
+
+    align 16, resb 1
     imgFiltered:
-        .pixel:              resb (640*480*4)
+        .pixel:              resd (640*480*4)
+
+
+section .data
+
+
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ; Data for SSE2_ImageFilter_Mean()
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    align 16, db 0
+    meanDivisor:
+        .b:                  dd 225.0 ;box size = 15 * 15
+        .g:                  dd 225.0
+        .r:                  dd 225.0
+        .a:                  dd 225.0

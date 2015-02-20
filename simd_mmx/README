@@ -1,0 +1,245 @@
+         1         2         3         4         5         6         7
+1234567890123456789012345678901234567890123456789012345678901234567890
+======================================================================
+---------------------------------------------+------------------------
+ TITLE: Examples using MMX features          |
+                                             |    #x86assembly
+                                             |    #research
+                                             |    #simd
+AUTHOR: Nik Mohamad Aizuddin bin Nik Azmi    |    #vector
+ EMAIL: nickaizuddin93@gmail.com             |    #ia32_features
+  DATE: 18-FEB-2015, Saturday                |
+---------------------------------------------+------------------------
+
+TARGET
+    KERNEL       : Linux x86
+    ARCHITECTURE : x86_64
+    ASSEMBLER    : NASM
+
+REQUIRED EXTERNAL FILES
+    ---
+
+NOTES
+
+    MMX registers are aliased to the x87 FPU register stack,
+    care must be taken when making transitions between x87 FPU
+    instructions and MMX instructions to prevent unexpected
+    results.
+
+    When an MMX instruction (other than the EMMS instruction) is
+    executed, the processor changes x87 FPU state as follows:
+
+        --> The TOS (top of stack) value of the x87 FPU status
+            word is set to 0.
+
+        --> The entire x87 FPU tag word is set to the valid
+            state (00B in all tag fields).
+
+        --> When an MMX instruction writes to an MMX register,
+            it writes ones (11B) to the exponent part of the
+            corresponding floating-point register
+            (bits 64 through 79).
+
+    An application can contain both x87 FPU floating-point and
+    MMX instructions, but must follow these guidelines:
+
+        --> When transitioning between x87 FPU and MMX code, save
+            the state of any x87 FPU data or control registers
+            that need to be preserved for future use. The FSAVE
+            and FXSAVE instructions save the entire x87 FPU state.
+
+        --> Execute the EMMS instruction to clear the MMX state
+            from the x87 data and control registers.
+
+        --> Keep the code in separate modules, procedures,
+            or routines.
+
+        --> Do not rely on register contents across transitions
+            between x87 FPU and MMX code modules.
+
+        --> When transitioning between MMX code and x87 FPU code,
+            save the MMX register state (if it will be needed
+            in the future) and execute an EMMS instruction to
+            empty the MMX state.
+
+        --> When transitioning between x87 FPU code and MMX code,
+            save the x87 FPU state if it will be needed in the
+            future.
+
+    MM0, MM1, MM2, MM3, MM4, MM5, MM6, MM7
+
+    63                              0
+    |                               |
+    +---+---+---+---+---+---+---+---+
+    |   |   |   |   |   |   |   |   | Packed Byte Integers
+    +---+---+---+---+---+---+---+---+
+
+    63                              0
+    |                               |
+    +-------+-------+-------+-------+
+    |       |       |       |       | Packed Word Integers
+    +-------+-------+-------+-------+
+
+    63                              0
+    |                               |
+    +---------------+---------------+
+    |               |               | Packed Doubleword Integers
+    +---------------+---------------+
+
+                      Figure 1: MMX Register
+
+
+    Wrap-around arithmetic:
+        Out-of-range result is truncated. The carry or overflow
+        bit is ignored, only the least significant bits of the
+        result are returned to the destination.
+
+    Signed saturation arithmetic:
+        If positive overflow occurs when operating on signed
+        word integers, the result is "saturated" to 0x7fff,
+        which is the largest positive integer that can be
+        represented in 16 bits.
+        If negative overflow occurs, the result is saturated to
+        0x8000.
+
+    Unsigned saturation arithmetic:
+        Positive overflow when operating on unsigned byte integers
+        results in 0xff being returned and negative overflow
+        results in 0x00 being returned.
+
+
+    Data Transfer Instructions
+    +--------------+--------------------------------------------+
+    | Instructions |                Description                 |
+    +--------------+--------------------------------------------+
+    | movd         | Move doubleword                            |
+    +--------------+--------------------------------------------+
+    | movq         | Move quadword                              |
+    +--------------+--------------------------------------------+
+
+
+    Arithmetic Instructions
+    +--------------+--------------------------------------------+
+    | Instructions |                Description                 |
+    +--------------+--------------------------------------------+
+    | paddb        | Add with wrap-around                       |
+    | paddw        |                                            |
+    | paddd        |                                            |
+    +--------------+--------------------------------------------+
+    | paddsb       | Add signed with saturation                 |
+    | paddsw       |                                            |
+    +--------------+--------------------------------------------+
+    | paddusb      | Add unsigned with saturation               |
+    | paddusw      |                                            |
+    +--------------+--------------------------------------------+
+    +--------------+--------------------------------------------+
+    | psubb        | Subtract with wrap-around                  |
+    | psubw        |                                            |
+    | psubd        |                                            |
+    +--------------+--------------------------------------------+
+    | psubsb       | Subtract signed with saturation            |
+    | psubsw       |                                            |
+    +--------------+--------------------------------------------+
+    | psubusb      | Subtract unsigned with saturation          |
+    | psubusw      |                                            |
+    +--------------+--------------------------------------------+
+    +--------------+--------------------------------------------+
+    | pmulhuw      | Packed multiplication, store high word     |
+    |              | (unsigned)                                 |
+    +--------------+--------------------------------------------+
+    | pmulhw       | Packed multiplication, store high word     |
+    +--------------+--------------------------------------------+
+    | pmullw       | Packed multiplication, store low word      |
+    +--------------+--------------------------------------------+
+    | pmaddwd      | Packed multiply add                        |
+    +--------------+--------------------------------------------+
+
+
+    Comparison Instructions
+    +--------------+--------------------------------------------+
+    | Instructions |                Description                 |
+    +--------------+--------------------------------------------+
+    | pcmpeqb      | Packed compare for equality                |
+    | pcmpeqw      |                                            |
+    | pcmpeqd      |                                            |
+    +--------------+--------------------------------------------+
+    | pcmpgtb      | Packed compare for greater (signed)        |
+    | pcmpgtw      |                                            |
+    | pcmpgtd      |                                            |
+    +--------------+--------------------------------------------+
+
+
+    Pack Instructions
+    +--------------+--------------------------------------------+
+    | Instructions |                Description                 |
+    +--------------+--------------------------------------------+
+    | packssdw     | Pack dword to word data (signed with       |
+    |              | saturation)                                |
+    +--------------+--------------------------------------------+
+    | packsswb     | Pack word to byte data (signed with        |
+    |              | saturation)                                |
+    +--------------+--------------------------------------------+
+    | packuswb     | Pack word to byte data (unsigned with      |
+    |              | saturation)                                |
+    +--------------+--------------------------------------------+
+
+
+    Unpack Instructions
+    +--------------+--------------------------------------------+
+    | Instructions |                Description                 |
+    +--------------+--------------------------------------------+
+    | punpckhbw    | Unpack high data to next larger type       |
+    | punpckhwd    |                                            |
+    | punpckhdq    |                                            |
+    +--------------+--------------------------------------------+
+    | punpcklbw    | Unpack low data to next larger type        |
+    | punpcklwd    |                                            |
+    | punpckldq    |                                            |
+    +--------------+--------------------------------------------+
+
+
+    Logical Instructions
+    +--------------+--------------------------------------------+
+    | Instructions |                Description                 |
+    +--------------+--------------------------------------------+
+    | pand         | Bitwise And                                |
+    +--------------+--------------------------------------------+
+    | pandn        | Bitwise AndNot                             |
+    +--------------+--------------------------------------------+
+    | por          | Bitwise Or                                 |
+    +--------------+--------------------------------------------+
+    | pxor         | Bitwise Xor                                |
+    +--------------+--------------------------------------------+
+
+
+    Shift Instructions
+    +--------------+--------------------------------------------+
+    | Instructions |                Description                 |
+    +--------------+--------------------------------------------+
+    | psllw        | Packed shift left logical                  |
+    | pslld        |                                            |
+    | psllq        |                                            |
+    +--------------+--------------------------------------------+
+    | psraw        | Packed shift right arithmetic              |
+    | psrad        |                                            |
+    +--------------+--------------------------------------------+
+    | psrlw        | Packed shift right logical                 |
+    | psrld        |                                            |
+    | psrlq        |                                            |
+    +--------------+--------------------------------------------+
+
+
+    EMMS Instruction
+    +--------------+--------------------------------------------+
+    | Instructions |                Description                 |
+    +--------------+--------------------------------------------+
+    | emms         | Empty MMX technology state.                |
+    +--------------+--------------------------------------------+
+
+
+REFERENCES
+
+    1) Intel 64 and IA-32 Architectures Software Developer's
+       Manual Volume 1: Basic Architecture (March 2009)
+
+======================================================================

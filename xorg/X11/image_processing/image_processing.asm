@@ -730,25 +730,31 @@ image_open_success:
 ; Initialize the loop
     mov    ecx, 640
     lea    esi, [imgRaw.pixel]
-    lea    edi, [imgOriginal.pixel]
+    lea    edi, [XImage.pixel]
+    lea    edx, [imgOriginal.pixel]
     mov    ebx, esi
     add    esi, ((640*480*4) - (640*4))
+    pxor   xmm7, xmm7
 
+align 16, nop
 loop_convert_ABGR_to_RGBA:
 
-    mov    eax, [esi  ]
-    mov    edx, [esi+4]
-
+    mov    eax, [esi]
     ror    eax, 8
-    ror    edx, 8
 
-    mov    [edi  ], eax
-    mov    [edi+4], edx
+    movd   xmm0, eax
+    punpcklbw xmm0, xmm7
+    punpcklwd xmm0, xmm7
+    cvtdq2ps xmm0, xmm0
 
-    add    esi, 8
-    add    edi, 8
+    movdqa [edx], xmm0
+    mov    [edi], eax
 
-    sub    ecx, 2
+    add    esi, 4
+    add    edx, _COLUMNSIZE_32_
+    add    edi, 4
+
+    sub    ecx, 1
     jnz    loop_convert_ABGR_to_RGBA
 
 endloop_convert_ABGR_to_RGBA:
@@ -757,6 +763,12 @@ endloop_convert_ABGR_to_RGBA:
     sub    esi, ((640*4) + (640*4))
     cmp    esi, ebx
     jge    loop_convert_ABGR_to_RGBA
+
+;Copy pixels from imgOriginal to imgCurrent
+    mov    ecx, (640*480*4)
+    lea    esi, [imgOriginal.pixel]
+    lea    edi, [imgCurrent.pixel]
+    rep    movsd
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -836,7 +848,7 @@ endloop_convert_ABGR_to_RGBA:
     mov    [putImage.drawable], eax
     mov    [putImage.gc], ebx
 
-    lea    edi, [imgOriginal.pixel]
+    lea    edi, [XImage.pixel]
     mov    esi, edi
     add    esi, (25600 * 47)
 
@@ -1028,6 +1040,7 @@ endloop_upload_imgOriginal:
 
 
 
+align 16, nop
 mainloop:
 
 
@@ -1407,4 +1420,4 @@ exit_failure:
 ;
 ; ####################################################################
 
-%include "ImageFilters/ImageFilter_Mean.asm"
+%include "ImageFilters/SSE2_ImageFilter_Mean.asm"

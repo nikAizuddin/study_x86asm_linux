@@ -1,0 +1,86 @@
+         1         2         3         4         5         6         7
+1234567890123456789012345678901234567890123456789012345678901234567890
+======================================================================
+---------------------------------------------+------------------------
+ TITLE: Examples using SSE features          |
+                                             |    #x86assembly
+                                             |    #research
+                                             |    #simd
+AUTHOR: Nik Mohamad Aizuddin bin Nik Azmi    |    #vector
+ EMAIL: nickaizuddin93@gmail.com             |    #ia32_features
+  DATE: 19-FEB-2015, Saturday                |
+---------------------------------------------+------------------------
+
+TARGET
+    KERNEL       : Linux x86
+    ARCHITECTURE : x86_64
+    ASSEMBLER    : NASM
+
+REQUIRED EXTERNAL FILES
+    ---
+
+NOTES
+
+
+    SSE can use some of MMX instructions such as packing and
+    unpacking instructions.
+
+
+    SSE Data Transfer Instructions
+    +--------------+--------------------------------------------+
+    | Instructions |                Descriptions                |
+    +--------------+--------------------------------------------+
+    | MOVAPS       | Move 4 aligned packed single-precision     |
+    |              | floating-point values.                     |
+    +--------------+--------------------------------------------+
+    | MOVUPS       | Move 4 unaligned packed single-precision   |
+    |              | floating-point values.                     |
+    +--------------+--------------------------------------------+
+    | MOVHPS       | Move two packed single-precision           |
+    |              | floating-point values to an XMM register   |
+    |              | from the high quadword of an XMM register  |
+    |              | and memory.                                |
+    +--------------+--------------------------------------------+
+    | MOVHLPS      | Move two packed single-precision           |
+    |              | floating-point values from the high        |
+    |              | quadword of an XMM register to the low     |
+    |              | quadword of another XMM register.          |
+    +--------------+--------------------------------------------+
+    | MOVLPS       | Move two packed single-precision           |
+    |              | floating-point values to an XMM register   |
+    |              | from the low quadword of an XMM register   |
+    |              | and memory.                                |
+    +--------------+--------------------------------------------+
+    | MOVLHPS      | Move two packed single-precision           |
+    |              | floating-point values from the low quadword|
+    |              | of an XMM register to the high quadword of |
+    |              | another XMM register.                      |
+    +--------------+--------------------------------------------+
+    | MOVMSKPS     | Extract sign mask from 4 packed            |
+    |              | single-precision floating-point values.    |
+    +--------------+--------------------------------------------+
+    | MOVSS        | Move scalar single-precision floating-point|
+    |              | value. For integer, this will move dword.  |
+    +--------------+--------------------------------------------+
+    |              |                                            |
+    +--------------+--------------------------------------------+
+    |              |                                            |
+    +--------------+--------------------------------------------+
+    |              |                                            |
+    +--------------+--------------------------------------------+
+    |              |                                            |
+    +--------------+--------------------------------------------+
+    |              |                                            |
+    +--------------+--------------------------------------------+
+    |              |                                            |
+    +--------------+--------------------------------------------+
+    |              |                                            |
+    +--------------+--------------------------------------------+
+
+
+REFERENCES
+
+    1) Intel 64 and IA-32 Architectures Software Developer's
+       Manual Volume 1: Basic Architecture (March 2009)
+
+======================================================================
