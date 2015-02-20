@@ -191,7 +191,7 @@ KeyPress_not_0:
     jne    KeyPress_not_Q
 KeyPress_is_Q:
     lea    ecx, [msg_KeyPress_Q]
-    jmp    KeyPress_display_key
+    jmp    SSE2_ImageFilter_NoFilter
 KeyPress_not_Q:
 
     cmp    eax, _KEY_W_

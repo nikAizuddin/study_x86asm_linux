@@ -1420,4 +1420,5 @@ exit_failure:
 ;
 ; ####################################################################
 
+%include "ImageFilters/SSE2_ImageFilter_NoFilter.asm"
 %include "ImageFilters/SSE2_ImageFilter_Mean.asm"

@@ -28,7 +28,7 @@ NOTES
     and then run the program using this command:
         $ ./image_processing
 
-    Q = No filter     (Not yet available)
+    Q = No filter
     W = Mean filter (15px * 15px)
     E = SobelOperator (Not yet available)
     R = Equalization  (Not yet available)
