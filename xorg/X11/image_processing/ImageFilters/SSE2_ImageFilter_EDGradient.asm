@@ -26,10 +26,12 @@ SSE2_ImageFilter_EDGradient:
     lea    edi, [imgFiltered.pixel + _COLUMNSIZE_32_ + _ROWSIZE_32_]
     mov    edx, (_IMG_HEIGHT_ - 1)
 
+align 16, nop
 loopRow_EDGradient:
 
     mov    ecx, (_IMG_WIDTH_ - 1)
 
+align 16, nop
 loopColumn_EDGradient:
 
 ;XMM0 = left pixel
@@ -80,6 +82,7 @@ endloopRow_EDGradient:
     lea    ebx, [imgCurrent.pixel]
     mov    ecx, (_IMG_WIDTH_ * _IMG_HEIGHT_)
 
+align 16, nop
 loop_EDGradient_saveToXimage:
 
     movdqa    xmm1, [esi]
