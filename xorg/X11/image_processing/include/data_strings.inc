@@ -158,6 +158,7 @@ section .data
     ; Path to the test image file.
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     path_image:              db "32bit_image.bmp",0
+    path_helpImage:          db "help.bmp",0
 
 
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

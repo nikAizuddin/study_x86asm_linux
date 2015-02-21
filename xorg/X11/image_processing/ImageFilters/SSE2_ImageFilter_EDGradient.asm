@@ -2,56 +2,21 @@
 ;234567890123456789012345678901234567890123456789012345678901234567890
 ;=====================================================================
 ;
-; SSE2_ImageFilter_NoFilter.asm
+; SSE2_ImageFilter_EDGradient.asm
 ;
-; Restore imgCurrent to original image.
+; Perform edge detector based on image gradient.
 ;
-; This source file contains function SSE2_ImageFilter_NoFilter().
-; The function only executed when key "Q" is pressed.
+; This source file contains function SSE2_ImageFilter_EDGradient().
+; The function only executed when key "E" is pressed.
 ;
-; Function SSE2_ImageFilter_NoFilter( void ) : void
+; Function SSE2_ImageFilter_EDGradient( void ) : void
 ;
 ;=====================================================================
 
 section .text
 
 
-SSE2_ImageFilter_NoFilter:
-
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;   This loop_NoFilter_restore() will fill the imgCurrent pixel
-;   and XImage pixel with imgOriginal pixel.
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    lea    esi, [imgOriginal.pixel] ;source pixel
-    lea    edi, [imgCurrent.pixel]  ;destination1 pixel
-    lea    ebx, [XImage.pixel]      ;destination2 pixel
-
-    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
-
-loop_NoFilter_restore:
-
-    movdqa xmm0, [esi]
-    movdqa xmm1, xmm0
-
-    cvtps2dq xmm1, xmm1 ;Convert single-precision to dword
-    packssdw xmm1, xmm7 ;Convert dword to word
-    packuswb xmm1, xmm7 ;Convert word to byte
-
-    movdqa  [edi], xmm0
-    movd    [ebx], xmm1
-
-    add    esi, _COLUMNSIZE_32_
-    add    edi, _COLUMNSIZE_32_
-    add    ebx, _COLUMNSIZE_8_
-
-    sub    ecx, 1
-    jnz    loop_NoFilter_restore
-
-endloop_NoFilter_restore:
+SSE2_ImageFilter_EDGradient:
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -75,7 +40,7 @@ endloop_NoFilter_restore:
     add    esi, (_IMG_UPLOAD_SIZE_ * ((_IMG_HEIGHT_/10) - 1))
 
 align 16, nop
-loop_upload_NoFilter:
+loop_upload_EDGradient:
 
 ;POLL( {socketX, _POLLOUT_}, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, [socketX]
@@ -109,9 +74,9 @@ loop_upload_NoFilter:
 
     add    edi, _IMG_UPLOAD_SIZE_
     cmp    edi, esi
-    jbe    loop_upload_NoFilter
+    jbe    loop_upload_EDGradient
 
-endloop_upload_NoFilter:
+endloop_upload_EDGradient:
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -153,5 +118,5 @@ endloop_upload_NoFilter:
     mov    edx, 28
     int    0x80
 
-;Done with SSE2_ImageFilter_NoFilter(). Exit the function.
+;Done with SSE2_ImageFilter_EDGradient(). Exit the function.
     jmp    mainloop

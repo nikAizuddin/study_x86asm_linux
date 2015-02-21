@@ -30,10 +30,7 @@ NOTES
 
     Q = No filter
     W = Mean filter (15px * 15px)
-    E = SobelOperator (Not yet available)
-    R = Equalization  (Not yet available)
-    T = Min Filter    (Not yet available)
-    Y = Max Filter    (Not yet available)
+    E = Edge Detection using Gradient (In development)
 
 
 REFERENCES

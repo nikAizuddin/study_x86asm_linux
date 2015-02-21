@@ -242,6 +242,7 @@ _KEY_LCTRL_             equ   0x25
 _KEY_RCTRL_             equ   0x69
 _KEY_LALT_              equ   0x40
 _KEY_RALT_              equ   0x6c
+_KEY_F1_                equ   0x43
 _KEY_1_                 equ   0x0a
 _KEY_2_                 equ   0x0b
 _KEY_3_                 equ   0x0c

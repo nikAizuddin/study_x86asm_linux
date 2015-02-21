@@ -2,7 +2,7 @@
 ;234567890123456789012345678901234567890123456789012345678901234567890
 ;=====================================================================
 ;
-;                         Image Processing
+;                 Introduction to Image Processing
 ;
 ;---------------------------------------------------------------------
 ;
@@ -20,7 +20,7 @@
 ;
 ;=====================================================================
 
-; Include constant symbols and global variables
+;Include constant symbols and global variables
 
 %include "include/constants.inc"
 %include "include/data_kernel.inc"
@@ -44,25 +44,29 @@ _start:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Setup parameters for the systemcall socket
+;Setup parameters for the systemcall socket
     mov    dword [args.param1], _PF_LOCAL_    ;protocol family
     mov    dword [args.param2], _SOCK_STREAM_ ;socket type
     mov    dword [args.param3], _IPPROTO_IP_  ;protocol used
 
-; SOCKETCALL( _CALL_SOCKET_, @args )
+;SOCKETCALL( _CALL_SOCKET_, @args )
+;The socketcall() will be directed to call_socket().
+;See Linux manual page for more info.
     mov    eax, _SYSCALL_SOCKETCALL_
     mov    ebx, _CALL_SOCKET_
     lea    ecx, [args]
     int    0x80
 
-; Check to make sure the SOCKETCALL() have no errors
+;Check to make sure the SOCKETCALL() have no errors
+;The socketcall will return negative if error.
     test   eax, eax
     js     socket_create_fail
     jmp    socket_create_success
 
 socket_create_fail:
 
-; WRITE( _STDOUT_, @errmsg_socketCreate, errmsg_len )
+;WRITE( _STDOUT_, @errmsg_socketCreate, errmsg_len )
+;Notify user about the error.
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, _STDOUT_
     lea    ecx, [errmsg_socketCreate]
@@ -72,19 +76,21 @@ socket_create_fail:
 
 socket_create_success:
 
+;If success, save the socket number. We will use this socketX
+;to communicate with X Server.
     mov    [socketX], eax
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Connect to X Server.
-;   We will use "/tmp/.X11-unix/X0" file to contact the X Server.
+;   Use "/tmp/.X11-unix/X0" file to contact the X Server.
 ;   Without this file, we will unable to contact and connect with
 ;   X Server.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Setup parameters for the systemcall connect
+;Setup parameters for the systemcall connect
     mov    eax, [socketX]
     lea    ebx, [contactX]
     mov    ecx, [contactX_size]
@@ -92,20 +98,22 @@ socket_create_success:
     mov    [args.param2], ebx
     mov    [args.param3], ecx
 
-; SOCKETCALL( _CALL_CONNECT_, @args )
+;SOCKETCALL( _CALL_CONNECT_, @args )
+;Connect to X Server.
     mov    eax, _SYSCALL_SOCKETCALL_
     mov    ebx, _CALL_CONNECT_
     lea    ecx, [args]
     int    0x80
 
-; Check to make sure the program successfully connect with X Server
+;Check to make sure the program successfully connect with X Server
     test   eax, eax
     js     connect_XServer_fail
     jmp    connect_XServer_success
 
 connect_XServer_fail:
 
-; WRITE( _STDOUT_, @errmsg_connect_XServer, errmsg_len )
+;WRITE( _STDOUT_, @errmsg_connect_XServer, errmsg_len )
+;Notify user about the error.
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, _STDOUT_
     lea    ecx, [errmsg_connect_XServer]
@@ -131,21 +139,22 @@ connect_XServer_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; FCNTL64( socketX, _F_SETFL_, _O_RDWR_ | _O_NONBLOCK_ )
+;FCNTL64( socketX, _F_SETFL_, _O_RDWR_ | _O_NONBLOCK_ )
     mov    eax, _SYSCALL_FCNTL64_
     mov    ebx, [socketX]
     mov    ecx, _F_SETFL_
     lea    edx, [_O_RDWR_ + _O_NONBLOCK_]
     int    0x80
 
-; Check to make sure the socket is properly set to non-blocking mode
+;Check to make sure the socket is properly set to non-blocking mode
     test   eax, eax
     js     set_nonBlocking_fail
     jmp    set_nonBlocking_success
 
 set_nonBlocking_fail:
 
-; WRITE( _STDOUT_, @errmsg_set_nonBlocking, errmsg_len )
+;WRITE( _STDOUT_, @errmsg_set_nonBlocking, errmsg_len )
+;Notify user about the error.
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, _STDOUT_
     lea    ecx, [errmsg_set_nonBlocking]
@@ -164,13 +173,13 @@ set_nonBlocking_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Setup parameters for systemcall poll
-    mov    eax, [socketX]
+;Setup parameters for systemcall poll
+    mov    eax, [socketX] ;Initialized for the first time only
     mov    ebx, _POLLOUT_
     mov    [poll.fd], eax
     mov    [poll.events], bx
 
-; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
     lea    ebx, [poll]
     mov    ecx, 1
@@ -186,7 +195,7 @@ set_nonBlocking_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; WRITE( socketX, @authenticateX, authenticateX_len )
+;WRITE( socketX, @authenticateX, authenticateX_len )
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
     lea    ecx, [authenticateX]
@@ -201,13 +210,9 @@ set_nonBlocking_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Setup parameters for the systemcall poll
-    mov    eax, [socketX]
+;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    ebx, _POLLIN_
-    mov    [poll.fd], eax
     mov    [poll.events], bx
-
-; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
     lea    ebx, [poll]
     mov    ecx, 1
@@ -222,21 +227,22 @@ set_nonBlocking_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; READ( socketX, @authenticateStatus, 2 )
+;READ( socketX, @authenticateStatus, 2 )
     mov    eax, _SYSCALL_READ_
     mov    ebx, [socketX]
     lea    ecx, [authenticateStatus]
     mov    edx, 2
     int    0x80
 
-; Check to make sure the READ() systemcall have no errors
+;Check to make sure the READ() systemcall have no errors
     test   eax, eax
     js     get_authStatus_fail
     jmp    get_authStatus_success
 
 get_authStatus_fail:
 
-; WRITE( _STDOUT_, @errmsg_get_authStatus, errmsg_len )
+;WRITE( _STDOUT_, @errmsg_get_authStatus, errmsg_len )
+;Notify user about the error.
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, _STDOUT_
     lea    ecx, [errmsg_get_authStatus]
@@ -250,8 +256,8 @@ get_authStatus_success:
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Check our authentication status.
-;   The first 2 bytes of value received, should be 1. Values
-;   other than 1 are considered as failure.
+;   The value received should be 1. Values
+;   other than 1 are considered as failure by the program.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -263,7 +269,8 @@ get_authStatus_success:
 
 authStatus_fail:
 
-; WRITE( _STDOUT_, @errmsg_authStatus, errmsg_len )
+;WRITE( _STDOUT_, @errmsg_authStatus, errmsg_len )
+;Notify user about the error.
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, _STDOUT_
     lea    ecx, [errmsg_authStatus]
@@ -272,6 +279,7 @@ authStatus_fail:
     jmp    exit_failure
 
 authStatus_success:
+
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
@@ -282,7 +290,7 @@ authStatus_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; READ( socketX, @authenticateSuccess, 6 )
+;READ( socketX, @authenticateSuccess, 6 )
     mov    eax, _SYSCALL_READ_
     mov    ebx, [socketX]
     lea    ecx, [authenticateSuccess]
@@ -297,7 +305,7 @@ authStatus_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; READ( socketX, @additionalData, authenticateSuccess.lenAddData*4 )
+;READ( socketX, @additionalData, authenticateSuccess.lenAddData*4 )
     mov    eax, _SYSCALL_READ_
     mov    ebx, [socketX]
     lea    ecx, [additionalData]
@@ -315,7 +323,7 @@ authStatus_success:
 
     lea    esi, [additionalData]
 
-; Fill additional data in our XServer data structure
+;Fill additional data in our XServer data structure
     lea    edi, [XServer]
     movsd  ;get release number
     movsd  ;get base resource id
@@ -333,9 +341,9 @@ authStatus_success:
     movsb  ;get maximum key code
     movsd  ;unused
 
-; Get vendor name and fill into XServer.vendorStr.
-; But first we have to calculate the length of the string
-; in double word units.
+;Get vendor name and fill into XServer.vendorStr.
+;But first we have to calculate the length of the string
+;in double word units.
     xor    eax, eax
     xor    edx, edx
     mov    ebx, 4
@@ -346,7 +354,7 @@ authStatus_success:
     mov    ecx, eax
     rep    movsd
 
-; Get screen structure from the additional data
+;Get screen structure from the additional data
     mov    eax, [XServer.numFormats]
     mov    ebx, 8
     xor    edx, edx
@@ -378,13 +386,9 @@ authStatus_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Setup parameters for the systemcall poll
-    mov    eax, [socketX]
+;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    ebx, _POLLOUT_
-    mov    [poll.fd], eax
     mov    [poll.events], bx
-
-; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
     lea    ebx, [poll]
     mov    ecx, 1
@@ -399,7 +403,8 @@ authStatus_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Initialize create_mainWindow structure
+;Initialize create_mainWindow structure, we will pass
+;this structure as the CreateWindow request.
     mov    eax, [XServer.ridBase]
     mov    ebx, [XScreen.root]
     mov    ecx, [XScreen.blackPixel]
@@ -409,7 +414,7 @@ authStatus_success:
     mov    [create_mainWindow.backgroundPixel], ecx
     mov    [create_mainWindow.borderPixel], edx
 
-; WRITE( socketX, @create_mainWindow, create_main...requestLength*4 )
+;WRITE( socketX, @create_mainWindow, create_main...requestLength*4 )
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
     lea    ecx, [create_mainWindow]
@@ -426,20 +431,16 @@ authStatus_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Setup parameters for the systemcall poll
-    mov    eax, [socketX]
+;POLL( @poll, 1, _POLL_SHORT_TIMEOUT_ )
     mov    ebx, _POLLIN_
-    mov    [poll.fd], eax
     mov    [poll.events], bx
-
-; POLL( @poll, 1, _POLL_SHORT_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
     lea    ebx, [poll]
     mov    ecx, 1
     mov    edx, _POLL_SHORT_TIMEOUT_
     int    0x80
 
-; Check if poll.revents == _POLLIN_
+;Check if poll.revents == _POLLIN_
     xor    eax, eax
     mov    ax, [poll.revents]
     mov    ebx, _POLLIN_
@@ -449,15 +450,16 @@ authStatus_success:
 
 create_mainWindow_fail:
 
-; Get the reason why CreateWindow request fail
-; READ( socketX, @requestStatus, 32 )
+;READ( socketX, @requestStatus, 32 )
+;Get the reason why CreateWindow request fail
     mov    eax, _SYSCALL_READ_
     mov    ebx, [socketX]
     lea    ecx, [requestStatus]
     mov    edx, 32
     int    0x80
 
-; WRITE( _STDOUT_, @errmsg_createMainWindow, errmsg_len )
+;WRITE( _STDOUT_, @errmsg_createMainWindow, errmsg_len )
+;Notify user about the error.
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, _STDOUT_
     lea    ecx, [errmsg_createMainWindow]
@@ -481,13 +483,9 @@ create_mainWindow_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Setup parameters for the systemcall poll
-    mov    eax, [socketX]
+;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    ebx, _POLLOUT_
-    mov    [poll.fd], eax
     mov    [poll.events], bx
-
-; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
     lea    ebx, [poll]
     mov    ecx, 1
@@ -504,7 +502,7 @@ create_mainWindow_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; WRITE( socketX, @getWMDeleteMessage, 24 )
+;WRITE( socketX, @getWMDeleteMessage, 24 )
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
     lea    ecx, [getWMDeleteMessage]
@@ -519,13 +517,9 @@ create_mainWindow_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Setup parameters for the systemcall poll
-    mov    eax, [socketX]
+;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    ebx, _POLLIN_
-    mov    [poll.fd], eax
     mov    [poll.events], bx
-
-; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
     lea    ebx, [poll]
     mov    ecx, 1
@@ -539,7 +533,7 @@ create_mainWindow_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; READ( socketX, @InternAtom_reply, 32 )
+;READ( socketX, @InternAtom_reply, 32 )
     mov    eax, _SYSCALL_READ_
     mov    ebx, [socketX]
     lea    ecx, [InternAtom_reply]
@@ -556,13 +550,9 @@ create_mainWindow_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Setup parameters for systemcall poll
-    mov    eax, [socketX]
+;POLL( [poll.fd, poll.events], 1, _POLL_INFINITE_TIMEOUT_ )
     mov    ebx, _POLLOUT_
-    mov    [poll.fd], eax
     mov    [poll.events], bx
-
-; POLL( [poll.fd, poll.events], 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
     lea    ebx, [poll]
     mov    ecx, 1
@@ -578,7 +568,7 @@ create_mainWindow_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; WRITE( socketX, @getWMProtocols, 20 )
+;WRITE( socketX, @getWMProtocols, 20 )
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
     lea    ecx, [getWMProtocols]
@@ -593,13 +583,9 @@ create_mainWindow_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Setup parameters for systemcall poll
-    mov    eax, [socketX]
+;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    ebx, _POLLIN_
-    mov    [poll.fd], eax
     mov    [poll.events], bx
-
-; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
     lea    ebx, [poll]
     mov    ecx, 1
@@ -613,7 +599,7 @@ create_mainWindow_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; READ( socketX, @InternAtom_reply, 32 )
+;READ( socketX, @InternAtom_reply, 32 )
     mov    eax, _SYSCALL_READ_
     mov    ebx, [socketX]
     lea    ecx, [InternAtom_reply]
@@ -630,13 +616,9 @@ create_mainWindow_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Setup parameters for the systemcall poll
-    mov    eax, [socketX]
+;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    ebx, _POLLOUT_
-    mov    [poll.fd], eax
     mov    [poll.events], bx
-
-; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
     lea    ebx, [poll]
     mov    ecx, 1
@@ -651,14 +633,15 @@ create_mainWindow_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Setup graphicContext structure
+;Setup graphicContext structure.
+;We will send this structure as CreateGC request.
     mov    eax, [XServer.ridBase]
     add    eax, 1
     mov    ebx, [mainWindow.wid]
     mov    [create_graphicContext.cid], eax
     mov    [create_graphicContext.drawable], ebx
 
-; WRITE( socketX, @create_graphicContext, 20 )
+;WRITE( socketX, @create_graphicContext, 20 )
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
     lea    ecx, [create_graphicContext]
@@ -675,7 +658,7 @@ create_mainWindow_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; image_fd = OPEN( @path_image, _O_RDONLY_ )
+;image_fd = OPEN( @path_image, _O_RDONLY_ )
     mov    eax, _SYSCALL_OPEN_
     lea    ebx, [path_image]
     mov    ecx, _O_RDONLY_
@@ -686,7 +669,8 @@ create_mainWindow_success:
 
 image_open_fail:
 
-; WRITE( _STDOUT_, @errmsg_imageOpen, errmsg_len )
+;WRITE( _STDOUT_, @errmsg_imageOpen, errmsg_len )
+;Notify user about the error.
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, _STDOUT_
     lea    ecx, [errmsg_imageOpen]
@@ -698,22 +682,23 @@ image_open_success:
 
     mov    [image_fd], eax
 
-; Seek to the offset 0x8a, which contains data pixels.
-; LSEEK( image_fd, 0x8a, _SEEK_SET_ )
+;LSEEK( image_fd, 0x8a, _SEEK_SET_ )
+;Seek to the offset 0x8a, which contains data pixels.
     mov    eax, _SYSCALL_LSEEK_
     mov    ebx, [image_fd]
     mov    ecx, 0x8a
     mov    edx, _SEEK_SET_
     int    0x80
 
-; READ( testimage_fd, @imgRaw.pixel, image_size )
+;READ( image_fd, @imgRaw.pixel, image_size )
+;Fill the imgRaw.pixel with the "32bit_image.bmp" pixels.
     mov    eax, _SYSCALL_READ_
     mov    ebx, [image_fd]
     lea    ecx, [imgRaw.pixel]
     mov    edx, (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
     int    0x80
 
-; CLOSE( image_fd )
+;CLOSE( image_fd )
     mov    eax, _SYSCALL_CLOSE_
     mov    ebx, [image_fd]
     int    0x80
@@ -721,13 +706,64 @@ image_open_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Fix testimage_pixelData byte order (convert ABGR to RGBA).
-;   The byte order in .bmp image file usually in format ABGR, but
-;   the format needed by the X Server is RGBA.
+;   Load "help.bmp" image
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Initialize the loop
+;image_fd = OPEN( @path_helpImage, _O_RDONLY_ )
+    mov    eax, _SYSCALL_OPEN_
+    lea    ebx, [path_helpImage]
+    mov    ecx, _O_RDONLY_
+    int    0x80
+    test   eax, eax
+    js     helpImage_open_fail
+    jmp    helpImage_open_success
+
+helpImage_open_fail:
+
+;WRITE( _STDOUT_, @errmsg_imageOpen, errmsg_len )
+;Notify user about the error.
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [errmsg_imageOpen]
+    mov    edx, [errmsg_len]
+    int    0x80
+    jmp    exit_failure
+
+helpImage_open_success:
+
+    mov    [image_fd], eax
+
+;LSEEK( image_fd, 0x8a, _SEEK_SET_ )
+;Seek to the offset 0x8a, which contains data pixels.
+    mov    eax, _SYSCALL_LSEEK_
+    mov    ebx, [image_fd]
+    mov    ecx, 0x8a
+    mov    edx, _SEEK_SET_
+    int    0x80
+
+;READ( image_fd, @helpImgRaw.pixel, image_size )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [image_fd]
+    lea    ecx, [helpImgRaw.pixel]
+    mov    edx, (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
+    int    0x80
+
+;CLOSE( image_fd )
+    mov    eax, _SYSCALL_CLOSE_
+    mov    ebx, [image_fd]
+    int    0x80
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Convert our test image from ABGR to BGRA.
+;   The pixel order in BMP image file is ABGR format, but X Server
+;   uses BGRA order.
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+;Initialize the loop
     mov    ecx, _IMG_WIDTH_
     lea    esi, [imgRaw.pixel]
     lea    edi, [XImage.pixel]
@@ -738,15 +774,15 @@ image_open_success:
     pxor   xmm7, xmm7
 
 align 16, nop
-loop_convert_ABGR_to_RGBA:
+loop_convert_ABGR_to_BGRA:
 
     mov    eax, [esi]
-    ror    eax, 8
+    ror    eax, 8 ;ABGR to BGRA
 
-    movd   xmm0, eax
+    movd      xmm0, eax
     punpcklbw xmm0, xmm7
     punpcklwd xmm0, xmm7
-    cvtdq2ps xmm0, xmm0
+    cvtdq2ps  xmm0, xmm0
 
     movdqa [edx], xmm0
     mov    [edi], eax
@@ -756,14 +792,14 @@ loop_convert_ABGR_to_RGBA:
     add    edi, _COLUMNSIZE_8_
 
     sub    ecx, 1
-    jnz    loop_convert_ABGR_to_RGBA
+    jnz    loop_convert_ABGR_to_BGRA
 
-endloop_convert_ABGR_to_RGBA:
+endloop_convert_ABGR_to_BGRA:
 
     mov    ecx, _IMG_WIDTH_
     sub    esi, (_ROWSIZE_8_ + _ROWSIZE_8_)
     cmp    esi, ebx
-    jge    loop_convert_ABGR_to_RGBA
+    jge    loop_convert_ABGR_to_BGRA
 
 ;Copy pixels from imgOriginal to imgCurrent
     mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
@@ -774,17 +810,50 @@ endloop_convert_ABGR_to_RGBA:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
+;   Convert the help image from ABGR to BGRA
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+;Initialize the loop
+    mov    ecx, _IMG_WIDTH_
+    lea    esi, [helpImgRaw.pixel]
+    lea    edi, [imgHelp.pixel]
+    mov    ebx, esi
+    add    esi, ( (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_) - \
+                  _ROWSIZE_8_ )
+    pxor   xmm7, xmm7
+
+align 16, nop
+loop_convert_helpImage_ABGR_to_BGRA:
+
+    mov    eax, [esi]
+    ror    eax, 8
+
+    mov    [edi], eax
+
+    add    esi, _COLUMNSIZE_8_
+    add    edi, _COLUMNSIZE_8_
+
+    sub    ecx, 1
+    jnz    loop_convert_helpImage_ABGR_to_BGRA
+
+endloop_convert_helpImage_ABGR_to_BGRA:
+
+    mov    ecx, _IMG_WIDTH_
+    sub    esi, (_ROWSIZE_8_ + _ROWSIZE_8_)
+    cmp    esi, ebx
+    jge    loop_convert_helpImage_ABGR_to_BGRA
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
 ;   Make sure the X Server is ready to receive the next request.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Setup parameters for the systemcall poll
-    mov    eax, [socketX]
+;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    ebx, _POLLOUT_
-    mov    [poll.fd], eax
     mov    [poll.events], bx
-
-; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
     lea    ebx, [poll]
     mov    ecx, 1
@@ -798,14 +867,15 @@ endloop_convert_ABGR_to_RGBA:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Setup createPixmap structure
+;Setup createPixmap structure
+;We will send this structure as the CreatePixmap request.
     mov    eax, [XServer.ridBase]
     add    eax, 2
     mov    ebx, [mainWindow.wid]
     mov    [createPixmap.pid], eax
     mov    [createPixmap.drawable], ebx
 
-; WRITE( socketX, @createPixmap, 16 )
+;WRITE( socketX, @createPixmap, 16 )
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
     lea    ecx, [createPixmap]
@@ -822,13 +892,9 @@ endloop_convert_ABGR_to_RGBA:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Setup parameters for the systemcall poll
-    mov    eax, [socketX]
+;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    ebx, _POLLOUT_
-    mov    [poll.fd], eax
     mov    [poll.events], bx
-
-; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
     lea    ebx, [poll]
     mov    ecx, 1
@@ -838,27 +904,27 @@ endloop_convert_ABGR_to_RGBA:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ;
-;   Upload imgOriginal.pixel to mainWindow pixmap by using
+;   Upload XImage.pixel to mainWindow pixmap by using
 ;   PutImage request.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-; Initialize putImage structure
+;Initialize putImage structure
+;We will use this structure as the PutImage request.
     mov    eax, [mainWindow.pid]
     mov    ebx, [mainWindow.cid]
     mov    [putImage.drawable], eax
     mov    [putImage.gc], ebx
 
+;Initialize loop
     lea    edi, [XImage.pixel]
     mov    esi, edi
     add    esi, (_IMG_UPLOAD_SIZE_ * ((_IMG_HEIGHT_/10) - 1))
 
-loop_upload_imgOriginal:
+loop_upload_XImage:
 
-; POLL( {socketX, _POLLOUT_}, 1, _POLL_INFINITE_TIMEOUT_ )
-    mov    eax, [socketX]
+;POLL( {socketX, _POLLOUT_}, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    ebx, _POLLOUT_
-    mov    [poll.fd], eax 
     mov    [poll.events], ebx 
     mov    eax, _SYSCALL_POLL_
     lea    ebx, [poll]
@@ -866,7 +932,7 @@ loop_upload_imgOriginal:
     mov    edx, _POLL_INFINITE_TIMEOUT_
     int    0x80
 
-; WRITE( socketX, @putImage, 24 )
+;WRITE( socketX, @putImage, 24 )
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
     lea    ecx, [putImage]
@@ -877,7 +943,7 @@ loop_upload_imgOriginal:
     add    eax, 10
     mov    [putImage.dstY], eax
 
-; WRITE( socketX, @EDI, _IMG_UPLOAD_SIZE_ )
+;WRITE( socketX, @EDI, _IMG_UPLOAD_SIZE_ )
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
     mov    ecx, edi
@@ -886,9 +952,9 @@ loop_upload_imgOriginal:
 
     add    edi, _IMG_UPLOAD_SIZE_
     cmp    edi, esi
-    jbe    loop_upload_imgOriginal
+    jbe    loop_upload_XImage
 
-endloop_upload_imgOriginal:
+endloop_upload_XImage:
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -897,13 +963,9 @@ endloop_upload_imgOriginal:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Setup parameters for the systemcall poll
-    mov    eax, [socketX]
+;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    ebx, _POLLOUT_
-    mov    [poll.fd], eax
     mov    [poll.events], bx
-
-; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
     lea    ebx, [poll]
     mov    ecx, 1
@@ -913,20 +975,20 @@ endloop_upload_imgOriginal:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Copy the drawed image from testimage_pixmap to the mainWindow
+;   Copy the drawed image from mainWindow.pixmap to mainWindow.window
 ;   by using CopyArea request.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Initialize copyArea structure
-    mov    eax, [mainWindow.pid]
-    mov    ebx, [mainWindow.wid]
+;Initialize copyArea structure
+    mov    eax, [mainWindow.pid] ;src=pixmap
+    mov    ebx, [mainWindow.wid] ;dst=window
     mov    ecx, [mainWindow.cid]
     mov    [copyArea.srcDrawable], eax
     mov    [copyArea.dstDrawable], ebx
     mov    [copyArea.gc], ecx
 
-; WRITE( socketX, @copyArea 28 )
+;WRITE( socketX, @copyArea 28 )
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
     lea    ecx, [copyArea]
@@ -940,18 +1002,15 @@ endloop_upload_imgOriginal:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Setup parameters for the systemcall poll
-    mov    eax, [socketX]
+;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    ebx, _POLLOUT_
-    mov    [poll.fd], eax
     mov    [poll.events], bx
-
-; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
     lea    ebx, [poll]
     mov    ecx, 1
     mov    edx, _POLL_INFINITE_TIMEOUT_
     int    0x80
+
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
@@ -964,36 +1023,36 @@ endloop_upload_imgOriginal:
     mov    eax, [mainWindow.wid]
     mov    ebx, [WMDeleteMessage]
     mov    ecx, [WMProtocols]
-; Setup setWindowDeleteMsg structure
+;Setup setWindowDeleteMsg structure
     mov    [setWindowDeleteMsg.window], eax
     mov    [setWindowDeleteMsg.data], ebx
     mov    [setWindowDeleteMsg.property], ecx
-; Setup setWindowName structure
+;Setup setWindowName structure
     mov    [setWindowName.window], eax
-; Setup setWindowSizeHints structure
+;Setup setWindowSizeHints structure
     mov    [setWindowSizeHints.window], eax
-; Setup setWindowManagerHints
+;Setup setWindowManagerHints
     mov    [setWindowManagerHints.window], eax
 
-; WRITE( socketX, @setWindowDeleteMsg, 28 )
+;WRITE( socketX, @setWindowDeleteMsg, 28 )
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
     lea    ecx, [setWindowDeleteMsg]
     mov    edx, 28 ;setWindowDeleteMsg.requestLength * 4
     int    0x80
-; WRITE( socketX, @setWindowName, 44 )
+;WRITE( socketX, @setWindowName, 44 )
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
     lea    ecx, [setWindowName]
     mov    edx, 44 ;setWindowName.requestLength * 4
     int    0x80
-; WRITE( socketX, @setWindowSizeHints, 96 )
+;WRITE( socketX, @setWindowSizeHints, 96 )
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
     lea    ecx, [setWindowSizeHints]
     mov    edx, 96 ;setWindowSizeHints.requestLength * 4
     int    0x80
-; WRITE( socketX, @setWindowManagerHints, 60 )
+;WRITE( socketX, @setWindowManagerHints, 60 )
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
     lea    ecx, [setWindowManagerHints]
@@ -1007,13 +1066,9 @@ endloop_upload_imgOriginal:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Setup parameters for the systemcall poll
-    mov    eax, [socketX]
+;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    ebx, _POLLOUT_
-    mov    [poll.fd], eax
     mov    [poll.events], bx
-
-; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, _SYSCALL_POLL_
     lea    ebx, [poll]
     mov    ecx, 1
@@ -1027,11 +1082,12 @@ endloop_upload_imgOriginal:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Setup mapWindow structure
+;Setup mapWindow structure
+;We will send this structure as the MapWindow request.
     mov    eax, [mainWindow.wid]
     mov    [mapWindow.wid], eax
 
-; WRITE( socketX, @mapWindow, 8 )
+;WRITE( socketX, @mapWindow, 8 )
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
     lea    ecx, [mapWindow]
@@ -1053,13 +1109,10 @@ mainloop:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; Setup parameters for the systemcall poll
-    mov    eax, [socketX]
-    mov    ebx, _POLLIN_
-    mov    [poll.fd], eax
-    mov    [poll.events], bx
 
-; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    ebx, _POLLIN_
+    mov    [poll.events], bx
     mov    eax, _SYSCALL_POLL_
     lea    ebx, [poll]
     mov    ecx, 1
@@ -1073,7 +1126,7 @@ mainloop:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-; READ( socketX, @XEventReply, 1 )
+;READ( socketX, @XEventReply, 1 )
     mov    eax, _SYSCALL_READ_
     mov    ebx, [socketX]
     lea    ecx, [XEventReply]
@@ -1315,7 +1368,7 @@ is_MappingNotify:
 not_MappingNotify:
 
 
-; Unknown events are treated as ClientMessage in this program.
+;Unknown events are treated as ClientMessage in this program.
 is_ClientMessage:
     jmp    XEventFunc_ClientMessage
 not_ClientMessage:
@@ -1335,7 +1388,9 @@ mainloop_end:
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 exit_success:
-; SOCKETCALL( _CALL_SHUTDOWN_, @[socketX, _SHUT_RDWR_] )
+
+;SOCKETCALL( _CALL_SHUTDOWN_, @[socketX, _SHUT_RDWR_] )
+;Shutdown the TCP socket.
     mov    eax, [socketX]
     mov    ebx, _SHUT_RDWR_
     mov    [args.param1], eax
@@ -1344,21 +1399,26 @@ exit_success:
     mov    ebx, _CALL_SHUTDOWN_
     lea    ecx, [args]
     int    0x80
-; CLOSE( socketX ) 
+
+;CLOSE( socketX ) 
+;Close the TCP socket.
     mov    eax, _SYSCALL_CLOSE_
     mov    ebx, [socketX]
     int    0x80
-; EXIT( 0 )
+
+;EXIT( 0 )
     mov    eax, _SYSCALL_EXIT_
     xor    ebx, ebx
     int    0x80
 
 exit_failure:
-; CLOSE( socketX )
+
+;CLOSE( socketX )
     mov    eax, _SYSCALL_CLOSE_
     mov    ebx, [socketX]
     int    0x80
-; EXIT( -1 )
+
+;EXIT( -1 )
     mov    eax, _SYSCALL_EXIT_
     mov    ebx, -1
     int    0x80
@@ -1423,3 +1483,4 @@ exit_failure:
 
 %include "ImageFilters/SSE2_ImageFilter_NoFilter.asm"
 %include "ImageFilters/SSE2_ImageFilter_Mean.asm"
+%include "ImageFilters/SSE2_ImageFilter_EDGradient.asm"

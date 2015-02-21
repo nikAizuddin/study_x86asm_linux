@@ -21,5 +21,4 @@ all:
 
 clean:
 	@rm \
-		${OBJ} \
-		${BIN}
+		${OBJ}

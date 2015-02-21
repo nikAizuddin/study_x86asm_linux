@@ -48,28 +48,45 @@ section .bss
 
 
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ; Data pixels
+    ; 8-bit data pixels.
+    ; X Server uses 8 bit pixel to display image. So, the
+    ; 32-bit single-precision must be converted to 8-bit value.
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     align 16, resb 1
     imgRaw:
-        .pixel:        resb (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
+
+    align 16, resb 1
+    helpImgRaw:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
 
     align 16, resb 1
     XImage:
-        .pixel:        resb (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
+
+    align 16, resb 1
+    imgHelp:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
+
+
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ; 32-bit single-precision data pixels.
+    ; We use single-precision to process image because SSE
+    ; instruction can only divide single-precision value.
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     align 16, resb 1
     imgOriginal:
-        .pixel:        resd (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
+        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
 
     align 16, resb 1
     imgCurrent:
-        .pixel:        resd (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
+        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
 
     align 16, resb 1
     imgFiltered:
-        .pixel:        resd (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
+        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
 
 
 section .data
