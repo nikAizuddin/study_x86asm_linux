@@ -2,108 +2,54 @@
 ;234567890123456789012345678901234567890123456789012345678901234567890
 ;=====================================================================
 ;
-; SSE2_ImageFilter_EDGradient.asm
+; Display_Help.asm
 ;
-; Perform edge detector based on image gradient.
+; This source file contains function Display_Help().
+; The function only executed when "F1" key is pressed.
 ;
-; This source file contains function SSE2_ImageFilter_EDGradient().
-; The function only executed when key "E" is pressed.
-;
-; Function SSE2_ImageFilter_EDGradient( void ) : void
+; Function XEventFunc_KeyPress( void ) : void
 ;
 ;=====================================================================
 
 section .text
 
 
-SSE2_ImageFilter_EDGradient:
+Display_Help:
 
-    pxor     xmm0, xmm0
-    pxor     xmm1, xmm1
-    movdqa   xmm7, [maskRemoveSign]
 
-    lea    esi, [imgCurrent.pixel  + _COLUMNSIZE_32_ + _ROWSIZE_32_]
-    lea    edi, [imgFiltered.pixel + _COLUMNSIZE_32_ + _ROWSIZE_32_]
-    mov    edx, (_IMG_HEIGHT_ - 1)
+;Check if ImageFilter is blocked.
+;If ImageFilter is currently blocked, draw the temporary XImage
+;and reset the is_ImageFilter_blocked to FALSE.
+;Otherwiese, if is_ImageFilter_blocked is currently FALSE,
+;reset the is_ImageFilter_blocked to TRUE and draw the help image.
 
-loopRow_EDGradient:
+    mov    eax, [is_ImageFilter_blocked]
+    cmp    eax, _FALSE_
+    je     display_HelpImage
 
-    mov    ecx, (_IMG_WIDTH_ - 1)
+dont_display_HelpImage:
+    mov    eax, _FALSE_
+    mov    [is_ImageFilter_blocked], eax
+    lea    edi, [temporary_XImage.pixel]
+    jmp    upload_HelpImage
 
-loopColumn_EDGradient:
-
-;XMM0 = left pixel
-;XMM1 = right pixel
-;XMM2 = above pixel
-;XMM3 = below pixel
-
-    movdqa   xmm0, [esi - _COLUMNSIZE_32_] ;left pixel
-    movdqa   xmm1, [esi + _COLUMNSIZE_32_] ;right pixel
-    movdqa   xmm2, [esi - _ROWSIZE_32_]    ;above pixel
-    movdqa   xmm3, [esi + _ROWSIZE_32_]    ;below pixel
-
-    movaps   xmm4, xmm0
-    movaps   xmm5, xmm2
-
-    subps    xmm4, xmm1
-    subps    xmm5, xmm3
-
-    andps    xmm4, xmm7
-    andps    xmm5, xmm7
-    addps    xmm4, xmm5
-
-    movdqa   [edi], xmm4
-
-    add    esi, _COLUMNSIZE_32_
-    add    edi, _COLUMNSIZE_32_
-    sub    ecx, 1
-    jnz    loopColumn_EDGradient
-
-endloopColumn_EDGradient:
-
-    sub    edx, 1
-    jnz    loopRow_EDGradient
-
-endloopRow_EDGradient:
+display_HelpImage:
+    mov    eax, _TRUE_
+    mov    [is_ImageFilter_blocked], eax
+    lea    esi, [XImage.pixel]
+    lea    edi, [temporary_XImage.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+    rep    movsd
+    lea    edi, [imgHelp.pixel]
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Convert 32-bit single-precision to 8-bit and update the
-;   imgCurrent pixel with imgFiltered pixel
+;   Upload the help image to the main window pixmap
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    pxor   xmm7, xmm7
-    lea    esi, [imgFiltered]
-    lea    edi, [XImage.pixel]
-    lea    ebx, [imgCurrent.pixel]
-    mov    ecx, (_IMG_WIDTH_ * _IMG_HEIGHT_)
-
-loop_EDGradient_saveToXimage:
-
-    movdqa    xmm1, [esi]
-    movaps    xmm2, xmm1
-    cvtps2dq  xmm1, xmm1 ;Convert single-precision to dword integer
-    packssdw  xmm1, xmm7 ;Convert dword to word
-    packuswb  xmm1, xmm7 ;Convert word to byte
-    movd      [edi], xmm1
-    movdqa    [ebx], xmm2
-
-    add    esi, _COLUMNSIZE_32_
-    add    ebx, _COLUMNSIZE_32_
-    add    edi, _COLUMNSIZE_8_
-    sub    ecx, 1
-    jnz    loop_EDGradient_saveToXimage
-
-endloop_EDGradient_saveToXimage:
-
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;   Upload the processed image to the main window pixmap
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+upload_HelpImage:
 
 ;Set putImage structure
     mov    eax, [mainWindow.pid]
@@ -113,14 +59,12 @@ endloop_EDGradient_saveToXimage:
     mov    [putImage.gc], ebx
     mov    [putImage.dstY], cx
 
-    lea    edi, [XImage.pixel]
-
 ;Loop 47 times to fill 480 lines
     mov    esi, edi
     add    esi, (_IMG_UPLOAD_SIZE_ * ((_IMG_HEIGHT_/10) - 1))
 
 align 16, nop
-loop_upload_EDGradient:
+loop_upload_HelpImage:
 
 ;POLL( {socketX, _POLLOUT_}, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, [socketX]
@@ -154,9 +98,9 @@ loop_upload_EDGradient:
 
     add    edi, _IMG_UPLOAD_SIZE_
     cmp    edi, esi
-    jbe    loop_upload_EDGradient
+    jbe    loop_upload_NoFilter
 
-endloop_upload_EDGradient:
+endloop_upload_HelpImage:
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -198,5 +142,4 @@ endloop_upload_EDGradient:
     mov    edx, 28
     int    0x80
 
-;Done with SSE2_ImageFilter_EDGradient(). Exit the function.
     jmp    mainloop

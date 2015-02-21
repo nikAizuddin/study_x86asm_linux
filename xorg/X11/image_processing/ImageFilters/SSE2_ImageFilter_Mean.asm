@@ -4,7 +4,7 @@
 ;
 ; SSE2_ImageFilter_Mean.asm
 ;
-; Mean Filter (15px * 15px)
+; Mean Filter (3px * 3px)
 ;
 ; This source file contains function SSE2_ImageFilter_Mean().
 ; The function only executed when key "W" is pressed.
@@ -109,7 +109,7 @@ loop_meanFilter_saveToXImage:
 
     movdqa   xmm1, [esi]
     movaps   xmm2, xmm1
-    cvtps2dq xmm1, xmm1  ;Convert single-precision to dword
+    cvtps2dq xmm1, xmm1  ;Convert single-precision to dword integer
     packssdw xmm1, xmm7  ;Convert dword to word
     packuswb xmm1, xmm7  ;Convert word to byte
     movd     [edi], xmm1
@@ -231,7 +231,7 @@ endloop_upload_meanFilter:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ;
-;   Calculate the mean filter box with size (15px * 15px)
+;   Calculate the mean filter box with size (3px * 3px)
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 

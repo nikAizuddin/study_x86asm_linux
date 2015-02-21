@@ -292,6 +292,6 @@ _COLUMNSIZE_8_          equ (_IMG_NCHANNELS_*1)
 _ROWSIZE_8_             equ (_IMG_WIDTH_*_COLUMNSIZE_8_)
 
 ; Constant values for image processing
-_MEANBOX_WIDTH_         equ      9
+_MEANBOX_WIDTH_         equ      3
 _MEANBOX_CENTER_        equ ((_MEANBOX_WIDTH_-1) / 2)
-_MEANBOX_AREA_          equ __float32__(81.0) ;_MEANBOX_WIDTH_^2
+_MEANBOX_AREA_          equ __float32__(9.0) ;_MEANBOX_WIDTH_^2

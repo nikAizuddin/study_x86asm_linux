@@ -1480,6 +1480,18 @@ exit_failure:
 ;
 ;
 ; ####################################################################
+%include "subroutines/Display_Help.asm"
+
+
+; ####################################################################
+;
+;
+;
+;                       ImageFilter Functions
+;
+;
+;
+; ####################################################################
 
 %include "ImageFilters/SSE2_ImageFilter_NoFilter.asm"
 %include "ImageFilters/SSE2_ImageFilter_Mean.asm"

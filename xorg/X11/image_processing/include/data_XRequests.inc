@@ -326,7 +326,7 @@ section .data
         .format:             db 8
         .unused_01:          db 0,0,0
         .lengthOfData:       dd 19
-        .data:               db "Intro-2-IP F1:Help"
+        .data:               db "Intro2IP (F1 Help)"
         .unused_02:          db 0
 
 

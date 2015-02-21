@@ -66,6 +66,10 @@ section .bss
         .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
 
     align 16, resb 1
+    temporary_XImage:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
+
+    align 16, resb 1
     imgHelp:
         .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
 
@@ -93,6 +97,13 @@ section .data
 
 
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ; ImageFilter functions are blocked if _TRUE_
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    align 16, db 0
+    is_ImageFilter_blocked:  dd _FALSE_
+
+
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ; Data for SSE2_ImageFilter_Mean()
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     align 16, db 0
@@ -101,3 +112,10 @@ section .data
         .g:                  dd _MEANBOX_AREA_
         .r:                  dd _MEANBOX_AREA_
         .a:                  dd _MEANBOX_AREA_
+
+    align 16, db 0
+    maskRemoveSign:
+        .b: dd 0b01111111111111111111111111111111
+        .g: dd 0b01111111111111111111111111111111
+        .r: dd 0b01111111111111111111111111111111
+        .a: dd 0b01111111111111111111111111111111
