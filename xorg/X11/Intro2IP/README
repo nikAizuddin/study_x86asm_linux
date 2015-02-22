@@ -53,8 +53,7 @@ NOTES
     In case if you don't know how to download a single file from
     Github, use svn command and replace "/tree/master/" with "/trunk/"
     like this:
-        $ svn checkout https://github.com/nikAizuddin/
-          research_x86asm/trunk/xorg/X11/Intro2IP
+        $ svn checkout https://github.com/nikAizuddin/research_x86asm/trunk/xorg/X11/Intro2IP
 
     STEP 2: Compile this project file.
     You can skip this STEP 2 because i'm already include the exe
@@ -93,8 +92,7 @@ REFERENCES
         6) /usr/include/bits/poll.h
 
     Intel CPU architecture and instructions:
-        1) http://download.intel.com/design/processor/
-           manuals/253665.pdf
+        1) http://download.intel.com/design/processor/manuals/253665.pdf
 
     X Window System structures and constants:
         1) /usr/include/X11/Xauth.h
@@ -103,10 +101,8 @@ REFERENCES
     X Server Architecture, Opcodes, and Protocol Specifications:
         1) at the end of /usr/include/X11/Xproto.h
         2) proto.pdf file, in this research_x86asm/xorg/x11 folder
-        3) http://www.x.org/releases/X11R7.7/doc/
-           xproto/x11protocol.pdf
-        4) http://www.x.org/releases/X11R7.7/doc/
-           libX11/libX11/libX11.pdf
+        3) http://www.x.org/releases/X11R7.7/doc/xproto/x11protocol.pdf
+        4) http://www.x.org/releases/X11R7.7/doc/libX11/libX11/libX11.pdf
         5) http://www.x.org/releases/X11R7.7/doc/index.html
 
 ======================================================================
