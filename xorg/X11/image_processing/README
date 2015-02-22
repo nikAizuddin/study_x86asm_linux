@@ -28,9 +28,7 @@ NOTES
     and then run the program using this command:
         $ ./image_processing
 
-    Q = No filter
-    W = Mean filter (15px * 15px)
-    E = Edge Detection using Gradient (In development)
+    When running the program press "F1" for Help.
 
 
 REFERENCES
