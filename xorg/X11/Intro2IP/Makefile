@@ -2,15 +2,15 @@ ASSEMBLER = nasm
 LINKER    = ld
 FORMAT    = elf32
 MACHINE   = elf_i386
-_START    = image_processing.asm
-BIN       = image_processing
-OBJ       = image_processing.o
+_START    = Intro2IP.asm
+BIN       = Intro2IP
+OBJ       = Intro2IP.o
 
 .PHONY: all clean
 all:
 	@${ASSEMBLER} \
 		${_START} \
-		-o image_processing.o \
+		-o Intro2IP.o \
 		-f ${FORMAT} \
 		-g -Fstabs
 

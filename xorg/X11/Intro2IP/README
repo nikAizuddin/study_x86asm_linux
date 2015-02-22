@@ -1,0 +1,112 @@
+         1         2         3         4         5         6         7
+1234567890123456789012345678901234567890123456789012345678901234567890
+======================================================================
+---------------------------------------------+------------------------
+ TITLE: Introduction to Image Processing     |
+        Version 1.0                          |    #x86assembly
+                                             |    #research
+                                             |    #xorg
+AUTHOR: Nik Mohamad Aizuddin bin Nik Azmi    |    #prototype
+ EMAIL: nickaizuddin93@gmail.com             |    #xprotocol
+  DATE: 17-FEB-2015, Thursday                |
+---------------------------------------------+------------------------
+
+PROJECT DESCRIPTION
+    The program Intro2IP is developed for low-level study purpose.
+    This program speaks directly with X Server and uses Linux
+    Kernel systemcalls. No C Library or any high-level API are used.
+
+    Note that this program uses SSE2 SIMD instructions for extra
+    performance when calculating image processing filter.
+
+    The Intro2IP program is licensed under MIT License.
+
+
+TARGET
+    KERNEL       : Linux x86
+    ARCHITECTURE : x86 and x86_64
+    ASSEMBLER    : NASM
+    X SERVER     : 11
+    OS           : Fedora 19 and Ubuntu 12.04
+
+REQUIRED EXTERNAL FILES
+    No external files needed. Everything are already included in this
+    project file.
+
+
+NOTES
+
+    Minimum Requirement
+    - - - - - - - - - -
+
+    1) X Server version 11
+    2) Linux Kernel version 3.14 or above.
+    3) x86 Intel/AMD CPU or better.
+    4) Graphics Memory with 12Mb and above.
+    5) RAM 512Mb or above
+
+
+    How to run this program
+    - - - - - - - - - - - -
+
+    STEP 1: Download this project file.
+    In case if you don't know how to download a single file from
+    Github, use svn command and replace "/tree/master/" with "/trunk/"
+    like this:
+        $ svn checkout https://github.com/nikAizuddin/
+          research_x86asm/trunk/xorg/X11/Intro2IP
+
+    STEP 2: Compile this project file.
+    You can skip this STEP 2 because i'm already include the exe
+    file, but you may want to compile the source code on your own.
+    Make sure you have already installed NASM Assembler to compile.
+    Just use this command to compile the source code:
+        $ make
+
+    STEP 3:
+    Run the program using this command:
+        $ ./Intro2IP
+
+    Additional notes
+    - - - - - - - - -
+
+    When running the program press "F1" for Help.
+    If you have any problem or suggestion about this program,
+    let me know :) This is my first time writing a low-level
+    program like this.
+
+
+REFERENCES
+    These references are used when creating this program and
+    you may read these references for further study.
+
+    Error codes:
+        1) /usr/include/asm-generic/errno.h
+        2) /usr/include/asm-generic/errno-base.h
+
+    Constant values:
+        1) /usr/include/netinet/in.h
+        2) /usr/include/bits/socket.h
+        3) /usr/include/bits/socket_type.h
+        4) /usr/include/bits/fcntl-linux.h
+        5) /usr/include/unistd.h
+        6) /usr/include/bits/poll.h
+
+    Intel CPU architecture and instructions:
+        1) http://download.intel.com/design/processor/
+           manuals/253665.pdf
+
+    X Window System structures and constants:
+        1) /usr/include/X11/Xauth.h
+        2) /usr/include/X11/Xatom.h
+
+    X Server Architecture, Opcodes, and Protocol Specifications:
+        1) at the end of /usr/include/X11/Xproto.h
+        2) proto.pdf file, in this research_x86asm/xorg/x11 folder
+        3) http://www.x.org/releases/X11R7.7/doc/
+           xproto/x11protocol.pdf
+        4) http://www.x.org/releases/X11R7.7/doc/
+           libX11/libX11/libX11.pdf
+        5) http://www.x.org/releases/X11R7.7/doc/index.html
+
+======================================================================
