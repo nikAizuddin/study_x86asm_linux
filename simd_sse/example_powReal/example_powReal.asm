@@ -60,8 +60,7 @@ section .text
 _start:
 
     movdqa   xmm0, [srcPixel]
-    movdqa   xmm1, [meanDivisor]
-    rcpps    xmm0, xmm0
+    rsqrtps  xmm0, xmm0
 b:
 
 align 16, nop

@@ -222,8 +222,9 @@ KeyPress_not_E:
     cmp    eax, _KEY_R_
     jne    KeyPress_not_R
 KeyPress_is_R:
-    lea    ecx, [msg_KeyPress_R]
-    jmp    KeyPress_display_key
+    cmp    ebx, _TRUE_
+    je     KeyPress_not_R ;skip SSE2_ImageFilter_JetColormap()
+    jmp    SSE2_ImageFilter_JetColormap
 KeyPress_not_R:
 
     cmp    eax, _KEY_T_

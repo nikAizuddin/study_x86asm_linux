@@ -62,6 +62,10 @@ section .bss
         .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
 
     align 16, resb 1
+    jetColormapRaw:
+        .pixel:    resb (256*1*4)
+
+    align 16, resb 1
     XImage:
         .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
 
@@ -79,6 +83,10 @@ section .bss
     ; We use single-precision to process image because SSE
     ; instruction can only divide single-precision value.
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    align 16, resb 1
+    jetColormap:
+        .pixel:    resd (256*1*4)
 
     align 16, resb 1
     imgOriginal:
@@ -119,3 +127,31 @@ section .data
         .g: dd 0b01111111111111111111111111111111
         .r: dd 0b01111111111111111111111111111111
         .a: dd 0b01111111111111111111111111111111
+
+
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    align 16, db 0
+    blueChannelMask:
+        .b: dd 0xffffffff 
+        .g: dd 0x0
+        .r: dd 0x0
+        .a: dd 0x0
+
+    align 16, db 0
+    greenChannelMask:
+        .b: dd 0x0 
+        .g: dd 0xffffffff
+        .r: dd 0x0
+        .a: dd 0x0
+
+    align 16, db 0
+    redChannelMask:
+        .b: dd 0x0
+        .g: dd 0x0
+        .r: dd 0xffffffff
+        .a: dd 0x0
+
+    align 16, db 0
+    bgraChannelDivisor: dd __float32__(3.0)

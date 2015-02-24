@@ -654,7 +654,7 @@ create_mainWindow_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Load the "32bit_testimage.bmp" image file.
+;   Load the "32bit_image.bmp" image file.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -757,6 +757,56 @@ helpImage_open_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
+;   Load "jetColormap.bmp" image
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+;image_fd = OPEN( @path_jetColormap, _O_RDONLY_ )
+    mov    eax, _SYSCALL_OPEN_
+    lea    ebx, [path_jetColormap]
+    mov    ecx, _O_RDONLY_
+    int    0x80
+    test   eax, eax
+    js     jetColormap_open_fail
+    jmp    jetColormap_open_success
+
+jetColormap_open_fail:
+
+;WRITE( _STDOUT_, @errmsg_imageOpen, errmsg_len )
+;Notify user about the error.
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [errmsg_imageOpen]
+    mov    edx, [errmsg_len]
+    int    0x80
+    jmp    exit_failure
+
+jetColormap_open_success:
+
+    mov    [image_fd], eax
+
+;LSEEK( image_fd, 0x8a, _SEEK_SET_ )
+;Seek to the offset 0x8a, which contains data pixels.
+    mov    eax, _SYSCALL_LSEEK_
+    mov    ebx, [image_fd]
+    mov    ecx, 0x8a
+    mov    edx, _SEEK_SET_
+    int    0x80
+
+;READ( image_fd, @jetColormapRaw.pixel, image_size )
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [image_fd]
+    lea    ecx, [jetColormapRaw.pixel]
+    mov    edx, (256*1*4)
+    int    0x80
+
+;CLOSE( image_fd )
+    mov    eax, _SYSCALL_CLOSE_
+    mov    ebx, [image_fd]
+    int    0x80
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
 ;   Convert our test image from ABGR to BGRA.
 ;   The pixel order in BMP image file is ABGR format, but X Server
 ;   uses BGRA order.
@@ -843,6 +893,47 @@ endloop_convert_helpImage_ABGR_to_BGRA:
     sub    esi, (_ROWSIZE_8_ + _ROWSIZE_8_)
     cmp    esi, ebx
     jge    loop_convert_helpImage_ABGR_to_BGRA
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Convert the jetColormap from ABGR to BGRA
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+;Initialize the loop
+    mov    ecx, 256
+    lea    esi, [jetColormapRaw.pixel]
+    lea    edi, [jetColormap.pixel]
+    pxor   xmm7, xmm7
+
+align 16, nop
+loop_convert_jetColormap_ABGR_to_BGRA:
+
+    mov    eax, [esi]
+    ror    eax, 8
+
+    movd      xmm0, eax
+    punpcklbw xmm0, xmm7
+    punpcklwd xmm0, xmm7
+    cvtdq2ps  xmm0, xmm0
+
+    movdqa [edi], xmm0
+
+    add    esi, _COLUMNSIZE_8_
+    add    edi, _COLUMNSIZE_32_
+
+    sub    ecx, 1
+    jnz    loop_convert_jetColormap_ABGR_to_BGRA
+
+endloop_convert_jetColormap_ABGR_to_BGRA:
+
+
+;Copy pixels from imgOriginal to imgCurrent
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_*_IMG_NCHANNELS_)
+    lea    esi, [imgOriginal.pixel]
+    lea    edi, [imgCurrent.pixel]
+    rep    movsd
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1475,12 +1566,13 @@ exit_failure:
 ;
 ;
 ;
-;                       ImageFilter Functions
+;                           Subroutines
 ;
 ;
 ;
 ; ####################################################################
 %include "subroutines/Display_Help.asm"
+%include "subroutines/apply_ImageFilter.asm"
 
 
 ; ####################################################################
@@ -1496,3 +1588,4 @@ exit_failure:
 %include "ImageFilters/SSE2_ImageFilter_NoFilter.asm"
 %include "ImageFilters/SSE2_ImageFilter_Mean.asm"
 %include "ImageFilters/SSE2_ImageFilter_EDGradient.asm"
+%include "ImageFilters/SSE2_ImageFilter_JetColormap.asm"

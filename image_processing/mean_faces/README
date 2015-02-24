@@ -1,0 +1,35 @@
+         1         2         3         4         5         6         7
+1234567890123456789012345678901234567890123456789012345678901234567890
+======================================================================
+---------------------------------------------+------------------------
+ TITLE: Mean faces                           |
+                                             |    #x86assembly
+                                             |    #research
+                                             |    #xorg
+AUTHOR: Nik Mohamad Aizuddin bin Nik Azmi    |    #prototype
+ EMAIL: nickaizuddin93@gmail.com             |    #xprotocol
+  DATE: 24-FEB-2015, Tuesday                 |
+---------------------------------------------+------------------------
+
+PROJECT DESCRIPTION
+    ---
+
+TARGET
+    KERNEL       : Linux x86
+    ARCHITECTURE : x86 and x86_64
+    ASSEMBLER    : NASM
+    X SERVER     : 11
+    OS           : Fedora 19 and Ubuntu 12.04
+
+REQUIRED EXTERNAL FILES
+    ---
+
+
+NOTES
+    ---
+
+
+REFERENCES
+    ---
+
+======================================================================

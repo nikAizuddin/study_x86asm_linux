@@ -98,7 +98,7 @@ loop_upload_HelpImage:
 
     add    edi, _IMG_UPLOAD_SIZE_
     cmp    edi, esi
-    jbe    loop_upload_NoFilter
+    jbe    loop_upload_HelpImage
 
 endloop_upload_HelpImage:
 
