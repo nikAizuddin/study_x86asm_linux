@@ -4,8 +4,6 @@
 ;
 ; SSE2_ImageFilter_JetColormap.asm
 ;
-; Perform edge detector based on image gradient.
-;
 ; This source file contains function SSE2_ImageFilter_JetColormap().
 ; The function only executed when key "R" is pressed.
 ;
