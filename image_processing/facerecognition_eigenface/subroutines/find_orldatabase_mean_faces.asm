@@ -20,7 +20,7 @@ find_orldatabase_mean_faces:
 
     xor    ecx, ecx
     movdqa xmm2, [meanDivisor]
-    lea    edi, [faceMean.pixel]
+    lea    edi, [meanFaces.pixel]
 
 loop_find_mean:
 
@@ -59,10 +59,10 @@ endloop_find_mean:
 
     mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
     lea    esi, [s08_01_float.pixel]
-    lea    ebx, [faceMean.pixel]
-    lea    edi, [s08_01_normalized.pixel]
+    lea    ebx, [meanFaces.pixel]
+    lea    edi, [s08_01_meanSubtracted.pixel]
 
-loop_normalize:
+loop_subtractMean:
 
     movdqa xmm0, [ebx]
 
@@ -91,9 +91,9 @@ loop_normalize:
     add    ebx, _COLUMNSIZE_32_BGRA_
 
     sub    ecx, 1
-    jnz    loop_normalize
+    jnz    loop_subtractMean
 
-endloop_normalize:
+endloop_subtractMean:
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -103,7 +103,8 @@ endloop_normalize:
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ;    lea    esi, [s08_04_normalized.pixel]
-    lea    esi, [faceMean.pixel]
+;    lea    esi, [meanFaces.pixel]
+    lea    esi, [s01_05_float.pixel]
     lea    edi, [XImage.pixel]
     mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
 

@@ -2,15 +2,15 @@ ASSEMBLER = nasm
 LINKER    = ld
 FORMAT    = elf32
 MACHINE   = elf_i386
-_START    = mean_faces.asm
-BIN       = mean_faces
-OBJ       = mean_faces.o
+_START    = facerecognition_eigenface.asm
+BIN       = facerecognition_eigenface
+OBJ       = facerecognition_eigenface.o
 
 .PHONY: all clean
 all:
 	@${ASSEMBLER} \
 		${_START} \
-		-o mean_faces.o \
+		-o facerecognition_eigenface.o \
 		-f ${FORMAT} \
 		-g -Fstabs
 

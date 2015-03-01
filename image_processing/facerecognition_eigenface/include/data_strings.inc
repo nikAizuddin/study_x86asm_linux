@@ -157,6 +157,41 @@ section .data
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ; Path to ATT Database
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    path_s01_01:             db "att_faces/orl_faces/s1/1.pgm",0
+    path_s01_02:             db "att_faces/orl_faces/s1/2.pgm",0
+    path_s01_03:             db "att_faces/orl_faces/s1/3.pgm",0
+    path_s01_04:             db "att_faces/orl_faces/s1/4.pgm",0
+    path_s01_05:             db "att_faces/orl_faces/s1/5.pgm",0
+    path_s02_01:             db "att_faces/orl_faces/s2/1.pgm",0
+    path_s02_02:             db "att_faces/orl_faces/s2/2.pgm",0
+    path_s02_03:             db "att_faces/orl_faces/s2/3.pgm",0
+    path_s02_04:             db "att_faces/orl_faces/s2/4.pgm",0
+    path_s02_05:             db "att_faces/orl_faces/s2/5.pgm",0
+    path_s03_01:             db "att_faces/orl_faces/s3/1.pgm",0
+    path_s03_02:             db "att_faces/orl_faces/s3/2.pgm",0
+    path_s03_03:             db "att_faces/orl_faces/s3/3.pgm",0
+    path_s03_04:             db "att_faces/orl_faces/s3/4.pgm",0
+    path_s03_05:             db "att_faces/orl_faces/s3/5.pgm",0
+    path_s04_01:             db "att_faces/orl_faces/s4/1.pgm",0
+    path_s04_02:             db "att_faces/orl_faces/s4/2.pgm",0
+    path_s04_03:             db "att_faces/orl_faces/s4/3.pgm",0
+    path_s04_04:             db "att_faces/orl_faces/s4/4.pgm",0
+    path_s04_05:             db "att_faces/orl_faces/s4/5.pgm",0
+    path_s05_01:             db "att_faces/orl_faces/s5/1.pgm",0
+    path_s05_02:             db "att_faces/orl_faces/s5/2.pgm",0
+    path_s05_03:             db "att_faces/orl_faces/s5/3.pgm",0
+    path_s05_04:             db "att_faces/orl_faces/s5/4.pgm",0
+    path_s05_05:             db "att_faces/orl_faces/s5/5.pgm",0
+    path_s06_01:             db "att_faces/orl_faces/s6/1.pgm",0
+    path_s06_02:             db "att_faces/orl_faces/s6/2.pgm",0
+    path_s06_03:             db "att_faces/orl_faces/s6/3.pgm",0
+    path_s06_04:             db "att_faces/orl_faces/s6/4.pgm",0
+    path_s06_05:             db "att_faces/orl_faces/s6/5.pgm",0
+    path_s07_01:             db "att_faces/orl_faces/s7/1.pgm",0
+    path_s07_02:             db "att_faces/orl_faces/s7/2.pgm",0
+    path_s07_03:             db "att_faces/orl_faces/s7/3.pgm",0
+    path_s07_04:             db "att_faces/orl_faces/s7/4.pgm",0
+    path_s07_05:             db "att_faces/orl_faces/s7/5.pgm",0
     path_s08_01:             db "att_faces/orl_faces/s8/1.pgm",0
     path_s08_02:             db "att_faces/orl_faces/s8/2.pgm",0
     path_s08_03:             db "att_faces/orl_faces/s8/3.pgm",0
