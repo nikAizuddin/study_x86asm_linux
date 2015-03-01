@@ -62,7 +62,7 @@ received_WindowDeleteMessage:
 
     mov    eax, [mainWindow.wid]
     mov    ebx, [mainWindow.cid]
-    mov    ecx, [mainWindow.pid]
+    mov    ecx, [mainWindow.s01_01_pid]
     mov    [destroyWindow.window], eax
     mov    [freeGC.gc], ebx
     mov    [freePixmap.pixmap], ecx

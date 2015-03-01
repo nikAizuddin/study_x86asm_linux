@@ -670,114 +670,18 @@ create_mainWindow_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Make sure the X Server is ready to receive the next request.
+;   Create pixmaps
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
-    mov    ebx, _POLLOUT_
-    mov    [poll.events], bx
-    mov    eax, _SYSCALL_POLL_
-    lea    ebx, [poll]
-    mov    ecx, 1
-    mov    edx, _POLL_INFINITE_TIMEOUT_
-    int    0x80
+%include "subroutines/create_pixmaps.asm"
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Create mainWindow pixmap using CreatePixmap request.
+;   Upload XImages
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-;Setup createPixmap structure
-;We will send this structure as the CreatePixmap request.
-    mov    eax, [XServer.ridBase]
-    add    eax, 2
-    mov    ebx, [mainWindow.wid]
-    mov    [createPixmap.pid], eax
-    mov    [createPixmap.drawable], ebx
-
-;WRITE( socketX, @createPixmap, 16 )
-    mov    eax, _SYSCALL_WRITE_
-    mov    ebx, [socketX]
-    lea    ecx, [createPixmap]
-    mov    edx, 16
-    int    0x80
-
-    mov    eax, [createPixmap.pid]
-    mov    [mainWindow.pid], eax
-
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;   Make sure the X Server is ready to receive the next request.
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
-    mov    ebx, _POLLOUT_
-    mov    [poll.events], bx
-    mov    eax, _SYSCALL_POLL_
-    lea    ebx, [poll]
-    mov    ecx, 1
-    mov    edx, _POLL_INFINITE_TIMEOUT_
-    int    0x80
-
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-;
-;   Upload XImage.pixel to mainWindow pixmap by using
-;   PutImage request.
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
-;Initialize putImage structure
-;We will use this structure as the PutImage request.
-    mov    eax, [mainWindow.pid]
-    mov    ebx, [mainWindow.cid]
-    mov    [putImage.drawable], eax
-    mov    [putImage.gc], ebx
-
-;Initialize loop
-    lea    edi, [XImage.pixel]
-    mov    esi, edi
-    add    esi, (_IMG_UPLOAD_SIZE_ * ((_IMG_HEIGHT_/10) - 1))
-
-loop_upload_XImage:
-
-;POLL( {socketX, _POLLOUT_}, 1, _POLL_INFINITE_TIMEOUT_ )
-    mov    ebx, _POLLOUT_
-    mov    [poll.events], ebx 
-    mov    eax, _SYSCALL_POLL_
-    lea    ebx, [poll]
-    mov    ecx, 1
-    mov    edx, _POLL_INFINITE_TIMEOUT_
-    int    0x80
-
-;WRITE( socketX, @putImage, 24 )
-    mov    eax, _SYSCALL_WRITE_
-    mov    ebx, [socketX]
-    lea    ecx, [putImage]
-    mov    edx, 24
-    int    0x80
-
-    mov    eax, [putImage.dstY]
-    add    eax, 10
-    mov    [putImage.dstY], eax
-
-;WRITE( socketX, @EDI, _IMG_UPLOAD_SIZE_ )
-    mov    eax, _SYSCALL_WRITE_
-    mov    ebx, [socketX]
-    mov    ecx, edi
-    mov    edx, _IMG_UPLOAD_SIZE_
-    int    0x80
-
-    add    edi, _IMG_UPLOAD_SIZE_
-    cmp    edi, esi
-    jbe    loop_upload_XImage
-
-endloop_upload_XImage:
+%include "subroutines/upload_ximages.asm"
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -798,25 +702,130 @@ endloop_upload_XImage:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Copy the drawed image from mainWindow.pixmap to mainWindow.window
-;   by using CopyArea request.
+;   Initialize copyArea structures
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-;Initialize copyArea structure
-    mov    eax, [mainWindow.pid] ;src=pixmap
-    mov    ebx, [mainWindow.wid] ;dst=window
-    mov    ecx, [mainWindow.cid]
-    mov    [copyArea.srcDrawable], eax
-    mov    [copyArea.dstDrawable], ebx
-    mov    [copyArea.gc], ecx
+;Initialize copyArea_s01_01 structure
 
-;WRITE( socketX, @copyArea 28 )
-    mov    eax, _SYSCALL_WRITE_
-    mov    ebx, [socketX]
-    lea    ecx, [copyArea]
-    mov    edx, 28
-    int    0x80
+    mov    eax, [mainWindow.s01_01_pid] ;src=pixmap
+    mov    ebx, [mainWindow.s01_02_pid]
+    mov    ecx, [mainWindow.s01_03_pid]
+    mov    edx, [mainWindow.s01_04_pid]
+    mov    esi, [mainWindow.s01_05_pid]
+    mov    [copyArea_s01_01.srcDrawable], eax
+    mov    [copyArea_s01_02.srcDrawable], ebx
+    mov    [copyArea_s01_03.srcDrawable], ecx
+    mov    [copyArea_s01_04.srcDrawable], edx
+    mov    [copyArea_s01_05.srcDrawable], esi
+
+    mov    eax, [mainWindow.s02_01_pid]
+    mov    ebx, [mainWindow.s02_02_pid]
+    mov    ecx, [mainWindow.s02_03_pid]
+    mov    edx, [mainWindow.s02_04_pid]
+    mov    esi, [mainWindow.s02_05_pid]
+    mov    [copyArea_s02_01.srcDrawable], eax
+    mov    [copyArea_s02_02.srcDrawable], ebx
+    mov    [copyArea_s02_03.srcDrawable], ecx
+    mov    [copyArea_s02_04.srcDrawable], edx
+    mov    [copyArea_s02_05.srcDrawable], esi
+
+    mov    eax, [mainWindow.s03_01_pid]
+    mov    ebx, [mainWindow.s03_02_pid]
+    mov    ecx, [mainWindow.s03_03_pid]
+    mov    edx, [mainWindow.s03_04_pid]
+    mov    esi, [mainWindow.s03_05_pid]
+    mov    [copyArea_s03_01.srcDrawable], eax
+    mov    [copyArea_s03_02.srcDrawable], ebx
+    mov    [copyArea_s03_03.srcDrawable], ecx
+    mov    [copyArea_s03_04.srcDrawable], edx
+    mov    [copyArea_s03_05.srcDrawable], esi
+
+    mov    eax, [mainWindow.s04_01_pid]
+    mov    ebx, [mainWindow.s04_02_pid]
+    mov    ecx, [mainWindow.s04_03_pid]
+    mov    edx, [mainWindow.s04_04_pid]
+    mov    esi, [mainWindow.s04_05_pid]
+    mov    [copyArea_s04_01.srcDrawable], eax
+    mov    [copyArea_s04_02.srcDrawable], ebx
+    mov    [copyArea_s04_03.srcDrawable], ecx
+    mov    [copyArea_s04_04.srcDrawable], edx
+    mov    [copyArea_s04_05.srcDrawable], esi
+
+    mov    eax, [mainWindow.s05_01_pid]
+    mov    ebx, [mainWindow.s05_02_pid]
+    mov    ecx, [mainWindow.s05_03_pid]
+    mov    edx, [mainWindow.s05_04_pid]
+    mov    esi, [mainWindow.s05_05_pid]
+    mov    [copyArea_s05_01.srcDrawable], eax
+    mov    [copyArea_s05_02.srcDrawable], ebx
+    mov    [copyArea_s05_03.srcDrawable], ecx
+    mov    [copyArea_s05_04.srcDrawable], edx
+    mov    [copyArea_s05_05.srcDrawable], esi
+
+
+    mov    eax, [mainWindow.wid] ;dst=window
+    mov    [copyArea_s01_01.dstDrawable], eax
+    mov    [copyArea_s01_02.dstDrawable], eax
+    mov    [copyArea_s01_03.dstDrawable], eax
+    mov    [copyArea_s01_04.dstDrawable], eax
+    mov    [copyArea_s01_05.dstDrawable], eax
+
+    mov    [copyArea_s02_01.dstDrawable], eax
+    mov    [copyArea_s02_02.dstDrawable], eax
+    mov    [copyArea_s02_03.dstDrawable], eax
+    mov    [copyArea_s02_04.dstDrawable], eax
+    mov    [copyArea_s02_05.dstDrawable], eax
+
+    mov    [copyArea_s03_01.dstDrawable], eax
+    mov    [copyArea_s03_02.dstDrawable], eax
+    mov    [copyArea_s03_03.dstDrawable], eax
+    mov    [copyArea_s03_04.dstDrawable], eax
+    mov    [copyArea_s03_05.dstDrawable], eax
+
+    mov    [copyArea_s04_01.dstDrawable], eax
+    mov    [copyArea_s04_02.dstDrawable], eax
+    mov    [copyArea_s04_03.dstDrawable], eax
+    mov    [copyArea_s04_04.dstDrawable], eax
+    mov    [copyArea_s04_05.dstDrawable], eax
+
+    mov    [copyArea_s05_01.dstDrawable], eax
+    mov    [copyArea_s05_02.dstDrawable], eax
+    mov    [copyArea_s05_03.dstDrawable], eax
+    mov    [copyArea_s05_04.dstDrawable], eax
+    mov    [copyArea_s05_05.dstDrawable], eax
+
+
+    mov    eax, [mainWindow.cid]
+    mov    [copyArea_s01_01.gc], eax
+    mov    [copyArea_s01_02.gc], eax
+    mov    [copyArea_s01_03.gc], eax
+    mov    [copyArea_s01_04.gc], eax
+    mov    [copyArea_s01_05.gc], eax
+
+    mov    [copyArea_s02_01.gc], eax
+    mov    [copyArea_s02_02.gc], eax
+    mov    [copyArea_s02_03.gc], eax
+    mov    [copyArea_s02_04.gc], eax
+    mov    [copyArea_s02_05.gc], eax
+
+    mov    [copyArea_s03_01.gc], eax
+    mov    [copyArea_s03_02.gc], eax
+    mov    [copyArea_s03_03.gc], eax
+    mov    [copyArea_s03_04.gc], eax
+    mov    [copyArea_s03_05.gc], eax
+
+    mov    [copyArea_s04_01.gc], eax
+    mov    [copyArea_s04_02.gc], eax
+    mov    [copyArea_s04_03.gc], eax
+    mov    [copyArea_s04_04.gc], eax
+    mov    [copyArea_s04_05.gc], eax
+
+    mov    [copyArea_s05_01.gc], eax
+    mov    [copyArea_s05_02.gc], eax
+    mov    [copyArea_s05_03.gc], eax
+    mov    [copyArea_s05_04.gc], eax
+    mov    [copyArea_s05_05.gc], eax
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

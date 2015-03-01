@@ -281,6 +281,8 @@ _KEY_N_                 equ   0x39
 _KEY_M_                 equ   0x3a
 
 ; Constant values for image information
+_WIN_WIDTH_             equ    460
+_WIN_HEIGHT_            equ    560
 _IMG_WIDTH_             equ     92 ;ONLY CHANGE THIS VALUE!
 _IMG_HEIGHT_            equ    112 ;ONLY CHANGE THIS VALUE!
 _CHANNELS_BGRA_         equ      4

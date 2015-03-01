@@ -38,7 +38,36 @@ section .bss
         .height:             resw 1
         .wid:                resd 1 ;window id
         .cid:                resd 1 ;graphic context id
-        .pid:                resd 1 ;pixmap id
+
+        .s01_01_pid:         resd 1 ;s01_01 face pixmap id
+        .s01_02_pid:         resd 1
+        .s01_03_pid:         resd 1
+        .s01_04_pid:         resd 1
+        .s01_05_pid:         resd 1
+
+        .s02_01_pid:         resd 1
+        .s02_02_pid:         resd 1
+        .s02_03_pid:         resd 1
+        .s02_04_pid:         resd 1
+        .s02_05_pid:         resd 1
+
+        .s03_01_pid:         resd 1
+        .s03_02_pid:         resd 1
+        .s03_03_pid:         resd 1
+        .s03_04_pid:         resd 1
+        .s03_05_pid:         resd 1
+
+        .s04_01_pid:         resd 1
+        .s04_02_pid:         resd 1
+        .s04_03_pid:         resd 1
+        .s04_04_pid:         resd 1
+        .s04_05_pid:         resd 1
+
+        .s05_01_pid:         resd 1
+        .s05_02_pid:         resd 1
+        .s05_03_pid:         resd 1
+        .s05_04_pid:         resd 1
+        .s05_05_pid:         resd 1
 
 
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -150,7 +179,63 @@ section .bss
         .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_GRAY_)
 
     align 16, resb 1
-    XImage:
+    XImage_s01_01:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s01_02:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s01_03:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s01_04:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s01_05:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+
+    align 16, resb 1
+    XImage_s02_01:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s02_02:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s02_03:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s02_04:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s02_05:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+
+    align 16, resb 1
+    XImage_s03_01:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s03_02:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s03_03:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s03_04:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s03_05:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+
+    align 16, resb 1
+    XImage_s04_01:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s04_02:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s04_03:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s04_04:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s04_05:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+
+    align 16, resb 1
+    XImage_s05_01:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s05_02:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s05_03:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s05_04:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s05_05:
         .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
 
 
@@ -358,19 +443,17 @@ section .bss
         .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
 
     align 16, resb 1
-    s08_01_covariance:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s08_02_covariance:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s08_03_covariance:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s08_04_covariance:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s08_05_covariance:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    transpose_faceMatrix:
+        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_*15)
+
+    align 16, resb 1
+    covariance_faceMatrix: ;Also known as eigenface matrix
+        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_*15)
 
     align 16, resb 1
     meanFaces:
+        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    meanFaces_normalized:
         .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
 
 
@@ -389,10 +472,17 @@ section .data
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     align 16, db 0
     meanDivisor:
-        .b:                  dd __float32__(5.0)
-        .g:                  dd __float32__(5.0)
-        .r:                  dd __float32__(5.0)
-        .a:                  dd __float32__(5.0)
+        .b:                  dd __float32__(15.0)
+        .g:                  dd __float32__(15.0)
+        .r:                  dd __float32__(15.0)
+        .a:                  dd __float32__(15.0)
+
+    align 16, db 0
+    maxPixelIntensity:
+        .b:                  dd __float32__(255.0)
+        .g:                  dd __float32__(255.0)
+        .r:                  dd __float32__(255.0)
+        .a:                  dd __float32__(255.0)
 
     align 16, db 0
     maskRemoveSign:

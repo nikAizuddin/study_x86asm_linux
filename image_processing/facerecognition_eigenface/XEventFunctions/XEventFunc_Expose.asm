@@ -55,6 +55,56 @@ XEventFunc_Expose:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Draw/Redraw the testimage by using CopyArea request.
+;   Using CopyArea request to draw image is much more efficient
+;   compared to PutImage request. The PutImage request should only
+;   be used to put data pixel onto pixmap, and then use CopyArea
+;   request to copy the picture from pixmap to the main window.
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+;WRITE( socketX, @copyArea_s01_01, 28 ) 
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s01_01]
+    mov    edx, 28
+    int    0x80
+
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+;WRITE( socketX, @copyArea_s01_02, 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s01_02]
+    mov    edx, 28
+    int    0x80
+
+
 ; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    eax, [socketX]
     mov    ebx, _POLLOUT_
@@ -67,21 +117,444 @@ XEventFunc_Expose:
     int    0x80
 
 
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;   Draw/Redraw the testimage by using CopyArea request.
-;   Using CopyArea request to draw image is much more efficient
-;   compared to PutImage request. The PutImage request should only
-;   be used to put data pixel onto pixmap, and then use CopyArea
-;   request to copy the picture from pixmap to the main window.
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-; WRITE( socketX, @copyArea 28 ) 
+;WRITE( socketX, @copyArea_s01_03, 28 )
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
-    lea    ecx, [copyArea]
+    lea    ecx, [copyArea_s01_03]
     mov    edx, 28
     int    0x80
+
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+;WRITE( socketX, @copyArea_s01_04, 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s01_04]
+    mov    edx, 28
+    int    0x80
+
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+;WRITE( socketX, @copyArea_s01_05, 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s01_05]
+    mov    edx, 28
+    int    0x80
+
+
+;---------------------------------------------------------------------
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+;WRITE( socketX, @copyArea_s02_01, 28 ) 
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s02_01]
+    mov    edx, 28
+    int    0x80
+
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+;WRITE( socketX, @copyArea_s02_02, 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s02_02]
+    mov    edx, 28
+    int    0x80
+
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+
+;WRITE( socketX, @copyArea_s02_03, 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s02_03]
+    mov    edx, 28
+    int    0x80
+
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+;WRITE( socketX, @copyArea_s02_04, 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s02_04]
+    mov    edx, 28
+    int    0x80
+
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+;WRITE( socketX, @copyArea_s02_05, 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s02_05]
+    mov    edx, 28
+    int    0x80
+
+
+;---------------------------------------------------------------------
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+;WRITE( socketX, @copyArea_s03_01, 28 ) 
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s03_01]
+    mov    edx, 28
+    int    0x80
+
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+;WRITE( socketX, @copyArea_s03_02, 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s03_02]
+    mov    edx, 28
+    int    0x80
+
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+
+;WRITE( socketX, @copyArea_s03_03, 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s03_03]
+    mov    edx, 28
+    int    0x80
+
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+;WRITE( socketX, @copyArea_s03_04, 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s03_04]
+    mov    edx, 28
+    int    0x80
+
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+;WRITE( socketX, @copyArea_s03_05, 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s03_05]
+    mov    edx, 28
+    int    0x80
+
+
+;---------------------------------------------------------------------
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+;WRITE( socketX, @copyArea_s04_01, 28 ) 
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s04_01]
+    mov    edx, 28
+    int    0x80
+
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+;WRITE( socketX, @copyArea_s04_02, 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s04_02]
+    mov    edx, 28
+    int    0x80
+
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+
+;WRITE( socketX, @copyArea_s04_03, 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s04_03]
+    mov    edx, 28
+    int    0x80
+
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+;WRITE( socketX, @copyArea_s04_04, 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s04_04]
+    mov    edx, 28
+    int    0x80
+
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+;WRITE( socketX, @copyArea_s04_05, 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s04_05]
+    mov    edx, 28
+    int    0x80
+
+
+;---------------------------------------------------------------------
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+;WRITE( socketX, @copyArea_s05_01, 28 ) 
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s05_01]
+    mov    edx, 28
+    int    0x80
+
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+;WRITE( socketX, @copyArea_s05_02, 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s05_02]
+    mov    edx, 28
+    int    0x80
+
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+
+;WRITE( socketX, @copyArea_s05_03, 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s05_03]
+    mov    edx, 28
+    int    0x80
+
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+;WRITE( socketX, @copyArea_s05_04, 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s05_04]
+    mov    edx, 28
+    int    0x80
+
+
+; POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    eax, [socketX]
+    mov    ebx, _POLLOUT_
+    mov    [poll.fd], eax
+    mov    [poll.events], ebx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+;WRITE( socketX, @copyArea_s05_05, 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [copyArea_s05_05]
+    mov    edx, 28
+    int    0x80
+
+
+;---------------------------------------------------------------------
 
     jmp    mainloop

@@ -24,9 +24,9 @@ find_orldatabase_mean_faces:
 
 loop_find_mean:
 
-    mov    edx, 5 ;s08_01 -> s08_05
+    mov    edx, 15 ;s01_01 -> s08_05
     pxor   xmm1, xmm1
-    lea    esi, [s08_01_float.pixel + ecx]
+    lea    esi, [s01_01_float.pixel + ecx]
 
 subloop_find_mean:
 
@@ -53,14 +53,14 @@ endloop_find_mean:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Normalize s08_01 to s08_05
+;   Get unique feature of a face by subtracting mean
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
-    lea    esi, [s08_01_float.pixel]
+    lea    esi, [s01_01_float.pixel]
     lea    ebx, [meanFaces.pixel]
-    lea    edi, [s08_01_meanSubtracted.pixel]
+    lea    edi, [s01_01_meanSubtracted.pixel]
 
 loop_subtractMean:
 
@@ -98,30 +98,65 @@ endloop_subtractMean:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Save to XImage
+;   Normalize meanFaces 0 -> 255
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-;    lea    esi, [s08_04_normalized.pixel]
-;    lea    esi, [meanFaces.pixel]
-    lea    esi, [s01_05_float.pixel]
-    lea    edi, [XImage.pixel]
+    pxor   xmm1, xmm1
     mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+    lea    esi, [meanFaces.pixel]
 
-loop_save_XImage:
+loop_findMax_meanFaces:
 
-    movdqa xmm0, [esi]
+    movdqa  xmm0, [esi]
+    ucomiss xmm0, xmm1
+    jb      meanFaces_pxIntensity_notHighest
 
-    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
-    packssdw xmm0, xmm0 ;Convert dword to word
-    packuswb xmm0, xmm0 ;Convert word to byte
+meanFaces_pxIntensity_highest:
 
-    movd    [edi], xmm0
+    movdqa  xmm1, xmm0
+
+meanFaces_pxIntensity_notHighest:
 
     add    esi, _COLUMNSIZE_32_BGRA_
-    add    edi, _COLUMNSIZE_8_BGRA_
 
     sub    ecx, 1
-    jnz    loop_save_XImage
+    jnz    loop_findMax_meanFaces
 
-endloop_save_XImage:
+endloop_findMax_meanFaces:
+
+
+    movdqa xmm3, xmm1
+    pslldq xmm1, 4
+    addss  xmm1, xmm3
+    pslldq xmm1, 4
+    addss  xmm1, xmm3
+
+    movdqa xmm2, [maxPixelIntensity]
+    divps  xmm2, xmm1
+
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+    lea    esi, [meanFaces.pixel]
+    lea    edi, [meanFaces_normalized.pixel]
+
+loop_normalize_meanFaces:
+
+    movdqa xmm0, [esi]
+    mulps  xmm0, xmm2
+    movdqa [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_32_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_normalize_meanFaces
+
+endloop_normalize_meanFaces:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImages
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%include "subroutines/save_to_ximages.asm"
