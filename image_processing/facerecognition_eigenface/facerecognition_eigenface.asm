@@ -423,14 +423,9 @@ authStatus_success:
     int    0x80
 
 
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;   Wait 100ms for the X Server to process the CreateWindow request.
-;   The X Server will send a reply if the request is fail.
-;   If the request is success, the X Server will not send any reply.
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+;Wait 100ms for the X Server to process the CreateWindow request.
+;The X Server will send a reply if the request is fail.
+;If the request is success, the X Server will not send any reply.
 ;POLL( @poll, 1, _POLL_SHORT_TIMEOUT_ )
     mov    ebx, _POLLIN_
     mov    [poll.events], bx
@@ -479,10 +474,11 @@ create_mainWindow_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Make sure the X Server is ready to receive the next request.
+;   Create winMeanSubtracted
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+;Make sure the X Server is ready to receive the next request.
 ;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    ebx, _POLLOUT_
     mov    [poll.events], bx
@@ -491,6 +487,74 @@ create_mainWindow_success:
     mov    ecx, 1
     mov    edx, _POLL_INFINITE_TIMEOUT_
     int    0x80
+
+;Initialize create_mainWindow structure, we will pass
+;this structure as the CreateWindow request.
+    mov    eax, [XServer.ridBase]
+    mov    ebx, [XScreen.root]
+    mov    ecx, [XScreen.blackPixel]
+    mov    edx, [XScreen.whitePixel]
+    add    eax, 0x100000
+    mov    [createWindow_meanSubtracted.wid], eax
+    mov    [createWindow_meanSubtracted.parent], ebx
+    mov    [createWindow_meanSubtracted.backgroundPixel], ecx
+    mov    [createWindow_meanSubtracted.borderPixel], edx
+
+;WRITE( socketX, @createWindow_meanSubtracted, requestLength*4 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [createWindow_meanSubtracted]
+    mov    edx, [createWindow_meanSubtracted.requestLength]
+    lea    edx, [edx * 4]
+    int    0x80
+
+;Wait 100ms for the X Server to process the CreateWindow request.
+;The X Server will send a reply if the request is fail.
+;If the request is success, the X Server will not send any reply.
+;POLL( @poll, 1, _POLL_SHORT_TIMEOUT_ )
+    mov    ebx, _POLLIN_
+    mov    [poll.events], bx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_SHORT_TIMEOUT_
+    int    0x80
+
+;Check if poll.revents == _POLLIN_
+    xor    eax, eax
+    mov    ax, [poll.revents]
+    mov    ebx, _POLLIN_
+    cmp    eax, ebx
+    je     createWindow_meanSubtracted_fail
+    jmp    createWindow_meanSubtracted_success
+
+createWindow_meanSubtracted_fail:
+
+;READ( socketX, @requestStatus, 32 )
+;Get the reason why CreateWindow request fail
+    mov    eax, _SYSCALL_READ_
+    mov    ebx, [socketX]
+    lea    ecx, [requestStatus]
+    mov    edx, 32
+    int    0x80
+
+;WRITE( _STDOUT_, @errmsg_createMainWindow, errmsg_len )
+;Notify user about the error.
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, _STDOUT_
+    lea    ecx, [errmsg_createMainWindow]
+    mov    edx, [errmsg_len]
+    int    0x80
+    jmp    exit_failure
+
+createWindow_meanSubtracted_success:
+
+    mov    eax, [createWindow_meanSubtracted.wid]
+    movzx  bx, [createWindow_meanSubtracted.width]
+    movzx  cx, [createWindow_meanSubtracted.height]
+    mov    [winMeanSubtracted.wid], eax
+    mov    [winMeanSubtracted.width], bx
+    mov    [winMeanSubtracted.height], cx
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -501,6 +565,16 @@ create_mainWindow_success:
 ;   disconnected when the mainWindow is deleted.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+;Make sure the X Server is ready to receive the next request.
+;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    ebx, _POLLOUT_
+    mov    [poll.events], bx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
 
 ;WRITE( socketX, @getWMDeleteMessage, 24 )
     mov    eax, _SYSCALL_WRITE_
@@ -830,10 +904,13 @@ create_mainWindow_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Make sure the X Server is ready to receive the next request.
+;   Request ChangeProperty, to modify the mainWindow properties.
+;   We need to use the ChangeProperty request to apply the
+;   WM_DELETE_WINDOW atom to the mainWindow.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+;Make sure the X Server is ready to receive the next request.
 ;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    ebx, _POLLOUT_
     mov    [poll.events], bx
@@ -843,16 +920,46 @@ create_mainWindow_success:
     mov    edx, _POLL_INFINITE_TIMEOUT_
     int    0x80
 
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;   Request ChangeProperty, to modify the mainWindow properties.
-;   We need to use the ChangeProperty request to apply the
-;   WM_DELETE_WINDOW atom to the mainWindow.
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
     mov    eax, [mainWindow.wid]
+    mov    ebx, [WMDeleteMessage]
+    mov    ecx, [WMProtocols]
+;Setup setWindowDeleteMsg structure
+    mov    [setWindowDeleteMsg.window], eax
+    mov    [setWindowDeleteMsg.data], ebx
+    mov    [setWindowDeleteMsg.property], ecx
+;Setup setWindowName structure
+    mov    [setWindowName.window], eax
+;Setup setWindowSizeHints structure
+    mov    [setWindowSizeHints.window], eax
+;Setup setWindowManagerHints
+    mov    [setWindowManagerHints.window], eax
+
+;WRITE( socketX, @setWindowDeleteMsg, 28 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [setWindowDeleteMsg]
+    mov    edx, 28 ;setWindowDeleteMsg.requestLength * 4
+    int    0x80
+;WRITE( socketX, @setWindowName, 44 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [setWindowName]
+    mov    edx, 44 ;setWindowName.requestLength * 4
+    int    0x80
+;WRITE( socketX, @setWindowSizeHints, 96 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [setWindowSizeHints]
+    mov    edx, 96 ;setWindowSizeHints.requestLength * 4
+    int    0x80
+;WRITE( socketX, @setWindowManagerHints, 60 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [setWindowManagerHints]
+    mov    edx, 60
+    int    0x80
+
+    mov    eax, [winMeanSubtracted.wid]
     mov    ebx, [WMDeleteMessage]
     mov    ecx, [WMProtocols]
 ;Setup setWindowDeleteMsg structure
@@ -914,9 +1021,19 @@ create_mainWindow_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-;Setup mapWindow structure
-;We will send this structure as the MapWindow request.
+;Setup mapWindow structure for the mainWindow
     mov    eax, [mainWindow.wid]
+    mov    [mapWindow.wid], eax
+
+;WRITE( socketX, @mapWindow, 8 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [mapWindow]
+    mov    edx, 8
+    int    0x80
+
+;Setup mapWindow structure for the winMeanSubtracted
+    mov    eax, [winMeanSubtracted.wid]
     mov    [mapWindow.wid], eax
 
 ;WRITE( socketX, @mapWindow, 8 )

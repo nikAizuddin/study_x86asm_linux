@@ -135,6 +135,93 @@ section .data
         .colorMap:           dd _CopyFromParent_
         .cursor:             dd _None_
 
+    createWindow_meanSubtracted:
+        .opcode:             db _REQUEST_CreateWindow_
+        .depth:              db _CopyFromParent_
+        .requestLength:      dw 23 ;( 8 + n ), n = no. of valuemask
+        .wid:                dd 0
+        .parent:             dd 0
+        .x:                  dw 120
+        .y:                  dw 120
+        .width:              dw _WIN_WIDTH_
+        .height:             dw _WIN_HEIGHT_
+        .borderWidth:        dw 0
+        .class:              dw _InputOutput_
+        .visual:             dd _CopyFromParent_
+                                ;bit  0 = background-pixmap
+                                ;bit  1 = background-pixel
+                                ;bit  2 = border-pixmap
+                                ;bit  3 = border-pixel
+                                ;bit  4 = bit-gravity
+                                ;bit  5 = win-gravity
+                                ;bit  6 = backing-store
+                                ;bit  7 = backing-planes
+                                ;bit  8 = backing-pixel
+                                ;bit  9 = override-redirect
+                                ;bit 10 = save-under
+                                ;bit 11 = event-mask
+                                ;bit 12 = do-not-propagate-mask
+                                ;bit 13 = colormap
+                                ;bit 14 = cursor
+        .valueMask:          dd 0b111111111111111
+        .backgroundPixmap:   dd _ParentRelative_
+        .backgroundPixel:    dd 0
+        .borderPixmap:       dd _CopyFromParent_
+        .borderPixel:        dd 0
+        .bitGravity:         dd _Forget_
+        .winGravity:         dd _NorthWest_
+        .backingStore:       dd _NotUseful_
+        .backingPlanes:      dd 0xffffffff
+        .backingPixel:       dd 0x00000000
+        .overrideRedirect:   dd _False_
+        .saveUnder:          dd _False_
+                                ;bit  0 = KeyPress
+                                ;bit  1 = KeyRelease
+                                ;bit  2 = ButtonPress
+                                ;bit  3 = ButtonRelease
+                                ;bit  4 = EnterWindow
+                                ;bit  5 = LeaveWindow
+                                ;bit  6 = PointerMotion
+                                ;bit  7 = PointerMotionHint
+                                ;bit  8 = Button1Motion
+                                ;bit  9 = Button2Motion
+                                ;bit 10 = Button3Motion
+                                ;bit 11 = Button4Motion
+                                ;bit 12 = Button5Motion
+                                ;bit 13 = ButtonMotion
+                                ;bit 14 = KeymapState
+                                ;bit 15 = Exposure
+                                ;bit 16 = VisibilityChange
+                                ;bit 17 = StructureNotify
+                                ;bit 18 = ResizeRedirect (OFF)
+                                ;bit 19 = SubstructureNotify
+                                ;bit 20 = SubstructureRedirect
+                                ;bit 21 = FocusChange
+                                ;bit 22 = PropertyChange
+                                ;bit 23 = ColormapChange
+                                ;bit 24 = OwnerGrabButton
+                                ;bit 25 - 31 = unused but must zero
+        .eventMask:          dd 0b1111110111111111111111111
+                                ;bit  0 = unused but must zero
+                                ;bit  1 = unused but must zero
+                                ;bit  2 = ButtonPress
+                                ;bit  3 = ButtonRelease
+                                ;bit  4 = EnterWindow
+                                ;bit  5 = LeaveWindow
+                                ;bit  6 = PointerMotion
+                                ;bit  7 = PointerMotionHint
+                                ;bit  8 = Button1Motion
+                                ;bit  9 = Button2Motion
+                                ;bit 10 = Button3Motion
+                                ;bit 11 = Button4Motion
+                                ;bit 12 = Button5Motion
+                                ;bit 13 = ButtonMotion
+                                ;bit 14 = KeymapState
+                                ;bit 15 - 31 = unused but must zero
+        .doNotPropagateMask: dd 0b000000000000000
+        .colorMap:           dd _CopyFromParent_
+        .cursor:             dd _None_
+
 
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ; Structure that is used to request GC.

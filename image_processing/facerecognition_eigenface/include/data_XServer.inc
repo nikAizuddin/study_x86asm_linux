@@ -10,38 +10,41 @@
 
 
 ; ---- Resource ID info ----------------------------------------------
-; mainWindow.wid            = XServer.ridBase + 0
-; graphicContext.cid        = XServer.ridBase + 1
+; mainWindow.wid               = XServer.ridBase + 0
+; graphicContext.cid           = XServer.ridBase + 1
 ;
-; mainWindow.s01_01_pid     = XServer.ridBase + 2
-; mainWindow.s01_02_pid     = XServer.ridBase + 3
-; mainWindow.s01_03_pid     = XServer.ridBase + 4
-; mainWindow.s01_04_pid     = XServer.ridBase + 5
-; mainWindow.s01_05_pid     = XServer.ridBase + 6
+; mainWindow.s01_01_pid        = XServer.ridBase + 2
+; mainWindow.s01_02_pid        = XServer.ridBase + 3
+; mainWindow.s01_03_pid        = XServer.ridBase + 4
+; mainWindow.s01_04_pid        = XServer.ridBase + 5
+; mainWindow.s01_05_pid        = XServer.ridBase + 6
 ;
-; mainWindow.s02_01_pid     = XServer.ridBase + 7
-; mainWindow.s02_02_pid     = XServer.ridBase + 8
-; mainWindow.s02_03_pid     = XServer.ridBase + 9
-; mainWindow.s02_04_pid     = XServer.ridBase + 10
-; mainWindow.s02_05_pid     = XServer.ridBase + 11
+; mainWindow.s02_01_pid        = XServer.ridBase + 7
+; mainWindow.s02_02_pid        = XServer.ridBase + 8
+; mainWindow.s02_03_pid        = XServer.ridBase + 9
+; mainWindow.s02_04_pid        = XServer.ridBase + 10
+; mainWindow.s02_05_pid        = XServer.ridBase + 11
 ;
-; mainWindow.s03_01_pid     = XServer.ridBase + 12
-; mainWindow.s03_02_pid     = XServer.ridBase + 13
-; mainWindow.s03_03_pid     = XServer.ridBase + 14
-; mainWindow.s03_04_pid     = XServer.ridBase + 15
-; mainWindow.s03_05_pid     = XServer.ridBase + 16
+; mainWindow.s03_01_pid        = XServer.ridBase + 12
+; mainWindow.s03_02_pid        = XServer.ridBase + 13
+; mainWindow.s03_03_pid        = XServer.ridBase + 14
+; mainWindow.s03_04_pid        = XServer.ridBase + 15
+; mainWindow.s03_05_pid        = XServer.ridBase + 16
 ;
-; mainWindow.s04_01_pid     = XServer.ridBase + 17
-; mainWindow.s04_02_pid     = XServer.ridBase + 18
-; mainWindow.s04_03_pid     = XServer.ridBase + 19
-; mainWindow.s04_04_pid     = XServer.ridBase + 20
-; mainWindow.s04_05_pid     = XServer.ridBase + 21
+; mainWindow.s04_01_pid        = XServer.ridBase + 17
+; mainWindow.s04_02_pid        = XServer.ridBase + 18
+; mainWindow.s04_03_pid        = XServer.ridBase + 19
+; mainWindow.s04_04_pid        = XServer.ridBase + 20
+; mainWindow.s04_05_pid        = XServer.ridBase + 21
 ;
-; mainWindow.s05_01_pid     = XServer.ridBase + 22
-; mainWindow.s05_02_pid     = XServer.ridBase + 23
-; mainWindow.s05_03_pid     = XServer.ridBase + 24
-; mainWindow.s05_04_pid     = XServer.ridBase + 25
-; mainWindow.s05_05_pid     = XServer.ridBase + 26
+; mainWindow.s05_01_pid        = XServer.ridBase + 22
+; mainWindow.s05_02_pid        = XServer.ridBase + 23
+; mainWindow.s05_03_pid        = XServer.ridBase + 24
+; mainWindow.s05_04_pid        = XServer.ridBase + 25
+; mainWindow.s05_05_pid        = XServer.ridBase + 26
+;
+; winMeanSubtracted.wid        = XServer.ridBase + (0x100000 + 0)
+; winMeanSubtracted.s01_01_pid = XServer.ridBase + (0x100000 + 1)
 ;
 ; --------------------------------------------------------------------
 

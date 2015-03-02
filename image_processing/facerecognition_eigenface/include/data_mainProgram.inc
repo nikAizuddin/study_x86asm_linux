@@ -70,6 +70,13 @@ section .bss
         .s05_05_pid:         resd 1
 
 
+    winMeanSubtracted:
+        .width:              resw 1
+        .height:             resw 1
+        .wid:                resd 1 ;window id
+        .cid:                resd 1 ;graphic context id
+
+
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ; Image file descriptor
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
