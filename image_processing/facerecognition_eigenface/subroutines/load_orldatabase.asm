@@ -9,7 +9,7 @@
 section .text
 
 
-load_orldatabase_s08_faces:
+load_orldatabase:
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

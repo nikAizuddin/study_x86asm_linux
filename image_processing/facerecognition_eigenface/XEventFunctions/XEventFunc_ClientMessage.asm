@@ -60,9 +60,9 @@ XEventFunc_ClientMessage:
 
 received_WindowDeleteMessage:
 
-    mov    eax, [mainWindow.wid]
-    mov    ebx, [mainWindow.cid]
-    mov    ecx, [mainWindow.s01_01_pid]
+    mov    eax, [winTrainingImages.wid]
+    mov    ebx, [winTrainingImages.cid]
+    mov    ecx, [winTrainingImages.s01_01_pid]
     mov    [destroyWindow.window], eax
     mov    [freeGC.gc], ebx
     mov    [freePixmap.pixmap], ecx

@@ -33,7 +33,7 @@ section .bss
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ; Structure for the main window
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    mainWindow:
+    winTrainingImages:
         .width:              resw 1
         .height:             resw 1
         .wid:                resd 1 ;window id
@@ -75,6 +75,36 @@ section .bss
         .height:             resw 1
         .wid:                resd 1 ;window id
         .cid:                resd 1 ;graphic context id
+
+        .s01_01_pid:         resd 1
+        .s01_02_pid:         resd 1
+        .s01_03_pid:         resd 1
+        .s01_04_pid:         resd 1
+        .s01_05_pid:         resd 1
+
+        .s02_01_pid:         resd 1
+        .s02_02_pid:         resd 1
+        .s02_03_pid:         resd 1
+        .s02_04_pid:         resd 1
+        .s02_05_pid:         resd 1
+
+        .s03_01_pid:         resd 1
+        .s03_02_pid:         resd 1
+        .s03_03_pid:         resd 1
+        .s03_04_pid:         resd 1
+        .s03_05_pid:         resd 1
+
+        .s04_01_pid:         resd 1
+        .s04_02_pid:         resd 1
+        .s04_03_pid:         resd 1
+        .s04_04_pid:         resd 1
+        .s04_05_pid:         resd 1
+
+        .s05_01_pid:         resd 1
+        .s05_02_pid:         resd 1
+        .s05_03_pid:         resd 1
+        .s05_04_pid:         resd 1
+        .s05_05_pid:         resd 1
 
 
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -149,41 +179,6 @@ section .bss
     s05_05_raw:
         .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_GRAY_)
 
-    align 16, resb 1
-    s06_01_raw:
-        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_GRAY_)
-    s06_02_raw:
-        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_GRAY_)
-    s06_03_raw:
-        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_GRAY_)
-    s06_04_raw:
-        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_GRAY_)
-    s06_05_raw:
-        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_GRAY_)
-
-    align 16, resb 1
-    s07_01_raw:
-        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_GRAY_)
-    s07_02_raw:
-        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_GRAY_)
-    s07_03_raw:
-        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_GRAY_)
-    s07_04_raw:
-        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_GRAY_)
-    s07_05_raw:
-        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_GRAY_)
-
-    align 16, resb 1
-    s08_01_raw:
-        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_GRAY_)
-    s08_02_raw:
-        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_GRAY_)
-    s08_03_raw:
-        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_GRAY_)
-    s08_04_raw:
-        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_GRAY_)
-    s08_05_raw:
-        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_GRAY_)
 
     align 16, resb 1
     XImage_s01_01:
@@ -243,6 +238,63 @@ section .bss
     XImage_s05_04:
         .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
     XImage_s05_05:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+
+
+    align 16, resb 1
+    XImage_s01_01_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s01_02_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s01_03_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s01_04_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s01_05_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+
+    XImage_s02_01_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s02_02_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s02_03_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s02_04_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s02_05_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+
+    XImage_s03_01_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s03_02_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s03_03_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s03_04_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s03_05_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+
+    XImage_s04_01_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s04_02_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s04_03_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s04_04_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s04_05_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+
+    XImage_s05_01_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s05_02_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s05_03_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s05_04_meanSubtracted:
+        .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
+    XImage_s05_05_meanSubtracted:
         .pixel:    resb (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
 
 
@@ -314,43 +366,6 @@ section .bss
     s05_05_float:
         .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
 
-    align 16, resb 1
-    s06_01_float:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s06_02_float:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s06_03_float:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s06_04_float:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s06_05_float:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-
-    align 16, resb 1
-    s07_01_float:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s07_02_float:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s07_03_float:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s07_04_float:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s07_05_float:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-
-    align 16, resb 1
-    s08_01_float:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s08_02_float:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s08_03_float:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s08_04_float:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s08_05_float:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-
-
     ;---- Mean subtracted single precision pixels --------------------
 
     align 16, resb 1
@@ -414,42 +429,6 @@ section .bss
         .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
 
     align 16, resb 1
-    s06_01_meanSubtracted:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s06_02_meanSubtracted:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s06_03_meanSubtracted:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s06_04_meanSubtracted:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s06_05_meanSubtracted:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-
-    align 16, resb 1
-    s07_01_meanSubtracted:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s07_02_meanSubtracted:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s07_03_meanSubtracted:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s07_04_meanSubtracted:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s07_05_meanSubtracted:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-
-    align 16, resb 1
-    s08_01_meanSubtracted:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s08_02_meanSubtracted:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s08_03_meanSubtracted:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s08_04_meanSubtracted:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-    s08_05_meanSubtracted:
-        .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_)
-
-    align 16, resb 1
     transpose_faceMatrix:
         .pixel:    resd (_IMG_WIDTH_*_IMG_HEIGHT_*_CHANNELS_BGRA_*15)
 
@@ -479,10 +458,10 @@ section .data
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     align 16, db 0
     meanDivisor:
-        .b:                  dd __float32__(15.0)
-        .g:                  dd __float32__(15.0)
-        .r:                  dd __float32__(15.0)
-        .a:                  dd __float32__(15.0)
+        .b:                  dd __float32__(25.0)
+        .g:                  dd __float32__(25.0)
+        .r:                  dd __float32__(25.0)
+        .a:                  dd __float32__(25.0)
 
     align 16, db 0
     maxPixelIntensity:

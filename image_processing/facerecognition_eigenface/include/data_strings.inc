@@ -207,5 +207,6 @@ section .data
     errmsg_set_nonBlocking:  db "ERR: Can't set to non-blocking ",0x0a
     errmsg_get_authStatus:   db "ERR: Can't get auth status     ",0x0a
     errmsg_authStatus:       db "ERR: Authentication failed     ",0x0a
-    errmsg_createMainWindow: db "ERR: Can't create mainWindow   ",0x0a
+    errmsg_createWinTImg:    db "ERR: createWindow_TrainingImg..",0x0a
+    errmsg_createWinMSubtr:  db "ERR: createWindow_MeanSubtrac..",0x0a
     errmsg_len:              dd 32

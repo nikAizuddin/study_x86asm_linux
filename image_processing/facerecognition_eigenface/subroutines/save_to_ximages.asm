@@ -746,3 +746,746 @@ endloop_save_XImage_s05_05:
 
 
 ;---------------------------------------------------------------------
+;---------------------------------------------------------------------
+;---------------------------------------------------------------------
+;---------------------------------------------------------------------
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s01_01_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s01_01_meanSubtracted.pixel]
+    lea    edi, [XImage_s01_01_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s01_01_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s01_01_meanSubtracted
+
+endloop_save_XImage_s01_01_meanSubtracted:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s01_02_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s01_02_meanSubtracted.pixel]
+    lea    edi, [XImage_s01_02_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s01_02_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s01_02_meanSubtracted
+
+endloop_save_XImage_s01_02_meanSubtracted:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s01_03_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s01_03_meanSubtracted.pixel]
+    lea    edi, [XImage_s01_03_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s01_03_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s01_03_meanSubtracted
+
+endloop_save_XImage_s01_03_meanSubtracted:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s01_04_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s01_04_meanSubtracted.pixel]
+    lea    edi, [XImage_s01_04_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s01_04_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s01_04_meanSubtracted
+
+endloop_save_XImage_s01_04_meanSubtracted:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s01_05_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s01_05_meanSubtracted.pixel]
+    lea    edi, [XImage_s01_05_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s01_05_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s01_05_meanSubtracted
+
+endloop_save_XImage_s01_05_meanSubtracted:
+
+
+;---------------------------------------------------------------------
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s02_01_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s02_01_meanSubtracted.pixel]
+    lea    edi, [XImage_s02_01_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s02_01_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s02_01_meanSubtracted
+
+endloop_save_XImage_s02_01_meanSubtracted:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s02_02_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s02_02_meanSubtracted.pixel]
+    lea    edi, [XImage_s02_02_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s02_02_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s02_02_meanSubtracted
+
+endloop_save_XImage_s02_02_meanSubtracted:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s02_03_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s02_03_meanSubtracted.pixel]
+    lea    edi, [XImage_s02_03_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s02_03_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s02_03_meanSubtracted
+
+endloop_save_XImage_s02_03_meanSubtracted:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s02_04_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s02_04_meanSubtracted.pixel]
+    lea    edi, [XImage_s02_04_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s02_04_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s02_04_meanSubtracted
+
+endloop_save_XImage_s02_04_meanSubtracted:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s02_05_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s02_05_meanSubtracted.pixel]
+    lea    edi, [XImage_s02_05_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s02_05_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s02_05_meanSubtracted
+
+endloop_save_XImage_s02_05_meanSubtracted:
+
+
+;---------------------------------------------------------------------
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s03_01_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s03_01_meanSubtracted.pixel]
+    lea    edi, [XImage_s03_01_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s03_01_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s03_01_meanSubtracted
+
+endloop_save_XImage_s03_01_meanSubtracted:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s03_02_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s03_02_meanSubtracted.pixel]
+    lea    edi, [XImage_s03_02_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s03_02_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s03_02_meanSubtracted
+
+endloop_save_XImage_s03_02_meanSubtracted:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s03_03_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s03_03_meanSubtracted.pixel]
+    lea    edi, [XImage_s03_03_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s03_03_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s03_03_meanSubtracted
+
+endloop_save_XImage_s03_03_meanSubtracted:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s03_04_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s03_04_meanSubtracted.pixel]
+    lea    edi, [XImage_s03_04_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s03_04_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s03_04_meanSubtracted
+
+endloop_save_XImage_s03_04_meanSubtracted:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s03_05_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s03_05_meanSubtracted.pixel]
+    lea    edi, [XImage_s03_05_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s03_05_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s03_05_meanSubtracted
+
+endloop_save_XImage_s03_05_meanSubtracted:
+
+
+;---------------------------------------------------------------------
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s04_01_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s04_01_meanSubtracted.pixel]
+    lea    edi, [XImage_s04_01_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s04_01_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s04_01_meanSubtracted
+
+endloop_save_XImage_s04_01_meanSubtracted:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s04_02_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s04_02_meanSubtracted.pixel]
+    lea    edi, [XImage_s04_02_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s04_02_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s04_02_meanSubtracted
+
+endloop_save_XImage_s04_02_meanSubtracted:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s04_03_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s04_03_meanSubtracted.pixel]
+    lea    edi, [XImage_s04_03_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s04_03_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s04_03_meanSubtracted
+
+endloop_save_XImage_s04_03_meanSubtracted:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s04_04_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s04_04_meanSubtracted.pixel]
+    lea    edi, [XImage_s04_04_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s04_04_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s04_04_meanSubtracted
+
+endloop_save_XImage_s04_04_meanSubtracted:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s04_05_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s04_05_meanSubtracted.pixel]
+    lea    edi, [XImage_s04_05_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s04_05_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s04_05_meanSubtracted
+
+endloop_save_XImage_s04_05_meanSubtracted:
+
+
+;---------------------------------------------------------------------
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s05_01_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s05_01_meanSubtracted.pixel]
+    lea    edi, [XImage_s05_01_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s05_01_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s05_01_meanSubtracted
+
+endloop_save_XImage_s05_01_meanSubtracted:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s05_02_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s05_02_meanSubtracted.pixel]
+    lea    edi, [XImage_s05_02_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s05_02_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s05_02_meanSubtracted
+
+endloop_save_XImage_s05_02_meanSubtracted:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s05_03_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s05_03_meanSubtracted.pixel]
+    lea    edi, [XImage_s05_03_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s05_03_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s05_03_meanSubtracted
+
+endloop_save_XImage_s05_03_meanSubtracted:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s05_04_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s05_04_meanSubtracted.pixel]
+    lea    edi, [XImage_s05_04_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s05_04_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s05_04_meanSubtracted
+
+endloop_save_XImage_s05_04_meanSubtracted:
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Save to XImage_s05_05_meanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    lea    esi, [s05_05_meanSubtracted.pixel]
+    lea    edi, [XImage_s05_05_meanSubtracted.pixel]
+    mov    ecx, (_IMG_WIDTH_*_IMG_HEIGHT_)
+
+loop_save_XImage_s05_05_meanSubtracted:
+
+    movdqa xmm0, [esi]
+
+    cvtps2dq xmm0, xmm0 ;Convert single-precision to dword
+    packssdw xmm0, xmm0 ;Convert dword to word
+    packuswb xmm0, xmm0 ;Convert word to byte
+
+    movd    [edi], xmm0
+
+    add    esi, _COLUMNSIZE_32_BGRA_
+    add    edi, _COLUMNSIZE_8_BGRA_
+
+    sub    ecx, 1
+    jnz    loop_save_XImage_s05_05_meanSubtracted
+
+endloop_save_XImage_s05_05_meanSubtracted:
+
+
+;---------------------------------------------------------------------

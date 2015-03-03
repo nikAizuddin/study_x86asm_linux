@@ -43,8 +43,38 @@
 ; mainWindow.s05_04_pid        = XServer.ridBase + 25
 ; mainWindow.s05_05_pid        = XServer.ridBase + 26
 ;
-; winMeanSubtracted.wid        = XServer.ridBase + (0x100000 + 0)
-; winMeanSubtracted.s01_01_pid = XServer.ridBase + (0x100000 + 1)
+; winMeanSubtracted.wid        = XServer.ridBase + (0x100000 +  0)
+; winMeanSubtracted.cid        = XServer.ridBase + (0x100000 +  1)
+;
+; winMeanSubtracted.s01_01_pid = XServer.ridBase + (0x100000 +  2)
+; winMeanSubtracted.s01_02_pid = XServer.ridBase + (0x100000 +  3)
+; winMeanSubtracted.s01_03_pid = XServer.ridBase + (0x100000 +  4)
+; winMeanSubtracted.s01_04_pid = XServer.ridBase + (0x100000 +  5)
+; winMeanSubtracted.s01_05_pid = XServer.ridBase + (0x100000 +  6)
+;
+; winMeanSubtracted.s02_01_pid = XServer.ridBase + (0x100000 +  7)
+; winMeanSubtracted.s02_02_pid = XServer.ridBase + (0x100000 +  8)
+; winMeanSubtracted.s02_03_pid = XServer.ridBase + (0x100000 +  9)
+; winMeanSubtracted.s02_04_pid = XServer.ridBase + (0x100000 + 10)
+; winMeanSubtracted.s02_05_pid = XServer.ridBase + (0x100000 + 11)
+;
+; winMeanSubtracted.s03_01_pid = XServer.ridBase + (0x100000 + 12)
+; winMeanSubtracted.s03_02_pid = XServer.ridBase + (0x100000 + 13)
+; winMeanSubtracted.s03_03_pid = XServer.ridBase + (0x100000 + 14)
+; winMeanSubtracted.s03_04_pid = XServer.ridBase + (0x100000 + 15)
+; winMeanSubtracted.s03_05_pid = XServer.ridBase + (0x100000 + 16)
+;
+; winMeanSubtracted.s04_01_pid = XServer.ridBase + (0x100000 + 17)
+; winMeanSubtracted.s04_02_pid = XServer.ridBase + (0x100000 + 18)
+; winMeanSubtracted.s04_03_pid = XServer.ridBase + (0x100000 + 19)
+; winMeanSubtracted.s04_04_pid = XServer.ridBase + (0x100000 + 20)
+; winMeanSubtracted.s04_05_pid = XServer.ridBase + (0x100000 + 21)
+;
+; winMeanSubtracted.s05_01_pid = XServer.ridBase + (0x100000 + 22)
+; winMeanSubtracted.s05_02_pid = XServer.ridBase + (0x100000 + 23)
+; winMeanSubtracted.s05_03_pid = XServer.ridBase + (0x100000 + 24)
+; winMeanSubtracted.s05_04_pid = XServer.ridBase + (0x100000 + 25)
+; winMeanSubtracted.s05_05_pid = XServer.ridBase + (0x100000 + 26)
 ;
 ; --------------------------------------------------------------------
 

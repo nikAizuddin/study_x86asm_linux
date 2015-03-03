@@ -48,7 +48,7 @@ section .data
     ; Structure for CreateWindow request. The program will send
     ; this structure to the X Server to create the mainWindow.
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    create_mainWindow:
+    createWindow_TrainingImages:
         .opcode:             db _REQUEST_CreateWindow_
         .depth:              db _CopyFromParent_
         .requestLength:      dw 23 ;( 8 + n ), n = no. of valuemask
@@ -141,7 +141,7 @@ section .data
         .requestLength:      dw 23 ;( 8 + n ), n = no. of valuemask
         .wid:                dd 0
         .parent:             dd 0
-        .x:                  dw 120
+        .x:                  dw 200
         .y:                  dw 120
         .width:              dw _WIN_WIDTH_
         .height:             dw _WIN_HEIGHT_
@@ -226,7 +226,39 @@ section .data
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ; Structure that is used to request GC.
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    create_graphicContext:
+    createGraphicContext_winTrainingImages:
+        .opcode:             db _REQUEST_CreateGC_
+        .unused_01:          db 0
+        .requestLength:      dw (4+1)
+        .cid:                dd 0
+        .drawable:           dd 0 ;drawable on which window ID ?
+                                ;bit  0 = function
+                                ;bit  1 = plane-mask
+                                ;bit  2 = foreground
+                                ;bit  3 = background
+                                ;bit  4 = line-width
+                                ;bit  5 = line-style
+                                ;bit  6 = cap-style
+                                ;bit  7 = join-style
+                                ;bit  8 = fill-style
+                                ;bit  9 = fill-rule
+                                ;bit 10 = tile
+                                ;bit 11 = stipple
+                                ;bit 12 = tile-stipple-x-origin
+                                ;bit 13 = tile-stipple-y-origin
+                                ;bit 14 = font
+                                ;bit 15 = subwindow-mode
+                                ;bit 16 = graphics-exposures
+                                ;bit 17 = clip-x-origin
+                                ;bit 18 = clip-y-origin
+                                ;bit 19 = clip-mask
+                                ;bit 20 = dash-offset
+                                ;bit 21 = dashes
+                                ;bit 22 = arc-mode
+        .valueMask:          dd 0b00000000000000000000001
+        .function:           dd 3
+
+    createGraphicContext_winMeanSubtracted:
         .opcode:             db _REQUEST_CreateGC_
         .unused_01:          db 0
         .requestLength:      dw (4+1)
@@ -1280,6 +1312,357 @@ section .data
         .height:             dw _IMG_HEIGHT_
 
 
+    copyArea_s01_01_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 0
+        .dstY:               dw 0
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s01_02_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 92
+        .dstY:               dw 0
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s01_03_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 184
+        .dstY:               dw 0
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s01_04_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 276
+        .dstY:               dw 0
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s01_05_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 368
+        .dstY:               dw 0
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s02_01_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 0
+        .dstY:               dw 112
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s02_02_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 92
+        .dstY:               dw 112
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s02_03_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 184
+        .dstY:               dw 112
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s02_04_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 276
+        .dstY:               dw 112
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s02_05_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 368
+        .dstY:               dw 112
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s03_01_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 0
+        .dstY:               dw 224
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s03_02_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 92
+        .dstY:               dw 224
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s03_03_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 184
+        .dstY:               dw 224
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s03_04_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 276
+        .dstY:               dw 224
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s03_05_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 368
+        .dstY:               dw 224
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s04_01_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 0
+        .dstY:               dw 336
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s04_02_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 92
+        .dstY:               dw 336
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s04_03_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 184
+        .dstY:               dw 336
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s04_04_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 276
+        .dstY:               dw 336
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s04_05_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 368
+        .dstY:               dw 336
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s05_01_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 0
+        .dstY:               dw 448
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s05_02_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 92
+        .dstY:               dw 448
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s05_03_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 184
+        .dstY:               dw 448
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s05_04_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 276
+        .dstY:               dw 448
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+    copyArea_s05_05_meanSubtracted:
+        .opcode:             db _REQUEST_CopyArea_
+        .unused:             db 0
+        .requestLength:      dw 7
+        .srcDrawable:        dd 0
+        .dstDrawable:        dd 0
+        .gc:                 dd 0
+        .srcX:               dw 0
+        .srcY:               dw 0
+        .dstX:               dw 368
+        .dstY:               dw 448
+        .width:              dw _IMG_WIDTH_
+        .height:             dw _IMG_HEIGHT_
+
+
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ; Clear the area (unused)
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1325,7 +1708,20 @@ section .data
         .format:             db 8
         .unused_01:          db 0,0,0
         .lengthOfData:       dd 19
-        .data:               db "DB Training Images"
+        .data:               db "Training Images   "
+        .unused_02:          db 0
+
+    setWindowName_meanSubtracted:
+        .opcode:             db _REQUEST_ChangeProperty_
+        .mode:               db _Replace_
+        .requestLength:      dw 11 ;11 = 44 / 4
+        .window:             dd 0
+        .property:           dd _XA_WM_NAME_
+        .type:               dd _XA_STRING_
+        .format:             db 8
+        .unused_01:          db 0,0,0
+        .lengthOfData:       dd 19
+        .data:               db "Mean Subtracted   "
         .unused_02:          db 0
 
 

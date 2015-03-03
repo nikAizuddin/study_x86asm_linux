@@ -54,7 +54,7 @@ XEventFunc_DestroyNotify:
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     mov    eax, [XEvent_DestroyNotify.window]
-    mov    ebx, [mainWindow.wid]
+    mov    ebx, [winTrainingImages.wid]
     cmp    eax, ebx
     jne    mainWindow_isnt_destroyed
 

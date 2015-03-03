@@ -381,11 +381,12 @@ authStatus_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Make sure the X Server is ready to receive requests.
-;   When the server is ready, we will request CreateWindow.
+;   Request CreateWindow.
+;   This request will create the mainWindow.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+;Make sure the X Server is ready to receive requests.
 ;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    ebx, _POLLOUT_
     mov    [poll.events], bx
@@ -395,30 +396,22 @@ authStatus_success:
     mov    edx, _POLL_INFINITE_TIMEOUT_
     int    0x80
 
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;   Request CreateWindow.
-;   This request will create the mainWindow.
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 ;Initialize create_mainWindow structure, we will pass
 ;this structure as the CreateWindow request.
     mov    eax, [XServer.ridBase]
     mov    ebx, [XScreen.root]
     mov    ecx, [XScreen.blackPixel]
     mov    edx, [XScreen.whitePixel]
-    mov    [create_mainWindow.wid], eax
-    mov    [create_mainWindow.parent], ebx
-    mov    [create_mainWindow.backgroundPixel], ecx
-    mov    [create_mainWindow.borderPixel], edx
+    mov    [createWindow_TrainingImages.wid], eax
+    mov    [createWindow_TrainingImages.parent], ebx
+    mov    [createWindow_TrainingImages.backgroundPixel], ecx
+    mov    [createWindow_TrainingImages.borderPixel], edx
 
 ;WRITE( socketX, @create_mainWindow, create_main...requestLength*4 )
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
-    lea    ecx, [create_mainWindow]
-    mov    edx, [create_mainWindow.requestLength]
+    lea    ecx, [createWindow_TrainingImages]
+    mov    edx, [createWindow_TrainingImages.requestLength]
     lea    edx, [edx * 4]
     int    0x80
 
@@ -435,7 +428,9 @@ authStatus_success:
     mov    edx, _POLL_SHORT_TIMEOUT_
     int    0x80
 
-;Check if poll.revents == _POLLIN_
+;Check if poll.revents == _POLLIN_,
+;thats mean there are something wrong, and server
+;will return error code.
     xor    eax, eax
     mov    ax, [poll.revents]
     mov    ebx, _POLLIN_
@@ -453,23 +448,23 @@ create_mainWindow_fail:
     mov    edx, 32
     int    0x80
 
-;WRITE( _STDOUT_, @errmsg_createMainWindow, errmsg_len )
+;WRITE( _STDOUT_, @errmsg_createWinTImg, errmsg_len )
 ;Notify user about the error.
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, _STDOUT_
-    lea    ecx, [errmsg_createMainWindow]
+    lea    ecx, [errmsg_createWinTImg]
     mov    edx, [errmsg_len]
     int    0x80
     jmp    exit_failure
 
 create_mainWindow_success:
 
-    mov    eax, [create_mainWindow.wid]
-    movzx  bx, [create_mainWindow.width]
-    movzx  cx, [create_mainWindow.height]
-    mov    [mainWindow.wid], eax
-    mov    [mainWindow.width], bx
-    mov    [mainWindow.height], cx
+    mov    eax, [createWindow_TrainingImages.wid]
+    movzx  bx, [createWindow_TrainingImages.width]
+    movzx  cx, [createWindow_TrainingImages.height]
+    mov    [winTrainingImages.wid], eax
+    mov    [winTrainingImages.width], bx
+    mov    [winTrainingImages.height], cx
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -478,7 +473,7 @@ create_mainWindow_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-;Make sure the X Server is ready to receive the next request.
+;Make sure the X Server is ready to receive the request.
 ;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    ebx, _POLLOUT_
     mov    [poll.events], bx
@@ -538,11 +533,11 @@ createWindow_meanSubtracted_fail:
     mov    edx, 32
     int    0x80
 
-;WRITE( _STDOUT_, @errmsg_createMainWindow, errmsg_len )
+;WRITE( _STDOUT_, @errmsg_createWinMSubtr, errmsg_len )
 ;Notify user about the error.
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, _STDOUT_
-    lea    ecx, [errmsg_createMainWindow]
+    lea    ecx, [errmsg_createWinMSubtr]
     mov    edx, [errmsg_len]
     int    0x80
     jmp    exit_failure
@@ -566,7 +561,7 @@ createWindow_meanSubtracted_success:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-;Make sure the X Server is ready to receive the next request.
+;Make sure the X Server is ready to receive the request.
 ;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    ebx, _POLLOUT_
     mov    [poll.events], bx
@@ -586,11 +581,11 @@ createWindow_meanSubtracted_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Wait for the X Server to process the InternAtom request, and
-;   become ready to send reply.
+;   Receive the requested WM_DELETE_WINDOW atom.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+;But, wait for the X Server to process the InternAtom request.
 ;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    ebx, _POLLIN_
     mov    [poll.events], bx
@@ -600,13 +595,7 @@ createWindow_meanSubtracted_success:
     mov    edx, _POLL_INFINITE_TIMEOUT_
     int    0x80
 
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;   Receive the requested WM_DELETE_WINDOW atom.
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+;Okay, X Server is ready and now receive the WM_DELETE_WINDOW atom.
 ;READ( socketX, @InternAtom_reply, 32 )
     mov    eax, _SYSCALL_READ_
     mov    ebx, [socketX]
@@ -614,24 +603,9 @@ createWindow_meanSubtracted_success:
     mov    edx, 32
     int    0x80
 
+;Save the atom
     mov    eax, [InternAtom_reply.atom]
     mov    [WMDeleteMessage], eax
-
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;   Make sure the X Server is ready to receive the next request.
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-;POLL( [poll.fd, poll.events], 1, _POLL_INFINITE_TIMEOUT_ )
-    mov    ebx, _POLLOUT_
-    mov    [poll.events], bx
-    mov    eax, _SYSCALL_POLL_
-    lea    ebx, [poll]
-    mov    ecx, 1
-    mov    edx, _POLL_INFINITE_TIMEOUT_
-    int    0x80
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -641,6 +615,16 @@ createWindow_meanSubtracted_success:
 ;   WM_DELETE_WINDOW atom.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+;Make sure the X Server is ready to receive next request.
+;POLL( [poll.fd, poll.events], 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    ebx, _POLLOUT_
+    mov    [poll.events], bx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
 
 ;WRITE( socketX, @getWMProtocols, 20 )
     mov    eax, _SYSCALL_WRITE_
@@ -652,11 +636,11 @@ createWindow_meanSubtracted_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Wait for the X Server to process the InternAtom request, and
-;   become ready to send reply.
+;   Receive the requested WM_PROTOCOLS property atom.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+;Wait for the X Server to process the InternAtom request
 ;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    ebx, _POLLIN_
     mov    [poll.events], bx
@@ -666,13 +650,8 @@ createWindow_meanSubtracted_success:
     mov    edx, _POLL_INFINITE_TIMEOUT_
     int    0x80
 
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;   Receive the requested WM_PROTOCOLS property atom.
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+;Okay, X Server has process the request, and the program can now
+;receive the atom.
 ;READ( socketX, @InternAtom_reply, 32 )
     mov    eax, _SYSCALL_READ_
     mov    ebx, [socketX]
@@ -680,16 +659,19 @@ createWindow_meanSubtracted_success:
     mov    edx, 32
     int    0x80
 
+;Save the atom
     mov    eax, [InternAtom_reply.atom]
     mov    [WMProtocols], eax
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Make sure the X Server is ready to receive the next request.
+;   Create X Graphic Context (GC) for winTrainingImages.
+;   Graphic Context (GC) is needed for PutImage request.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+;Make sure the X Server is ready to receive the request.
 ;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
     mov    ebx, _POLLOUT_
     mov    [poll.events], bx
@@ -699,31 +681,62 @@ createWindow_meanSubtracted_success:
     mov    edx, _POLL_INFINITE_TIMEOUT_
     int    0x80
 
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;   Create the graphic context using CreateGC request.
-;   Graphic Context (GC) is needed for PutImage request.
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 ;Setup graphicContext structure.
 ;We will send this structure as CreateGC request.
     mov    eax, [XServer.ridBase]
     add    eax, 1
-    mov    ebx, [mainWindow.wid]
-    mov    [create_graphicContext.cid], eax
-    mov    [create_graphicContext.drawable], ebx
+    mov    ebx, [winTrainingImages.wid]
+    mov    [createGraphicContext_winTrainingImages.cid], eax
+    mov    [createGraphicContext_winTrainingImages.drawable], ebx
 
+;Request X Graphic Context
 ;WRITE( socketX, @create_graphicContext, 20 )
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
-    lea    ecx, [create_graphicContext]
+    lea    ecx, [createGraphicContext_winTrainingImages]
     mov    edx, 20
     int    0x80
 
-    mov    eax, [create_graphicContext.cid]
-    mov    [mainWindow.cid], eax
+;Save the winTrainingImages X Graphic Context ID
+    mov    eax, [createGraphicContext_winTrainingImages.cid]
+    mov    [winTrainingImages.cid], eax
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
+;   Create X Graphic Context (GC) for winMeanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+;Make sure the X Server is ready to receive the request.
+;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
+    mov    ebx, _POLLOUT_
+    mov    [poll.events], bx
+    mov    eax, _SYSCALL_POLL_
+    lea    ebx, [poll]
+    mov    ecx, 1
+    mov    edx, _POLL_INFINITE_TIMEOUT_
+    int    0x80
+
+;Setup graphicContext structure.
+;We will send this structure as CreateGC request.
+    mov    eax, [XServer.ridBase]
+    add    eax, (0x100000 + 1)
+    mov    ebx, [winMeanSubtracted.wid]
+    mov    [createGraphicContext_winMeanSubtracted.cid], eax
+    mov    [createGraphicContext_winMeanSubtracted.drawable], ebx
+
+;Request X Graphic Context
+;WRITE( socketX, @create_graphicContext, 20 )
+    mov    eax, _SYSCALL_WRITE_
+    mov    ebx, [socketX]
+    lea    ecx, [createGraphicContext_winMeanSubtracted]
+    mov    edx, 20
+    int    0x80
+
+;Save the winTrainingImages X Graphic Context ID
+    mov    eax, [createGraphicContext_winMeanSubtracted.cid]
+    mov    [winMeanSubtracted.cid], eax
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -731,7 +744,7 @@ createWindow_meanSubtracted_success:
 ;   Load ORL Database image.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-%include "subroutines/load_orldatabase_s08_faces.asm"
+%include "subroutines/load_orldatabase.asm"
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -760,77 +773,61 @@ createWindow_meanSubtracted_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
-;   Make sure the X Server is ready to receive the next request.
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-;POLL( @poll, 1, _POLL_INFINITE_TIMEOUT_ )
-    mov    ebx, _POLLOUT_
-    mov    [poll.events], bx
-    mov    eax, _SYSCALL_POLL_
-    lea    ebx, [poll]
-    mov    ecx, 1
-    mov    edx, _POLL_INFINITE_TIMEOUT_
-    int    0x80
-
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;   Initialize copyArea structures
+;   Initialize copyArea structures for winTrainingImages
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ;Initialize copyArea_s01_01 structure
 
-    mov    eax, [mainWindow.s01_01_pid] ;src=pixmap
-    mov    ebx, [mainWindow.s01_02_pid]
-    mov    ecx, [mainWindow.s01_03_pid]
-    mov    edx, [mainWindow.s01_04_pid]
-    mov    esi, [mainWindow.s01_05_pid]
+    mov    eax, [winTrainingImages.s01_01_pid] ;src=pixmap
+    mov    ebx, [winTrainingImages.s01_02_pid]
+    mov    ecx, [winTrainingImages.s01_03_pid]
+    mov    edx, [winTrainingImages.s01_04_pid]
+    mov    esi, [winTrainingImages.s01_05_pid]
     mov    [copyArea_s01_01.srcDrawable], eax
     mov    [copyArea_s01_02.srcDrawable], ebx
     mov    [copyArea_s01_03.srcDrawable], ecx
     mov    [copyArea_s01_04.srcDrawable], edx
     mov    [copyArea_s01_05.srcDrawable], esi
 
-    mov    eax, [mainWindow.s02_01_pid]
-    mov    ebx, [mainWindow.s02_02_pid]
-    mov    ecx, [mainWindow.s02_03_pid]
-    mov    edx, [mainWindow.s02_04_pid]
-    mov    esi, [mainWindow.s02_05_pid]
+    mov    eax, [winTrainingImages.s02_01_pid]
+    mov    ebx, [winTrainingImages.s02_02_pid]
+    mov    ecx, [winTrainingImages.s02_03_pid]
+    mov    edx, [winTrainingImages.s02_04_pid]
+    mov    esi, [winTrainingImages.s02_05_pid]
     mov    [copyArea_s02_01.srcDrawable], eax
     mov    [copyArea_s02_02.srcDrawable], ebx
     mov    [copyArea_s02_03.srcDrawable], ecx
     mov    [copyArea_s02_04.srcDrawable], edx
     mov    [copyArea_s02_05.srcDrawable], esi
 
-    mov    eax, [mainWindow.s03_01_pid]
-    mov    ebx, [mainWindow.s03_02_pid]
-    mov    ecx, [mainWindow.s03_03_pid]
-    mov    edx, [mainWindow.s03_04_pid]
-    mov    esi, [mainWindow.s03_05_pid]
+    mov    eax, [winTrainingImages.s03_01_pid]
+    mov    ebx, [winTrainingImages.s03_02_pid]
+    mov    ecx, [winTrainingImages.s03_03_pid]
+    mov    edx, [winTrainingImages.s03_04_pid]
+    mov    esi, [winTrainingImages.s03_05_pid]
     mov    [copyArea_s03_01.srcDrawable], eax
     mov    [copyArea_s03_02.srcDrawable], ebx
     mov    [copyArea_s03_03.srcDrawable], ecx
     mov    [copyArea_s03_04.srcDrawable], edx
     mov    [copyArea_s03_05.srcDrawable], esi
 
-    mov    eax, [mainWindow.s04_01_pid]
-    mov    ebx, [mainWindow.s04_02_pid]
-    mov    ecx, [mainWindow.s04_03_pid]
-    mov    edx, [mainWindow.s04_04_pid]
-    mov    esi, [mainWindow.s04_05_pid]
+    mov    eax, [winTrainingImages.s04_01_pid]
+    mov    ebx, [winTrainingImages.s04_02_pid]
+    mov    ecx, [winTrainingImages.s04_03_pid]
+    mov    edx, [winTrainingImages.s04_04_pid]
+    mov    esi, [winTrainingImages.s04_05_pid]
     mov    [copyArea_s04_01.srcDrawable], eax
     mov    [copyArea_s04_02.srcDrawable], ebx
     mov    [copyArea_s04_03.srcDrawable], ecx
     mov    [copyArea_s04_04.srcDrawable], edx
     mov    [copyArea_s04_05.srcDrawable], esi
 
-    mov    eax, [mainWindow.s05_01_pid]
-    mov    ebx, [mainWindow.s05_02_pid]
-    mov    ecx, [mainWindow.s05_03_pid]
-    mov    edx, [mainWindow.s05_04_pid]
-    mov    esi, [mainWindow.s05_05_pid]
+    mov    eax, [winTrainingImages.s05_01_pid]
+    mov    ebx, [winTrainingImages.s05_02_pid]
+    mov    ecx, [winTrainingImages.s05_03_pid]
+    mov    edx, [winTrainingImages.s05_04_pid]
+    mov    esi, [winTrainingImages.s05_05_pid]
     mov    [copyArea_s05_01.srcDrawable], eax
     mov    [copyArea_s05_02.srcDrawable], ebx
     mov    [copyArea_s05_03.srcDrawable], ecx
@@ -838,7 +835,7 @@ createWindow_meanSubtracted_success:
     mov    [copyArea_s05_05.srcDrawable], esi
 
 
-    mov    eax, [mainWindow.wid] ;dst=window
+    mov    eax, [winTrainingImages.wid] ;dst=window
     mov    [copyArea_s01_01.dstDrawable], eax
     mov    [copyArea_s01_02.dstDrawable], eax
     mov    [copyArea_s01_03.dstDrawable], eax
@@ -870,7 +867,7 @@ createWindow_meanSubtracted_success:
     mov    [copyArea_s05_05.dstDrawable], eax
 
 
-    mov    eax, [mainWindow.cid]
+    mov    eax, [winTrainingImages.cid]
     mov    [copyArea_s01_01.gc], eax
     mov    [copyArea_s01_02.gc], eax
     mov    [copyArea_s01_03.gc], eax
@@ -904,6 +901,130 @@ createWindow_meanSubtracted_success:
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
+;   Initialize copyArea structures for winMeanSubtracted
+;
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    mov    eax, [winMeanSubtracted.s01_01_pid] ;src=pixmap
+    mov    ebx, [winMeanSubtracted.s01_02_pid]
+    mov    ecx, [winMeanSubtracted.s01_03_pid]
+    mov    edx, [winMeanSubtracted.s01_04_pid]
+    mov    esi, [winMeanSubtracted.s01_05_pid]
+    mov    [copyArea_s01_01_meanSubtracted.srcDrawable], eax
+    mov    [copyArea_s01_02_meanSubtracted.srcDrawable], ebx
+    mov    [copyArea_s01_03_meanSubtracted.srcDrawable], ecx
+    mov    [copyArea_s01_04_meanSubtracted.srcDrawable], edx
+    mov    [copyArea_s01_05_meanSubtracted.srcDrawable], esi
+
+    mov    eax, [winMeanSubtracted.s02_01_pid]
+    mov    ebx, [winMeanSubtracted.s02_02_pid]
+    mov    ecx, [winMeanSubtracted.s02_03_pid]
+    mov    edx, [winMeanSubtracted.s02_04_pid]
+    mov    esi, [winMeanSubtracted.s02_05_pid]
+    mov    [copyArea_s02_01_meanSubtracted.srcDrawable], eax
+    mov    [copyArea_s02_02_meanSubtracted.srcDrawable], ebx
+    mov    [copyArea_s02_03_meanSubtracted.srcDrawable], ecx
+    mov    [copyArea_s02_04_meanSubtracted.srcDrawable], edx
+    mov    [copyArea_s02_05_meanSubtracted.srcDrawable], esi
+
+    mov    eax, [winMeanSubtracted.s03_01_pid]
+    mov    ebx, [winMeanSubtracted.s03_02_pid]
+    mov    ecx, [winMeanSubtracted.s03_03_pid]
+    mov    edx, [winMeanSubtracted.s03_04_pid]
+    mov    esi, [winMeanSubtracted.s03_05_pid]
+    mov    [copyArea_s03_01_meanSubtracted.srcDrawable], eax
+    mov    [copyArea_s03_02_meanSubtracted.srcDrawable], ebx
+    mov    [copyArea_s03_03_meanSubtracted.srcDrawable], ecx
+    mov    [copyArea_s03_04_meanSubtracted.srcDrawable], edx
+    mov    [copyArea_s03_05_meanSubtracted.srcDrawable], esi
+
+    mov    eax, [winMeanSubtracted.s04_01_pid]
+    mov    ebx, [winMeanSubtracted.s04_02_pid]
+    mov    ecx, [winMeanSubtracted.s04_03_pid]
+    mov    edx, [winMeanSubtracted.s04_04_pid]
+    mov    esi, [winMeanSubtracted.s04_05_pid]
+    mov    [copyArea_s04_01_meanSubtracted.srcDrawable], eax
+    mov    [copyArea_s04_02_meanSubtracted.srcDrawable], ebx
+    mov    [copyArea_s04_03_meanSubtracted.srcDrawable], ecx
+    mov    [copyArea_s04_04_meanSubtracted.srcDrawable], edx
+    mov    [copyArea_s04_05_meanSubtracted.srcDrawable], esi
+
+    mov    eax, [winMeanSubtracted.s05_01_pid]
+    mov    ebx, [winMeanSubtracted.s05_02_pid]
+    mov    ecx, [winMeanSubtracted.s05_03_pid]
+    mov    edx, [winMeanSubtracted.s05_04_pid]
+    mov    esi, [winMeanSubtracted.s05_05_pid]
+    mov    [copyArea_s05_01_meanSubtracted.srcDrawable], eax
+    mov    [copyArea_s05_02_meanSubtracted.srcDrawable], ebx
+    mov    [copyArea_s05_03_meanSubtracted.srcDrawable], ecx
+    mov    [copyArea_s05_04_meanSubtracted.srcDrawable], edx
+    mov    [copyArea_s05_05_meanSubtracted.srcDrawable], esi
+
+    mov    eax, [winMeanSubtracted.wid] ;dst=window
+    mov    [copyArea_s01_01_meanSubtracted.dstDrawable], eax
+    mov    [copyArea_s01_02_meanSubtracted.dstDrawable], eax
+    mov    [copyArea_s01_03_meanSubtracted.dstDrawable], eax
+    mov    [copyArea_s01_04_meanSubtracted.dstDrawable], eax
+    mov    [copyArea_s01_05_meanSubtracted.dstDrawable], eax
+
+    mov    [copyArea_s02_01_meanSubtracted.dstDrawable], eax
+    mov    [copyArea_s02_02_meanSubtracted.dstDrawable], eax
+    mov    [copyArea_s02_03_meanSubtracted.dstDrawable], eax
+    mov    [copyArea_s02_04_meanSubtracted.dstDrawable], eax
+    mov    [copyArea_s02_05_meanSubtracted.dstDrawable], eax
+
+    mov    [copyArea_s03_01_meanSubtracted.dstDrawable], eax
+    mov    [copyArea_s03_02_meanSubtracted.dstDrawable], eax
+    mov    [copyArea_s03_03_meanSubtracted.dstDrawable], eax
+    mov    [copyArea_s03_04_meanSubtracted.dstDrawable], eax
+    mov    [copyArea_s03_05_meanSubtracted.dstDrawable], eax
+
+    mov    [copyArea_s04_01_meanSubtracted.dstDrawable], eax
+    mov    [copyArea_s04_02_meanSubtracted.dstDrawable], eax
+    mov    [copyArea_s04_03_meanSubtracted.dstDrawable], eax
+    mov    [copyArea_s04_04_meanSubtracted.dstDrawable], eax
+    mov    [copyArea_s04_05_meanSubtracted.dstDrawable], eax
+
+    mov    [copyArea_s05_01_meanSubtracted.dstDrawable], eax
+    mov    [copyArea_s05_02_meanSubtracted.dstDrawable], eax
+    mov    [copyArea_s05_03_meanSubtracted.dstDrawable], eax
+    mov    [copyArea_s05_04_meanSubtracted.dstDrawable], eax
+    mov    [copyArea_s05_05_meanSubtracted.dstDrawable], eax
+
+    mov    eax, [winMeanSubtracted.cid]
+    mov    [copyArea_s01_01_meanSubtracted.gc], eax
+    mov    [copyArea_s01_02_meanSubtracted.gc], eax
+    mov    [copyArea_s01_03_meanSubtracted.gc], eax
+    mov    [copyArea_s01_04_meanSubtracted.gc], eax
+    mov    [copyArea_s01_05_meanSubtracted.gc], eax
+
+    mov    [copyArea_s02_01_meanSubtracted.gc], eax
+    mov    [copyArea_s02_02_meanSubtracted.gc], eax
+    mov    [copyArea_s02_03_meanSubtracted.gc], eax
+    mov    [copyArea_s02_04_meanSubtracted.gc], eax
+    mov    [copyArea_s02_05_meanSubtracted.gc], eax
+
+    mov    [copyArea_s03_01_meanSubtracted.gc], eax
+    mov    [copyArea_s03_02_meanSubtracted.gc], eax
+    mov    [copyArea_s03_03_meanSubtracted.gc], eax
+    mov    [copyArea_s03_04_meanSubtracted.gc], eax
+    mov    [copyArea_s03_05_meanSubtracted.gc], eax
+
+    mov    [copyArea_s04_01_meanSubtracted.gc], eax
+    mov    [copyArea_s04_02_meanSubtracted.gc], eax
+    mov    [copyArea_s04_03_meanSubtracted.gc], eax
+    mov    [copyArea_s04_04_meanSubtracted.gc], eax
+    mov    [copyArea_s04_05_meanSubtracted.gc], eax
+
+    mov    [copyArea_s05_01_meanSubtracted.gc], eax
+    mov    [copyArea_s05_02_meanSubtracted.gc], eax
+    mov    [copyArea_s05_03_meanSubtracted.gc], eax
+    mov    [copyArea_s05_04_meanSubtracted.gc], eax
+    mov    [copyArea_s05_05_meanSubtracted.gc], eax
+
+
+;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+;
 ;   Request ChangeProperty, to modify the mainWindow properties.
 ;   We need to use the ChangeProperty request to apply the
 ;   WM_DELETE_WINDOW atom to the mainWindow.
@@ -920,7 +1041,7 @@ createWindow_meanSubtracted_success:
     mov    edx, _POLL_INFINITE_TIMEOUT_
     int    0x80
 
-    mov    eax, [mainWindow.wid]
+    mov    eax, [winTrainingImages.wid]
     mov    ebx, [WMDeleteMessage]
     mov    ecx, [WMProtocols]
 ;Setup setWindowDeleteMsg structure
@@ -959,6 +1080,8 @@ createWindow_meanSubtracted_success:
     mov    edx, 60
     int    0x80
 
+;--------------------------------------------------------------------
+
     mov    eax, [winMeanSubtracted.wid]
     mov    ebx, [WMDeleteMessage]
     mov    ecx, [WMProtocols]
@@ -967,7 +1090,7 @@ createWindow_meanSubtracted_success:
     mov    [setWindowDeleteMsg.data], ebx
     mov    [setWindowDeleteMsg.property], ecx
 ;Setup setWindowName structure
-    mov    [setWindowName.window], eax
+    mov    [setWindowName_meanSubtracted.window], eax
 ;Setup setWindowSizeHints structure
     mov    [setWindowSizeHints.window], eax
 ;Setup setWindowManagerHints
@@ -979,10 +1102,10 @@ createWindow_meanSubtracted_success:
     lea    ecx, [setWindowDeleteMsg]
     mov    edx, 28 ;setWindowDeleteMsg.requestLength * 4
     int    0x80
-;WRITE( socketX, @setWindowName, 44 )
+;WRITE( socketX, @setWindowName_meanSubtracted, 44 )
     mov    eax, _SYSCALL_WRITE_
     mov    ebx, [socketX]
-    lea    ecx, [setWindowName]
+    lea    ecx, [setWindowName_meanSubtracted]
     mov    edx, 44 ;setWindowName.requestLength * 4
     int    0x80
 ;WRITE( socketX, @setWindowSizeHints, 96 )
@@ -1022,7 +1145,7 @@ createWindow_meanSubtracted_success:
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ;Setup mapWindow structure for the mainWindow
-    mov    eax, [mainWindow.wid]
+    mov    eax, [winTrainingImages.wid]
     mov    [mapWindow.wid], eax
 
 ;WRITE( socketX, @mapWindow, 8 )
