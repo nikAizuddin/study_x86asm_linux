@@ -1,0 +1,46 @@
+         1         2         3         4         5         6         7
+1234567890123456789012345678901234567890123456789012345678901234567890
+======================================================================
+---------------------------------------------+------------------------
+ TITLE: Find the roots for polynomial        |
+        of degree 5                          |    #x86assembly
+                                             |    #research
+                                             |    #mathematics
+AUTHOR: Nik Mohamad Aizuddin bin Nik Azmi    |    #prototype
+ EMAIL: nickaizuddin93@gmail.com             |
+  DATE: 24-FEB-2015, Tuesday                 |
+---------------------------------------------+------------------------
+
+PROJECT DESCRIPTION
+    An introduction to find the real roots of a polynomial.
+
+TARGET
+    KERNEL       : Linux x86
+    ARCHITECTURE : x86 and x86_64
+    ASSEMBLER    : NASM
+
+REQUIRED EXTERNAL FILES
+    No external files needed.
+
+HOW TO RUN:
+    STEP 1: Download this project file using command:
+            $ svn checkout https://github.com/nikAizuddin/research_x86asm/trunk/roots_polydegree5
+    STEP 2: Execute cd command to the roots_polydegree5 directory
+    STEP 3: Execute make command
+    STEP 4: Execute gdb ./bin/exe command to run this program
+    STEP 5: Read and study the source code src/roots_polydegree5.asm
+
+
+NOTES
+
+    ax^5 + bx^4 + cx^3 + dx^2 + ex + f = 0
+
+    (gdb) x/fw &x --> to display single-precision value of [x]
+
+
+REFERENCES
+    1) Intel 64 and IA-32 Architectures Software Developer's
+       Manual, Volume 1: Basic Architecture
+    2) http://rechneronline.de/function-graphs/
+
+======================================================================
