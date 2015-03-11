@@ -1,0 +1,43 @@
+         1         2         3         4         5         6         7
+1234567890123456789012345678901234567890123456789012345678901234567890
+======================================================================
+---------------------------------------------+------------------------
+ TITLE: Find the value of mean from a data   |
+        set.                                 |    #x86assembly
+                                             |    #research
+                                             |    #mathematics
+AUTHOR: Nik Mohamad Aizuddin bin Nik Azmi    |    #prototype
+ EMAIL: nickaizuddin93@gmail.com             |    #appliedStatistics
+  DATE: 11-MAC-2015, Wednesday               |
+---------------------------------------------+------------------------
+
+PROJECT DESCRIPTION
+    An introduction to find the mean value from the data set.
+
+TARGET
+    KERNEL       : Linux x86
+    ARCHITECTURE : x86 and x86_64
+    ASSEMBLER    : NASM
+
+REQUIRED EXTERNAL FILES
+    No external files needed.
+
+HOW TO RUN:
+    STEP 1: Download this project file using command:
+            $ svn checkout https://github.com/nikAizuddin/research_x86asm/trunk/calc_mean
+    STEP 2: Execute cd command to the calc_mean directory
+    STEP 3: Execute make command
+    STEP 4: Execute gdb ./bin/exe command to run this program
+    STEP 5: Read and study the source code src/calc_mean.asm
+
+
+NOTES
+
+    ---
+
+REFERENCES
+    1) Intel 64 and IA-32 Architectures Software Developer's
+       Manual, Volume 1: Basic Architecture
+    2) http://rechneronline.de/function-graphs/
+
+======================================================================
