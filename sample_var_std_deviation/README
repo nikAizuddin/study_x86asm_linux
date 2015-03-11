@@ -1,0 +1,45 @@
+         1         2         3         4         5         6         7
+1234567890123456789012345678901234567890123456789012345678901234567890
+======================================================================
+---------------------------------------------+------------------------
+ TITLE: Find variance and standard deviation |
+        of a sample data set.                |    #x86assembly
+                                             |    #research
+                                             |    #mathematics
+AUTHOR: Nik Mohamad Aizuddin bin Nik Azmi    |    #prototype
+ EMAIL: nickaizuddin93@gmail.com             |    #appliedStatistics
+  DATE: 11-MAC-2015, Wednesday               |
+---------------------------------------------+------------------------
+
+PROJECT DESCRIPTION
+    An introduction to find variance and standard deviation of
+    a sample data set.
+
+TARGET
+    KERNEL       : Linux x86
+    ARCHITECTURE : x86 and x86_64
+    ASSEMBLER    : NASM
+
+REQUIRED EXTERNAL FILES
+    No external files needed.
+
+HOW TO RUN:
+    STEP 1: Download this project file using command:
+            $ svn checkout https://github.com/nikAizuddin/research_x86asm/trunk/sample_var_std_deviation
+    STEP 2: $ cd sample_var_std_deviation
+    STEP 3: Build the project file:
+            $ make
+    STEP 4: Run the program using GNU GDB debugger:
+            $ gdb ./bin/exe
+    STEP 5: Read and study the source code src/sample_var_std_deviation.asm
+
+
+NOTES
+
+    ---
+
+REFERENCES
+    1) Intel 64 and IA-32 Architectures Software Developer's
+       Manual, Volume 1: Basic Architecture
+
+======================================================================
