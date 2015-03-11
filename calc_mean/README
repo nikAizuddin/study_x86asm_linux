@@ -25,9 +25,11 @@ REQUIRED EXTERNAL FILES
 HOW TO RUN:
     STEP 1: Download this project file using command:
             $ svn checkout https://github.com/nikAizuddin/research_x86asm/trunk/calc_mean
-    STEP 2: Execute cd command to the calc_mean directory
-    STEP 3: Execute make command
-    STEP 4: Execute gdb ./bin/exe command to run this program
+    STEP 2: $ cd calc_mean
+    STEP 3: Build the project file:
+            $ make
+    STEP 4: Run the program using GNU GDB debugger:
+            $ gdb ./bin/exe
     STEP 5: Read and study the source code src/calc_mean.asm
 
 
@@ -38,6 +40,5 @@ NOTES
 REFERENCES
     1) Intel 64 and IA-32 Architectures Software Developer's
        Manual, Volume 1: Basic Architecture
-    2) http://rechneronline.de/function-graphs/
 
 ======================================================================
