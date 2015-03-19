@@ -4,13 +4,23 @@ FORMAT    = elf32
 MACHINE   = elf_i386
 _START    = facerecognition_eigenface.asm
 BIN       = facerecognition_eigenface
-OBJ       = facerecognition_eigenface.o
+OBJ       = build/facerecognition_eigenface.o \
+            build/create_socket.o
+
+CREATE_SOCKET = \
+"../../../lib80386/src/linux/create_socket/src/create_socket.asm"
 
 .PHONY: all clean
 all:
 	@${ASSEMBLER} \
 		${_START} \
-		-o facerecognition_eigenface.o \
+		-o build/facerecognition_eigenface.o \
+		-f ${FORMAT} \
+		-g -Fstabs
+
+	@${ASSEMBLER} \
+		${CREATE_SOCKET} \
+		-o build/create_socket.o \
 		-f ${FORMAT} \
 		-g -Fstabs
 

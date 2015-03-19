@@ -30,6 +30,7 @@
 %include "include/data_XEvent.inc"
 %include "include/data_mainProgram.inc"
 
+extern create_socket
 global _start
 
 section .text
@@ -44,40 +45,10 @@ _start:
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-;Setup parameters for the systemcall socket
-    mov    dword [args.param1], _PF_LOCAL_    ;protocol family
-    mov    dword [args.param2], _SOCK_STREAM_ ;socket type
-    mov    dword [args.param3], _IPPROTO_IP_  ;protocol used
-
-;SOCKETCALL( _CALL_SOCKET_, @args )
-;The socketcall() will be directed to call_socket().
-;See Linux manual page for more info.
-    mov    eax, _SYSCALL_SOCKETCALL_
-    mov    ebx, _CALL_SOCKET_
-    lea    ecx, [args]
-    int    0x80
-
-;Check to make sure the SOCKETCALL() have no errors
-;The socketcall will return negative if error.
-    test   eax, eax
-    js     socket_create_fail
-    jmp    socket_create_success
-
-socket_create_fail:
-
-;WRITE( _STDOUT_, @errmsg_socketCreate, errmsg_len )
-;Notify user about the error.
-    mov    eax, _SYSCALL_WRITE_
-    mov    ebx, _STDOUT_
-    lea    ecx, [errmsg_socketCreate]
-    mov    edx, [errmsg_len]
-    int    0x80
-    jmp    exit_failure
-
-socket_create_success:
-
-;If success, save the socket number. We will use this socketX
-;to communicate with X Server.
+    mov    eax, _PF_LOCAL_
+    mov    ebx, _SOCK_STREAM_
+    mov    ecx, _IPPROTO_IP_
+    call   create_socket
     mov    [socketX], eax
 
 
