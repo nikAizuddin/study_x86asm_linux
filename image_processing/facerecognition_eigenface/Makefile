@@ -5,10 +5,14 @@ MACHINE   = elf_i386
 _START    = facerecognition_eigenface.asm
 BIN       = facerecognition_eigenface
 OBJ       = build/facerecognition_eigenface.o \
-            build/create_socket.o
+            build/create_socket.o \
+            build/XConnect.o
 
 CREATE_SOCKET = \
 "../../../lib80386/src/linux/create_socket/src/create_socket.asm"
+
+XCONNECT = \
+"../../../lib80386/src/xorg/X11/XConnect/src/XConnect.asm"
 
 .PHONY: all clean
 all:
@@ -21,6 +25,12 @@ all:
 	@${ASSEMBLER} \
 		${CREATE_SOCKET} \
 		-o build/create_socket.o \
+		-f ${FORMAT} \
+		-g -Fstabs
+
+	@${ASSEMBLER} \
+		${XCONNECT} \
+		-o build/XConnect.o \
 		-f ${FORMAT} \
 		-g -Fstabs
 

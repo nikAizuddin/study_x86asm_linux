@@ -31,6 +31,7 @@
 %include "include/data_mainProgram.inc"
 
 extern create_socket
+extern XConnect
 global _start
 
 section .text
@@ -55,85 +56,11 @@ _start:
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ;
 ;   Connect to X Server.
-;   Use "/tmp/.X11-unix/X0" file to contact the X Server.
-;   Without this file, we will unable to contact and connect with
-;   X Server.
 ;
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-;Setup parameters for the systemcall connect
     mov    eax, [socketX]
-    lea    ebx, [contactX]
-    mov    ecx, [contactX_size]
-    mov    [args.param1], eax
-    mov    [args.param2], ebx
-    mov    [args.param3], ecx
-
-;SOCKETCALL( _CALL_CONNECT_, @args )
-;Connect to X Server.
-    mov    eax, _SYSCALL_SOCKETCALL_
-    mov    ebx, _CALL_CONNECT_
-    lea    ecx, [args]
-    int    0x80
-
-;Check to make sure the program successfully connect with X Server
-    test   eax, eax
-    js     connect_XServer_fail
-    jmp    connect_XServer_success
-
-connect_XServer_fail:
-
-;WRITE( _STDOUT_, @errmsg_connect_XServer, errmsg_len )
-;Notify user about the error.
-    mov    eax, _SYSCALL_WRITE_
-    mov    ebx, _STDOUT_
-    lea    ecx, [errmsg_connect_XServer]
-    mov    edx, [errmsg_len]
-    int    0x80
-    jmp    exit_failure
-
-connect_XServer_success:
-
-
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-;
-;   Set TCP socketX to non-blocking mode.
-;   By default, TCP socket are in blocking mode. It is important
-;   to use a non-blocking socket.
-;
-;   If TCP socket in blocking mode, when system call read is used to
-;   read data from the socket, the program waits for resources, if
-;   the resources are unavailable.
-;
-;   If TCP socket in non-blocking mode, the program does not wait
-;   for resources if they are unavailable.
-;
-;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-;FCNTL64( socketX, _F_SETFL_, _O_RDWR_ | _O_NONBLOCK_ )
-    mov    eax, _SYSCALL_FCNTL64_
-    mov    ebx, [socketX]
-    mov    ecx, _F_SETFL_
-    lea    edx, [_O_RDWR_ + _O_NONBLOCK_]
-    int    0x80
-
-;Check to make sure the socket is properly set to non-blocking mode
-    test   eax, eax
-    js     set_nonBlocking_fail
-    jmp    set_nonBlocking_success
-
-set_nonBlocking_fail:
-
-;WRITE( _STDOUT_, @errmsg_set_nonBlocking, errmsg_len )
-;Notify user about the error.
-    mov    eax, _SYSCALL_WRITE_
-    mov    ebx, _STDOUT_
-    lea    ecx, [errmsg_set_nonBlocking]
-    mov    edx, [errmsg_len]
-    int    0x80
-    jmp    exit_failure
-
-set_nonBlocking_success:
+    call   XConnect
 
 
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
