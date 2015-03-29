@@ -5,14 +5,11 @@ MACHINE   = elf_i386
 _START    = facerecognition_eigenface.asm
 BIN       = facerecognition_eigenface
 OBJ       = build/facerecognition_eigenface.o \
-            build/create_socket.o \
-            build/XConnect.o
+            build/loadpgm.o
 
-CREATE_SOCKET = \
-"../../../lib80386/src/linux/create_socket/src/create_socket.asm"
+LOADPGM = \
+  "../../../lib80386/src/imageprocessing/loadpgm/src/loadpgm.asm"
 
-XCONNECT = \
-"../../../lib80386/src/xorg/X11/XConnect/src/XConnect.asm"
 
 .PHONY: all clean
 all:
@@ -23,14 +20,8 @@ all:
 		-g -Fstabs
 
 	@${ASSEMBLER} \
-		${CREATE_SOCKET} \
-		-o build/create_socket.o \
-		-f ${FORMAT} \
-		-g -Fstabs
-
-	@${ASSEMBLER} \
-		${XCONNECT} \
-		-o build/XConnect.o \
+		${LOADPGM} \
+		-o build/loadpgm.o \
 		-f ${FORMAT} \
 		-g -Fstabs
 

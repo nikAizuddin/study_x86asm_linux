@@ -49,7 +49,7 @@ _start:
 ;   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     mov    eax, 5                   ;systemcall open
     lea    ebx, [filename]
-    xor    ecx, 0q2101              ;read-only
+    xor    ecx, 0q2101              ;write-only
     mov    edx, 0q644               ;file permission
     int    0x80
 
