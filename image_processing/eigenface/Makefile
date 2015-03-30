@@ -2,9 +2,9 @@ ASSEMBLER = nasm
 LINKER    = ld
 FORMAT    = elf32
 MACHINE   = elf_i386
-_START    = facerecognition_eigenface.asm
-BIN       = facerecognition_eigenface
-OBJ       = build/facerecognition_eigenface.o \
+_START    = eigenface.asm
+BIN       = eigenface
+OBJ       = build/eigenface.o \
             build/loadpgm.o
 
 LOADPGM = \
@@ -15,7 +15,7 @@ LOADPGM = \
 all:
 	@${ASSEMBLER} \
 		${_START} \
-		-o build/facerecognition_eigenface.o \
+		-o build/eigenface.o \
 		-f ${FORMAT} \
 		-g -Fstabs
 
