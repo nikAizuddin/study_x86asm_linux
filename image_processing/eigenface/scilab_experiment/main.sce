@@ -91,7 +91,7 @@ function[] = main()
     // STEP 6: Find eigenvalue and eigenvector of the matrix L.
     //////////////////////////////////////////////////////////////////
 
-    [eigenvector_L, eigenvalues_L] = spec(L);
+    [eigenvector_L, eigenvalues_L] = eigen_qr(L);
 
 
     //////////////////////////////////////////////////////////////////
