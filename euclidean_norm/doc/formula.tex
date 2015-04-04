@@ -1,0 +1,36 @@
+%% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%% File: formula.tex
+%%
+%% This 'pdflatex' code will print the formula to pdf.
+%%
+%% Compile with:
+%%     pdflatex formula.tex formula.pdf
+%% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+%%\pagestyle{empty}
+
+\begin{document}
+
+    \begin{flushleft}
+        Given matrix X, find the Euclidean Norm.
+    \end{flushleft}
+
+    \begin{flalign*}
+        X =
+        \begin{bmatrix}
+            54.2314 & -23.1234 & 90.8656
+        \end{bmatrix}
+    \end{flalign*}
+
+    \begin{align*}
+        Y     &= \sqrt{\sum\limits_{i=1}^n{|x_i|}^2} \\
+        Y     &= \sqrt{|54.2314|^2 + |-23.1234|^2 + |90.8656|^2} \\
+        Y     &= \sqrt{54.2314^2 + 23.1234^2 + 90.8656^2} \\
+        Y     &= \sqrt{2941.04474596 + 534.69162756 + 8256.55726336} \\
+        Y     &= \sqrt{11732.29363688} \\
+        Y     &= 108.3157127884962
+    \end{align*}
+
+\end{document}
