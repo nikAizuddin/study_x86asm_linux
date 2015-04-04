@@ -17,7 +17,7 @@ section .data
 
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ; If you want to increase the number of columns in this
-    ; matrix X, don't forget to increase the value of
+    ; vector X, don't forget to increase the value of
     ; NUM_OF_COLUMNS in constants.inc header file.
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
