@@ -1,0 +1,34 @@
+         1         2         3         4         5         6         7
+1234567890123456789012345678901234567890123456789012345678901234567890
+======================================================================
+---------------------------------------------+------------------------
+ TITLE: QR Decomposition of a matrix.        |
+                                             |    #x86assembly
+                                             |    #research
+                                             |    #prototype
+AUTHOR: Nik Mohamad Aizuddin bin Nik Azmi    |
+ EMAIL: nickaizuddin93@gmail.com             |
+  DATE: 06-APR-2015, Monday                  |
+---------------------------------------------+------------------------
+
+PROJECT DESCRIPTION
+    Study how to implement QR Decomposition using x86 Assembly.
+
+
+TARGET
+    KERNEL       : Linux x86
+    ARCHITECTURE : x86 and x86_64
+    ASSEMBLER    : NASM
+
+REQUIRED EXTERNAL FILES
+    No need for external files.
+
+
+NOTES
+    The algorithm of the program is in doc/scilab/qr_decomposition.sce
+
+
+REFERENCES
+    ---
+
+======================================================================
